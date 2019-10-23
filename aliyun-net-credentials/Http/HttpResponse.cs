@@ -99,15 +99,6 @@ namespace Aliyun.Credentials.Http
                     return httpResponse;
                 }
             }
-            catch (WebException ex)
-            {
-                using(httpWebResponse = ex.Response as HttpWebResponse)
-                {
-                    ParseHttpResponse(httpResponse, httpWebResponse);
-                    return httpResponse;
-                }
-
-            }
             catch (Exception ex)
             {
                 throw new CredentialException("Exception",
