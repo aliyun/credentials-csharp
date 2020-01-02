@@ -1,6 +1,7 @@
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
+using Aliyun.Credentials.Utils;
 
 using Moq;
 
