@@ -16,13 +16,6 @@ namespace Aliyun.Credentials.Provider
             UserConfigurationProviders.Add(new ProfileCredentialsProvider());
             var roleName = AuthUtils.EnvironmentEcsMetaData;
 
-            if (roleName == null) return;
-            if (roleName.Length == 0)
-            {
-                throw new CredentialException(
-                    "Environment variable roleName('ALIBABA_CLOUD_ECS_METADATA') cannot be empty");
-            }
-
             UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
         }
 

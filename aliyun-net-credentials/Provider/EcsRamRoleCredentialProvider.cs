@@ -16,7 +16,7 @@ namespace Aliyun.Credentials.Provider
         private const string EcsMetadatFetchErrorMsg =
             "Failed to get RAM session credentials from ECS metadata service.";
 
-        private readonly string roleName;
+        private string roleName;
         private string credentialUrl;
         private const string MetadataServiceHost = "100.100.100.200";
         private readonly int connectionTimeout = 1000;
@@ -24,23 +24,12 @@ namespace Aliyun.Credentials.Provider
 
         public EcsRamRoleCredentialProvider(string roleName)
         {
-            if (string.IsNullOrWhiteSpace(roleName))
-            {
-                throw new ArgumentNullException("roleName", "You must specifiy a valid role name.");
-            }
-
             this.roleName = roleName;
             SetCredentialUrl();
         }
 
         public EcsRamRoleCredentialProvider(Configuration config)
         {
-            if (string.IsNullOrWhiteSpace(config.RoleName))
-            {
-                var e = new InvalidDataException("You must specify a valid role name.");
-                throw new ArgumentNullException("You must specify a valid role name.", e);
-            }
-
             if (config.ConnectTimeout > 1000)
             {
                 this.connectionTimeout = config.ConnectTimeout;
@@ -63,12 +52,43 @@ namespace Aliyun.Credentials.Provider
         public IAlibabaCloudCredentials GetCredentials()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                GetRoleName(client);
+                SetCredentialUrl();
+            }
             return CreateCredential(client);
         }
 
         public IAlibabaCloudCredentials CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
+        }
+
+        public void GetRoleName(IConnClient client)
+        {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.Method = MethodType.Get;
+            httpRequest.ConnectTimeout = connectionTimeout;
+            httpRequest.ReadTimeout = readTimeout;
+            httpRequest.Url = credentialUrl;
+            HttpResponse httpResponse;
+
+            try
+            {
+                httpResponse = client.DoAction(httpRequest);
+            }
+            catch (Exception ex)
+            {
+                throw new CredentialException("Failed to connect ECS Metadata Service: " + ex.Message);
+            }
+
+            if (httpResponse != null && httpResponse.Status != 200)
+            {
+                throw new CredentialException(EcsMetadatFetchErrorMsg + " HttpCode=" + httpResponse.Status);
+            }
+
+            roleName = httpResponse.GetHttpContentString();
         }
 
         private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
@@ -85,7 +105,7 @@ namespace Aliyun.Credentials.Provider
             string contentAccessKeySecret;
             string contentSecurityToken;
             string contentExpiration;
-            
+
             try
             {
                 httpResponse = client.DoAction(httpRequest);
