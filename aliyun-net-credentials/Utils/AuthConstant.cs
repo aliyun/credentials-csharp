@@ -22,11 +22,11 @@ namespace Aliyun.Credentials.Utils
         public const string DefaultRegion = "region_id";
         public const string IniEnable = "enable";
 
-        public const string AccessKey = "ACCESS_KEY";
-        public const string Sts = "STS";
-        public const string EcsRamRole = "ECS_RAM_ROLE";
-        public const string RamRoleArn = "RAM_ROLE_ARN";
-        public const string RsaKeyPair = "RSA_KEY_PAIR";
+        public const string AccessKey = "access_key";
+        public const string Sts = "sts";
+        public const string EcsRamRole = "ecs_ram_role";
+        public const string RamRoleArn = "ram_role_arn";
+        public const string RsaKeyPair = "rsa_key_pair";
 
         private static string GetHomePath()
         {
