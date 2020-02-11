@@ -1,3 +1,6 @@
+### 2020-02-11 Version 1.0.1
+* Improved Construct
+
 ### 2020-01-10 Version 0.0.3
 * Fixed const type name
 
