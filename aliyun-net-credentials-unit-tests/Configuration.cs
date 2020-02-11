@@ -1,4 +1,5 @@
 using Aliyun.Credentials;
+using Aliyun.Credentials.Models;
 
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace aliyun_net_credentials_unit_tests
         [Fact]
         public void GetConfig()
         {
-            Configuration config = new Configuration();
+            Config config = new Config();
             Assert.NotNull(config);
 
             config.AccessKeyId = "AccessKeyId";

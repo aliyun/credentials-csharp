@@ -3,6 +3,7 @@ using System.Text;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 
 using Moq;
@@ -16,7 +17,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void RamRoleArnProviderTest()
         {
-            Configuration config = new Configuration() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
+            Config config = new Config() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
             RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
             Assert.NotNull(provider);
 
