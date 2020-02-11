@@ -1,6 +1,6 @@
-namespace Aliyun.Credentials
+namespace Aliyun.Credentials.Models
 {
-    public class Configuration
+    public class Config
     {
         private string type = "default";
 

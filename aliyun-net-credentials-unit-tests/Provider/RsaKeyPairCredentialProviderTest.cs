@@ -3,6 +3,7 @@ using System.Text;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 
 using Moq;
@@ -16,7 +17,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void RsaKeyPairProviderTest()
         {
-            Configuration config = new Configuration() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, ReadTimeout = 15000 };
+            Config config = new Config() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, ReadTimeout = 15000 };
             RsaKeyPairCredentialProvider provider = new RsaKeyPairCredentialProvider(config);
             provider.DurationSeconds = 3650;
             provider.RegionId = "regionId";

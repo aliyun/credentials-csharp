@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 using Newtonsoft.Json;
@@ -39,7 +40,7 @@ namespace Aliyun.Credentials.Provider
 
         private int readTimeout = 1000;
 
-        public RamRoleArnCredentialProvider(Configuration config) : this(config.AccessKeyId, config.AccessKeySecret,
+        public RamRoleArnCredentialProvider(Config config) : this(config.AccessKeyId, config.AccessKeySecret,
             config.RoleArn)
         {
             this.connectTimeout = config.ConnectTimeout;

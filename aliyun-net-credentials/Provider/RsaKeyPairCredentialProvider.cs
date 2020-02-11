@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ namespace Aliyun.Credentials.Provider
         private int connectTimeout = 1000;
         private int readTimeout = 1000;
 
-        public RsaKeyPairCredentialProvider(Configuration config) : this(config.PublicKeyId, config.PrivateKeyFile)
+        public RsaKeyPairCredentialProvider(Config config) : this(config.PublicKeyId, config.PrivateKeyFile)
         {
             this.connectTimeout = config.ConnectTimeout;
             this.readTimeout = config.ReadTimeout;

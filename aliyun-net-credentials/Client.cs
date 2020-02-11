@@ -1,18 +1,19 @@
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
-    public class Credential
+    public class Client
     {
         private IAlibabaCloudCredentials cloudCredential;
 
-        public Credential(Configuration config)
+        public Client(Config config)
         {
             this.cloudCredential = GetCredential(config);
         }
 
-        private IAlibabaCloudCredentials GetCredential(Configuration config)
+        private IAlibabaCloudCredentials GetCredential(Config config)
         {
             switch (config.Type)
             {
@@ -25,7 +26,7 @@ namespace Aliyun.Credentials
             }
         }
 
-        private IAlibabaCloudCredentialsProvider GetProvider(Configuration config)
+        private IAlibabaCloudCredentialsProvider GetProvider(Config config)
         {
             switch (config.Type)
             {
@@ -40,36 +41,33 @@ namespace Aliyun.Credentials
             }
         }
 
-        public string AccessKeyId
+        public string GetAccessKeyId()
         {
-            get
-            {
-                return this.cloudCredential.AccessKeyId;
-            }
+            return this.cloudCredential.AccessKeyId;
         }
 
-        public string AccessKeySecret
+        public string GetAccessKeySecret()
         {
-            get
-            {
-                return this.cloudCredential.AccessKeySecret;
-            }
+            return this.cloudCredential.AccessKeySecret;
         }
 
-        public string SecurityToken
+        public string GetSecurityToken()
         {
-            get
-            {
-                return this.cloudCredential.SecurityToken;
-            }
+            return this.cloudCredential.SecurityToken;
         }
 
-        public string Type
+        public string GetBearerToken()
         {
-            get
+            if (this.cloudCredential is BearerTokenCredential)
             {
-                return this.cloudCredential.CredentialType;
+                return (((BearerTokenCredential) this.cloudCredential).BearerToken);
             }
+            return string.Empty;
+        }
+
+        public new string GetType()
+        {
+            return this.cloudCredential.CredentialType;
         }
     }
 }

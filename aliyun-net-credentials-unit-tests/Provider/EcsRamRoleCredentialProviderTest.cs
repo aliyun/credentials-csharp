@@ -4,6 +4,7 @@ using System.Text;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 
 using Moq;
@@ -22,7 +23,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("roleName", providerRoleName.RoleName);
             Assert.NotNull(providerRoleName.CredentialUrl);
 
-            EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(new Configuration() { RoleName = "roleName" });
+            EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(new Config() { RoleName = "roleName" });
             Assert.Throws<CredentialException>(() => { providerConfig.GetCredentials(); });
 
         }
@@ -31,11 +32,11 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void EcsRamRoleProviderClientTest()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Configuration() { RoleName = "roleName" });
+                new Config() { RoleName = "roleName" });
             Assert.Equal("roleName", providerConfig.RoleName);
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Configuration() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
@@ -69,7 +70,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetRoleName()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Configuration() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
@@ -87,14 +88,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetCredentials()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Configuration() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetCredentials", providerConfig, new object[] { });
             });
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Configuration() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetCredentials", providerConfig, new object[] { });

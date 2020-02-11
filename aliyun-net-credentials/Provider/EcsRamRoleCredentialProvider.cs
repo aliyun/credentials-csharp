@@ -3,6 +3,7 @@ using System.IO;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 using Newtonsoft.Json;
@@ -28,7 +29,7 @@ namespace Aliyun.Credentials.Provider
             SetCredentialUrl();
         }
 
-        public EcsRamRoleCredentialProvider(Configuration config)
+        public EcsRamRoleCredentialProvider(Config config)
         {
             if (config.ConnectTimeout > 1000)
             {
