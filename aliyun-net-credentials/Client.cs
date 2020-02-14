@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
@@ -43,31 +45,60 @@ namespace Aliyun.Credentials
 
         public string GetAccessKeyId()
         {
-            return this.cloudCredential.AccessKeyId;
+            return cloudCredential.GetAccessKeyId();
+        }
+
+        public async Task<string> GetAccessKeyIdAsync()
+        {
+            return await cloudCredential.GetAccessKeyIdAsync();
         }
 
         public string GetAccessKeySecret()
         {
-            return this.cloudCredential.AccessKeySecret;
+            return cloudCredential.GetAccessKeySecret();
+        }
+
+        public async Task<string> GetAccessKeySecretAsync()
+        {
+            return await cloudCredential.GetAccessKeySecretAsync();
         }
 
         public string GetSecurityToken()
         {
-            return this.cloudCredential.SecurityToken;
+            return cloudCredential.GetSecurityToken();
+        }
+
+        public async Task<string> GetSecurityTokenAsync()
+        {
+            return await cloudCredential.GetSecurityTokenAsync();
         }
 
         public string GetBearerToken()
         {
-            if (this.cloudCredential is BearerTokenCredential)
+            if (cloudCredential is BearerTokenCredential)
             {
-                return (((BearerTokenCredential) this.cloudCredential).BearerToken);
+                return (((BearerTokenCredential) cloudCredential).GetBearerToken());
             }
-            return string.Empty;
+            return null;
+        }
+
+        public async Task<string> GetBearerTokenAsync()
+        {
+            if (cloudCredential is BearerTokenCredential)
+            {
+                return await ((BearerTokenCredential) cloudCredential).GetBearerTokenAsync();
+            }
+            return null;
         }
 
         public new string GetType()
         {
-            return this.cloudCredential.CredentialType;
+            return cloudCredential.GetCredentialType();
+        }
+
+        public async Task<string> GetTypeAsync()
+        {
+            return await cloudCredential.GetCredentialTypeAsync();
         }
     }
 }

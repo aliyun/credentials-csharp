@@ -53,7 +53,7 @@ namespace aliyun_net_credentials_unit_tests
                 }
 
                 object objRet = m.Invoke(objInstance, aobjParams);
-                return objRet;
+                return objRet; 
             }
             catch (TargetInvocationException ex)
             {
@@ -61,7 +61,7 @@ namespace aliyun_net_credentials_unit_tests
                 {
                     throw ex.InnerException;
                 }
-
+ 
                 throw;
             }
         }
@@ -110,7 +110,7 @@ namespace aliyun_net_credentials_unit_tests
                 }
 
                 var task = m.Invoke(objInstance, aobjParams) as Task;
-                if(task.Status == TaskStatus.WaitingForActivation || task.Status == TaskStatus.WaitingToRun)
+                if (task.Status == TaskStatus.WaitingForActivation || task.Status == TaskStatus.WaitingToRun)
                 {
                     task.Wait();
                 }

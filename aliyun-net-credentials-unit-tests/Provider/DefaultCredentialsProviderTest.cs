@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
@@ -54,7 +55,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             provider.ClearCredentialsProvider();
 
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync((AccessKeyCredential)null);
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync((AccessKeyCredential) null);
             provider.AddCredentialsProvider(mockProvider.Object);
             await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
             provider.ClearCredentialsProvider();
@@ -65,7 +66,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<AccessKeyCredential>(await provider.GetCredentialsAsync());
 
             provider.ClearCredentialsProvider();
-            await Assert.ThrowsAsync<CredentialException>(async() => {await provider.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
         }
     }
 }

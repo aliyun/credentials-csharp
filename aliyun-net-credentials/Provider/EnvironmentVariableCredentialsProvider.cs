@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Utils;
 
@@ -28,6 +30,14 @@ namespace Aliyun.Credentials.Provider
             }
 
             return new AccessKeyCredential(accessKeyId, accessKeySecret);
+        }
+
+        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        {
+            return await Task.Run(() =>
+            {
+                return GetCredentials();
+            });
         }
     }
 }
