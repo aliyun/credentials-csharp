@@ -1,5 +1,5 @@
 using System.IO;
-
+using System.Threading.Tasks;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Utils;
 
@@ -10,14 +10,20 @@ namespace aliyun_net_credentials_unit_tests
     public class RsaKeyPairCredentialTest
     {
         [Fact]
-        public void RsaKeyPairTest()
+        public async Task RsaKeyPairTest()
         {
             RsaKeyPairCredential rsaKeyPairCredential = new RsaKeyPairCredential("publicKeyId", "privateKeySecret", 10000, null);
-            Assert.Equal("publicKeyId", rsaKeyPairCredential.AccessKeyId);
-            Assert.Equal("privateKeySecret", rsaKeyPairCredential.AccessKeySecret);
-            Assert.Null(rsaKeyPairCredential.SecurityToken);
-            Assert.Equal(10000, rsaKeyPairCredential.Expiration);
-            Assert.Equal(AuthConstant.RsaKeyPair, rsaKeyPairCredential.CredentialType);
+            Assert.Equal("publicKeyId", rsaKeyPairCredential.GetAccessKeyId());
+            Assert.Equal("privateKeySecret", rsaKeyPairCredential.GetAccessKeySecret());
+            Assert.Null(rsaKeyPairCredential.GetSecurityToken());
+            Assert.Equal(10000, rsaKeyPairCredential.GetExpiration());
+            Assert.Equal(AuthConstant.RsaKeyPair, rsaKeyPairCredential.GetCredentialType());
+
+            Assert.Equal("publicKeyId", await rsaKeyPairCredential.GetAccessKeyIdAsync());
+            Assert.Equal("privateKeySecret", await rsaKeyPairCredential.GetAccessKeySecretAsync());
+            Assert.Null(await rsaKeyPairCredential.GetSecurityTokenAsync());
+            Assert.Equal(10000, await rsaKeyPairCredential.GetExpirationAsync());
+            Assert.Equal(AuthConstant.RsaKeyPair, await rsaKeyPairCredential.GetCredentialTypeAsync());
         }
 
         [Fact]

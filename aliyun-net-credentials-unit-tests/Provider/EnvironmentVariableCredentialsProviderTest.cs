@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
@@ -35,6 +36,38 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
             Assert.IsType<AccessKeyCredential>(provider.GetCredentials());
+
+            AuthUtils.ClientType = tempClientType;
+            AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;
+            AuthUtils.EnvironmentAccesskeySecret = tempEnvironmentAccesskeySecret;
+        }
+
+        [Fact]
+        public async Task EnvironmentVariableProviderAsyncTest()
+        {
+            EnvironmentVariableCredentialsProvider provider = new EnvironmentVariableCredentialsProvider();
+            string tempClientType = AuthUtils.ClientType;
+            string tempEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
+            string tempEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
+            AuthUtils.ClientType = string.Empty;
+            Assert.Null(await provider.GetCredentialsAsync());
+
+            AuthUtils.ClientType = "default";
+            AuthUtils.EnvironmentAccessKeyId = null;
+            Assert.Null(await provider.GetCredentialsAsync());
+
+            AuthUtils.EnvironmentAccesskeySecret = null;
+            Assert.Null(await provider.GetCredentialsAsync());
+
+            AuthUtils.EnvironmentAccessKeyId = string.Empty;
+            AuthUtils.EnvironmentAccesskeySecret = string.Empty;
+            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+
+            AuthUtils.EnvironmentAccessKeyId = "AccessKeyId";
+            await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
+
+            AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
+            Assert.IsType<AccessKeyCredential>(await provider.GetCredentialsAsync());
 
             AuthUtils.ClientType = tempClientType;
             AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;

@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace aliyun_net_credentials_unit_tests
 {
@@ -61,6 +62,79 @@ namespace aliyun_net_credentials_unit_tests
                     throw ex.InnerException;
                 }
 
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 调用静态异步方法
+        /// </summary>
+        /// <param name="t">类全名</param>
+        /// <param name="strMethod">方法名</param>
+        /// <param name="aobjParams">参数表</param>
+        /// <returns>函数返回值</returns>
+        public static void RunStaticMethodAsync(Type t, string strMethod, object[] aobjParams)
+        {
+            BindingFlags eFlags =
+                BindingFlags.Static | BindingFlags.Public |
+                BindingFlags.NonPublic;
+            RunMethodAsync(t, strMethod, null, aobjParams, eFlags);
+        }
+
+        /// <summary>
+        /// 调用实例异步方法
+        /// </summary>
+        /// <param name="t">类全名</param>
+        /// <param name="strMethod">方法名</param>
+        /// <param name="objInstance">类的实例</param>
+        /// <param name="aobjParams">参数表</param>
+        ///<returns>函数返回值</returns>
+        public static object RunInstanceMethodAsync(Type t, string strMethod, object objInstance, object[] aobjParams)
+        {
+            BindingFlags eFlags = BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic;
+            return RunMethodAsync(t, strMethod,
+                objInstance, aobjParams, eFlags);
+        }
+
+        private static object RunMethodAsync(Type t, string strMethod, object objInstance, object[] aobjParams,
+            BindingFlags eFlags)
+        {
+            MethodInfo m;
+            try
+            {
+                m = t.GetMethod(strMethod, eFlags);
+                if (m == null)
+                {
+                    throw new ArgumentException("There is no method '" + strMethod + "' for type'" + t + "'.");
+                }
+
+                var task = m.Invoke(objInstance, aobjParams) as Task;
+                if(task.Status == TaskStatus.WaitingForActivation || task.Status == TaskStatus.WaitingToRun)
+                {
+                    task.Wait();
+                }
+                if (task.Status == TaskStatus.Faulted)
+                {
+                    throw task.Exception;
+                }
+                return task.GetType().GetProperty("Result").GetValue(task, null);
+            }
+            catch (TargetInvocationException ex)
+            {
+                if (null != ex.InnerException)
+                {
+                    throw ex.InnerException;
+                }
+
+                throw;
+            }
+            catch (AggregateException ex)
+            {
+                if (null != ex.InnerException)
+                {
+                    throw ex.InnerException;
+                }
                 throw;
             }
         }
