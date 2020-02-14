@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
@@ -37,6 +38,34 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             provider.ClearCredentialsProvider();
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+        }
+
+        [Fact]
+        public async Task DefaultProviderAsyncTest()
+        {
+            DefaultCredentialsProvider provider = new DefaultCredentialsProvider();
+            Assert.NotNull(provider);
+            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+
+            RamRoleArnCredentialProvider testProvider = new RamRoleArnCredentialProvider("accessKeyId2", "accessKeySecret", "roleArn");
+            provider.AddCredentialsProvider(testProvider);
+            provider.RemoveCredentialsProvider(testProvider);
+            Assert.False(provider.ContainsCredentialsProvider(testProvider));
+            provider.ClearCredentialsProvider();
+
+            Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync((AccessKeyCredential)null);
+            provider.AddCredentialsProvider(mockProvider.Object);
+            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+            provider.ClearCredentialsProvider();
+
+            mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new AccessKeyCredential("accessKeyId", "accessKeySecret"));
+            provider.AddCredentialsProvider(mockProvider.Object);
+            Assert.IsType<AccessKeyCredential>(await provider.GetCredentialsAsync());
+
+            provider.ClearCredentialsProvider();
+            await Assert.ThrowsAsync<CredentialException>(async() => {await provider.GetCredentialsAsync(); });
         }
     }
 }

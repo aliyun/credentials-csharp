@@ -1,5 +1,5 @@
 using System;
-
+using System.Threading.Tasks;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Utils;
 
@@ -10,7 +10,7 @@ namespace aliyun_net_credentials_unit_tests
     public class AccessKeyCredentialTest
     {
         [Fact]
-        public void TesetAccessKeyCredential()
+        public async Task TesetAccessKeyCredential()
         {
             AccessKeyCredential accessKeyCredential;
             try
@@ -33,10 +33,14 @@ namespace aliyun_net_credentials_unit_tests
 
             accessKeyCredential = new AccessKeyCredential("accessKeyId", "accessKeySecret");
             Assert.NotNull(accessKeyCredential);
-            Assert.Equal("accessKeyId", accessKeyCredential.AccessKeyId);
-            Assert.Equal("accessKeySecret", accessKeyCredential.AccessKeySecret);
-            Assert.Null(accessKeyCredential.SecurityToken);
-            Assert.Equal(AuthConstant.AccessKey, accessKeyCredential.CredentialType);
+            Assert.Equal("accessKeyId", accessKeyCredential.GetAccessKeyId());
+            Assert.Equal("accessKeySecret", accessKeyCredential.GetAccessKeySecret());
+            Assert.Null(accessKeyCredential.GetSecurityToken());
+            Assert.Equal(AuthConstant.AccessKey, accessKeyCredential.GetCredentialType());
+            Assert.Equal("accessKeyId", await accessKeyCredential.GetAccessKeyIdAsync());
+            Assert.Equal("accessKeySecret", await accessKeyCredential.GetAccessKeySecretAsync());
+            Assert.Null(await accessKeyCredential.GetSecurityTokenAsync());
+            Assert.Equal(AuthConstant.AccessKey, await accessKeyCredential.GetCredentialTypeAsync());
         }
     }
 }
