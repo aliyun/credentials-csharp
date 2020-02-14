@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
@@ -35,9 +36,20 @@ namespace Aliyun.Credentials.Provider
             return CreateCredential(client);
         }
 
+        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        {
+            CompatibleUrlConnClient client = new CompatibleUrlConnClient();
+            return await CreateCredentialAsync(client);
+        }
+
         private IAlibabaCloudCredentials CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
+        }
+
+        private async Task<IAlibabaCloudCredentials> CreateCredentialAsync(IConnClient client)
+        {
+            return await GetNewSessionCredentialsAsync(client);
         }
 
         private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
@@ -58,6 +70,50 @@ namespace Aliyun.Credentials.Provider
             httpRequest.ReadTimeout = readTimeout;
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");
             HttpResponse httpResponse = client.DoAction(httpRequest);
+            if (httpResponse != null && httpResponse.Status != 200)
+            {
+                throw new CredentialException("Failed to get session credentials.HttpCode=" + httpResponse.Status);
+            }
+
+            Debug.Assert(httpResponse != null, "httpResponse != null");
+            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(httpResponse.GetHttpContentString());
+            string sessionAccessKeyId;
+            string sessionAccessKeySecret;
+            string expirationStr;
+            try
+            {
+                sessionAccessKeyId = contentObj.SessionAccessKey.SessionAccessKeyId;
+                sessionAccessKeySecret = contentObj.SessionAccessKey.SessionAccessKeySecret;
+                expirationStr = contentObj.SessionAccessKey.Expiration;
+            }
+            catch
+            {
+                throw new CredentialException("Invalid json got from service.");
+            }
+            expirationStr = expirationStr.Replace('T', ' ').Replace('Z', ' ');
+            var dt = Convert.ToDateTime(expirationStr);
+            long expiration = dt.GetTimeMillis();
+            return new RsaKeyPairCredential(sessionAccessKeyId, sessionAccessKeySecret, expiration, this);
+        }
+
+        private async Task<IAlibabaCloudCredentials> GetNewSessionCredentialsAsync(IConnClient client)
+        {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.SetCommonUrlParameters();
+            httpRequest.AddUrlParameter("Action", "GenerateSessionAccessKey");
+            httpRequest.AddUrlParameter("Format", "JSON");
+            httpRequest.AddUrlParameter("Version", "2015-04-01");
+            httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
+            httpRequest.AddUrlParameter("AccessKeyId", PublicKeyId);
+            httpRequest.AddUrlParameter("RegionId", regionId);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            String signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
+            httpRequest.AddUrlParameter("Signature", signature);
+            httpRequest.Method = MethodType.Get;
+            httpRequest.ConnectTimeout = connectTimeout;
+            httpRequest.ReadTimeout = readTimeout;
+            httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");
+            HttpResponse httpResponse = await client.DoActionAsync(httpRequest);
             if (httpResponse != null && httpResponse.Status != 200)
             {
                 throw new CredentialException("Failed to get session credentials.HttpCode=" + httpResponse.Status);

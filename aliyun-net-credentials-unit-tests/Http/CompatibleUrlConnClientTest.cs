@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 
@@ -64,14 +65,14 @@ namespace aliyun_net_credentials_unit_tests.Http
             httpRequest.ConnectTimeout = 10000;
             httpRequest.ReadTimeout = 10000;
             Assert.Equal("URL is null for HttpRequest.",
-                (await Assert.ThrowsAsync<InvalidDataException>(async () => await client.DoActionAsync(httpRequest))).Message
+                (await Assert.ThrowsAsync<InvalidDataException>(async() => await client.DoActionAsync(httpRequest))).Message
             );
 
             httpRequest = new HttpRequest("http://www.aliyun.com");
             httpRequest.ConnectTimeout = 10000;
             httpRequest.ReadTimeout = 10000;
             Assert.Equal("Method is null for HttpRequest.",
-                (await Assert.ThrowsAsync<InvalidDataException>(async () => await client.DoActionAsync(httpRequest))).Message
+                (await Assert.ThrowsAsync<InvalidDataException>(async() => await client.DoActionAsync(httpRequest))).Message
             );
 
         }

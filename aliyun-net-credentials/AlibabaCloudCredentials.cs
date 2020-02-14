@@ -1,13 +1,23 @@
+using System.Threading.Tasks;
+
 namespace Aliyun.Credentials
 {
     public interface IAlibabaCloudCredentials
     {
-        string AccessKeyId { get; }
+        string GetAccessKeyId();
 
-        string AccessKeySecret { get; }
+        Task<string> GetAccessKeyIdAsync();
 
-        string SecurityToken { get; }
+        string GetAccessKeySecret();
 
-        string CredentialType { get; }
+        Task<string> GetAccessKeySecretAsync();
+
+        string GetSecurityToken();
+
+        Task<string> GetSecurityTokenAsync();
+
+        string GetCredentialType();
+
+        Task<string> GetCredentialTypeAsync();
     }
 }

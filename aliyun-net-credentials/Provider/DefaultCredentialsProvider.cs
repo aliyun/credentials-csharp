@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Utils;
@@ -25,6 +26,21 @@ namespace Aliyun.Credentials.Provider
             foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
             {
                 credential = provider.GetCredentials();
+                if (credential != null)
+                {
+                    return credential;
+                }
+            }
+
+            throw new CredentialException("not found credentials");
+        }
+
+        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        {
+            IAlibabaCloudCredentials credential;
+            foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
+            {
+                credential = await provider.GetCredentialsAsync();
                 if (credential != null)
                 {
                     return credential;

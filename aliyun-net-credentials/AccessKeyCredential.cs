@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Utils;
 
@@ -24,37 +25,57 @@ namespace Aliyun.Credentials
             this.accessKeySecret = accessKeySecret;
         }
 
-        public string AccessKeyId
+        public string GetAccessKeyId()
         {
-            get
-            {
-                return this.accessKeyId;
-            }
+            return accessKeyId;
         }
 
-        public string AccessKeySecret
+        public async Task<string> GetAccessKeyIdAsync()
         {
-            get
+            return await Task.Run(() =>
             {
-                return this.accessKeySecret;
-            }
+                return accessKeyId;
+            });
         }
 
-        public string SecurityToken
+        public string GetAccessKeySecret()
         {
-            get
-            {
-                return null;
-            }
+            return accessKeySecret;
         }
 
-        public string CredentialType
+        public async Task<string> GetAccessKeySecretAsync()
         {
-            get
+            return await Task.Run(() =>
+            {
+                return accessKeySecret;
+            });
+        }
+
+        public string GetSecurityToken()
+        {
+            return null;
+        }
+
+        public async Task<string> GetSecurityTokenAsync()
+        {
+            return await Task.Run(() =>
+            {
+                string securityToken = null;
+                return securityToken;
+            });
+        }
+
+        public string GetCredentialType()
+        {
+            return AuthConstant.AccessKey;
+        }
+
+        public async Task<string> GetCredentialTypeAsync()
+        {
+            return await Task.Run(() =>
             {
                 return AuthConstant.AccessKey;
-            }
+            });
         }
-
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
@@ -68,9 +69,20 @@ namespace Aliyun.Credentials.Provider
             return CreateCredential(client);
         }
 
+        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        {
+            CompatibleUrlConnClient client = new CompatibleUrlConnClient();
+            return await CreateCredentialAsync(client);
+        }
+
         private IAlibabaCloudCredentials CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
+        }
+
+        private async Task<IAlibabaCloudCredentials> CreateCredentialAsync(IConnClient client)
+        {
+            return await GetNewSessionCredentialsAsync(client);
         }
 
         private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
@@ -99,6 +111,52 @@ namespace Aliyun.Credentials.Provider
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
                 "https");
             HttpResponse httpResponse = client.DoAction(httpRequest);
+            Dictionary<string, object> map =
+                JsonConvert.DeserializeObject<Dictionary<string, object>>(httpResponse.GetHttpContentString());
+            if (map.ContainsKey("Credentials"))
+            {
+                string credentialsJson = JsonConvert.SerializeObject(DictionaryUtil.Get(map, "Credentials"));
+                Dictionary<string, string> credentials =
+                    JsonConvert.DeserializeObject<Dictionary<string, string>>(credentialsJson);
+                string expirationStr =
+                    DictionaryUtil.Get(credentials, "Expiration").Replace('T', ' ').Replace('Z', ' ');
+                var dt = Convert.ToDateTime(expirationStr);
+                long expiration = dt.GetTimeMillis();
+                accessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId");
+                accessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret");
+                securityToken = DictionaryUtil.Get(credentials, "SecurityToken");
+                return new RamRoleArnCredential(accessKeyId, accessKeySecret, securityToken, expiration, this);
+            }
+
+            throw new CredentialException(JsonConvert.SerializeObject(map));
+        }
+
+        private async Task<IAlibabaCloudCredentials> GetNewSessionCredentialsAsync(IConnClient client)
+        {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.SetCommonUrlParameters();
+            httpRequest.AddUrlParameter("Action", "AssumeRole");
+            httpRequest.AddUrlParameter("Format", "JSON");
+            httpRequest.AddUrlParameter("Version", "2015-04-01");
+            httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
+            httpRequest.AddUrlParameter("RoleArn", this.roleArn);
+            httpRequest.AddUrlParameter("AccessKeyId", this.accessKeyId);
+            httpRequest.AddUrlParameter("RegionId", this.regionId);
+            httpRequest.AddUrlParameter("RoleSessionName", this.roleSessionName);
+            if (policy != null)
+            {
+                httpRequest.AddUrlParameter("Policy", this.policy);
+            }
+
+            httpRequest.Method = MethodType.Get;
+            httpRequest.ConnectTimeout = connectTimeout;
+            httpRequest.ReadTimeout = readTimeout;
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
+            httpRequest.AddUrlParameter("Signature", signature);
+            httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
+                "https");
+            HttpResponse httpResponse = await client.DoActionAsync(httpRequest);
             Dictionary<string, object> map =
                 JsonConvert.DeserializeObject<Dictionary<string, object>>(httpResponse.GetHttpContentString());
             if (map.ContainsKey("Credentials"))

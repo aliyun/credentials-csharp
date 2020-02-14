@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+
 using Aliyun.Credentials.Http;
 
 using Moq;
@@ -152,7 +153,7 @@ namespace aliyun_net_credentials_unit_tests.Http
             HttpResponse httpResponse = new HttpResponse("http://www.baidu.com");
 
             Mock<HttpWebResponse> mock = new Mock<HttpWebResponse>();
-            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream)null);
+            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream) null);
             mock.Setup(p => p.Method).Returns("Get");
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("test", "test");

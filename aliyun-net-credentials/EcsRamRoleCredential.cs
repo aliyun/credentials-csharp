@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
@@ -32,60 +33,94 @@ namespace Aliyun.Credentials
             return (EcsRamRoleCredential) provider.GetCredentials();
         }
 
+        public async Task<EcsRamRoleCredential> GetNewCredentialAsync()
+        {
+            return (EcsRamRoleCredential) await provider.GetCredentialsAsync();
+        }
+
         public void RefreshCredential()
         {
             if (WithShouldRefresh())
             {
                 EcsRamRoleCredential credential = GetNewCredential();
-                this.expiration = credential.Expiration;
-                this.accessKeyId = credential.AccessKeyId;
-                this.accessKeySecret = credential.AccessKeySecret;
-                this.securityToken = credential.SecurityToken;
+                this.expiration = credential.GetExpiration();
+                this.accessKeyId = credential.GetAccessKeyId();
+                this.accessKeySecret = credential.GetAccessKeySecret();
+                this.securityToken = credential.GetSecurityToken();
             }
         }
 
-        public string AccessKeyId
+        public async Task RefreshCredentialAsync()
         {
-            get
+            if (WithShouldRefresh())
             {
-                RefreshCredential();
-                return this.accessKeyId;
+                EcsRamRoleCredential credential = await GetNewCredentialAsync();
+                this.expiration = await credential.GetExpirationAsync();
+                this.accessKeyId = await credential.GetAccessKeyIdAsync();
+                this.accessKeySecret = await credential.GetAccessKeySecretAsync();
+                this.securityToken = await credential.GetSecurityTokenAsync();
             }
         }
 
-        public string AccessKeySecret
+        public string GetAccessKeyId()
         {
-            get
-            {
-                RefreshCredential();
-                return this.accessKeySecret;
-            }
+            RefreshCredential();
+            return accessKeyId;
         }
 
-        public string SecurityToken
+        public async Task<string> GetAccessKeyIdAsync()
         {
-            get
-            {
-                RefreshCredential();
-                return this.securityToken;
-            }
+            await RefreshCredentialAsync();
+            return accessKeyId;
         }
 
-        public string CredentialType
+        public string GetAccessKeySecret()
         {
-            get
+            RefreshCredential();
+            return accessKeySecret;
+        }
+
+        public async Task<string> GetAccessKeySecretAsync()
+        {
+            await RefreshCredentialAsync();
+            return accessKeySecret;
+        }
+
+        public string GetSecurityToken()
+        {
+            RefreshCredential();
+            return securityToken;
+        }
+
+        public async Task<string> GetSecurityTokenAsync()
+        {
+            await RefreshCredentialAsync();
+            return securityToken;
+        }
+
+        public string GetCredentialType()
+        {
+            return AuthConstant.EcsRamRole;
+        }
+
+        public async Task<string> GetCredentialTypeAsync()
+        {
+            return await Task.Run(() =>
             {
                 return AuthConstant.EcsRamRole;
-            }
+            });
         }
 
-        public long Expiration
+        public long GetExpiration()
         {
-            get
-            {
-                RefreshCredential();
-                return expiration;
-            }
+            RefreshCredential();
+            return expiration;
+        }
+
+        public async Task<long> GetExpirationAsync()
+        {
+            await RefreshCredentialAsync();
+            return expiration;
         }
     }
 }

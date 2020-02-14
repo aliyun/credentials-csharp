@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+
 using Aliyun.Credentials;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
@@ -31,7 +32,7 @@ namespace aliyun_net_credentials_unit_tests
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
             mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
             EcsRamRoleCredential ecsRamRoleCredential = new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, mockProvider.Object);
-            
+
             Assert.Equal("accessKeyId", await ecsRamRoleCredential.GetAccessKeyIdAsync());
             Assert.Equal("accessKeySecret", await ecsRamRoleCredential.GetAccessKeySecretAsync());
             Assert.Equal("securityToken", await ecsRamRoleCredential.GetSecurityTokenAsync());

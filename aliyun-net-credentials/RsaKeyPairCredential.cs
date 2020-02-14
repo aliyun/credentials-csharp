@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
@@ -25,44 +26,70 @@ namespace Aliyun.Credentials
             this.provider = provider;
         }
 
-        public string AccessKeyId
+        public string GetAccessKeyId()
         {
-            get
-            {
-                return this.publicKeyId;
-            }
+            return publicKeyId;
         }
 
-        public string AccessKeySecret
+        public async Task<string> GetAccessKeyIdAsync()
         {
-            get
+            return await Task.Run(() =>
             {
-                return this.privateKeySecret;
-            }
+                return publicKeyId;
+            });
         }
 
-        public string SecurityToken
+        public string GetAccessKeySecret()
         {
-            get
-            {
-                return null;
-            }
+            return privateKeySecret;
         }
 
-        public string CredentialType
+        public async Task<string> GetAccessKeySecretAsync()
         {
-            get
+            return await Task.Run(() =>
+            {
+                return privateKeySecret;
+            });
+        }
+
+        public string GetSecurityToken()
+        {
+            return null;
+        }
+
+        public async Task<string> GetSecurityTokenAsync()
+        {
+            return await Task.Run(() =>
+            {
+                string securityToken = null;
+                return securityToken;
+            });
+        }
+
+        public string GetCredentialType()
+        {
+            return AuthConstant.RsaKeyPair;
+        }
+
+        public async Task<string> GetCredentialTypeAsync()
+        {
+            return await Task.Run(() =>
             {
                 return AuthConstant.RsaKeyPair;
-            }
+            });
         }
 
-        public long Expiration
+        public long GetExpiration()
         {
-            get
+            return expiration;
+        }
+
+        public async Task<long> GetExpirationAsync()
+        {
+            return await Task.Run(() =>
             {
-                return this.expiration;
-            }
+                return expiration;
+            });
         }
     }
 }

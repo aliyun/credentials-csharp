@@ -1,45 +1,83 @@
+using System.Threading.Tasks;
+
 namespace Aliyun.Credentials
 {
     public class BearerTokenCredential : IAlibabaCloudCredentials
     {
+        private string bearerToken;
         public BearerTokenCredential(string bearerToken)
         {
-            BearerToken = bearerToken;
+            this.bearerToken = bearerToken;
         }
 
-        public string AccessKeyId
+        public string GetAccessKeyId()
         {
-            get
-            {
-                return null;
-            }
+            return null;
         }
 
-        public string AccessKeySecret
+        public async Task<string> GetAccessKeyIdAsync()
         {
-            get
+            return await Task.Run(() =>
             {
-                return null;
-            }
+                string accessKeyId = null;
+                return accessKeyId;
+            });
         }
 
-        public string SecurityToken
+        public string GetAccessKeySecret()
         {
-            get
-            {
-                return null;
-            }
+            return null;
         }
 
-        public string CredentialType
+        public async Task<string> GetAccessKeySecretAsync()
         {
-            get
+            return await Task.Run(() =>
             {
-                return null;
-            }
+                string accessKeySecret = null;
+                return accessKeySecret;
+            });
         }
 
-        public string BearerToken { get; set; }
+        public string GetSecurityToken()
+        {
+            return null;
+        }
+
+        public async Task<string> GetSecurityTokenAsync()
+        {
+            return await Task.Run(() =>
+            {
+                string securityToken = null;
+                return securityToken;
+            });
+        }
+
+        public string GetCredentialType()
+        {
+            return null;
+        }
+
+        public async Task<string> GetCredentialTypeAsync()
+        {
+            return await Task.Run(() =>
+            {
+                string type = null;
+                return type;
+            });
+        }
+
+        public string GetBearerToken()
+        {
+            return bearerToken;
+        }
+
+        public async Task<string> GetBearerTokenAsync()
+        {
+            return await Task.Run(() =>
+            {
+                return bearerToken;
+            });
+        }
 
     }
 }
