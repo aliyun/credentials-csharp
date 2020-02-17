@@ -1,3 +1,6 @@
+### 2020-02-17 Version 1.1.1
+* Supported Async
+
 ### 2020-02-11 Version 1.0.1
 * Improved Construct
 
