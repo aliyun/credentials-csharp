@@ -18,7 +18,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void RsaKeyPairProviderTest()
         {
-            Config config = new Config() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, ReadTimeout = 15000 };
+            Config config = new Config() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, Timeout = 15000 };
             RsaKeyPairCredentialProvider provider = new RsaKeyPairCredentialProvider(config);
             provider.DurationSeconds = 3650;
             provider.RegionId = "regionId";
@@ -67,7 +67,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void RsaKeyPairProviderAsyncTest()
         {
-            Config config = new Config() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, ReadTimeout = 15000 };
+            Config config = new Config() { PublicKeyId = "publicKeyId", PrivateKeyFile = "privateKeyFile", ConnectTimeout = 20000, Timeout = 15000 };
             RsaKeyPairCredentialProvider provider = new RsaKeyPairCredentialProvider(config);
             provider.DurationSeconds = 3650;
             provider.RegionId = "regionId";

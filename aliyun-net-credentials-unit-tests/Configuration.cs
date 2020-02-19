@@ -19,14 +19,11 @@ namespace aliyun_net_credentials_unit_tests
             config.AccessKeySecret = "AccessKeySecret";
             Assert.Equal("AccessKeySecret", config.AccessKeySecret);
 
-            config.CertFile = "CertFile";
-            Assert.Equal("CertFile", config.CertFile);
-
-            config.CertPassword = "CertPassword";
-            Assert.Equal("CertPassword", config.CertPassword);
-
             config.ConnectTimeout = 10000;
             Assert.Equal(10000, config.ConnectTimeout);
+
+            config.BearerToken = "bearerToken";
+            Assert.Equal("bearerToken", config.BearerToken);
 
             config.Host = "Host";
             Assert.Equal("Host", config.Host);
@@ -40,8 +37,8 @@ namespace aliyun_net_credentials_unit_tests
             config.PublicKeyId = "PublicKeyId";
             Assert.Equal("PublicKeyId", config.PublicKeyId);
 
-            config.ReadTimeout = 20000;
-            Assert.Equal(20000, config.ReadTimeout);
+            config.Timeout = 20000;
+            Assert.Equal(20000, config.Timeout);
 
             config.RoleArn = "RoleArn";
             Assert.Equal("RoleArn", config.RoleArn);

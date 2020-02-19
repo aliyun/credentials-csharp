@@ -27,6 +27,7 @@ namespace Aliyun.Credentials.Utils
         public const string EcsRamRole = "ecs_ram_role";
         public const string RamRoleArn = "ram_role_arn";
         public const string RsaKeyPair = "rsa_key_pair";
+        public const string BeareaToken = "bearer";
 
         private static string GetHomePath()
         {

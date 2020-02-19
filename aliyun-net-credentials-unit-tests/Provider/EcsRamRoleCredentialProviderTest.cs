@@ -50,7 +50,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("roleName", providerConfig.RoleName);
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, Timeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
@@ -88,7 +88,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("roleName", providerConfig.RoleName);
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, Timeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(httpResponse);
@@ -122,7 +122,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetRoleName()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, Timeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
@@ -140,7 +140,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetRoleNameAsync()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, Timeout = 1200 });
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse httpResponse = new HttpResponse("http://www.aliyun.com");
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(httpResponse);
@@ -158,14 +158,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetCredentials()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, Timeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetCredentials", providerConfig, new object[] { });
             });
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, Timeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetCredentials", providerConfig, new object[] { });
@@ -176,14 +176,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestGetCredentialsAsync()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "", ConnectTimeout = 1100, Timeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethodAsync(typeof(EcsRamRoleCredentialProvider), "GetCredentialsAsync", providerConfig, new object[] { });
             });
 
             providerConfig = new EcsRamRoleCredentialProvider(
-                new Config() { RoleName = "roleName", ConnectTimeout = 1100, ReadTimeout = 1200 });
+                new Config() { RoleName = "roleName", ConnectTimeout = 1100, Timeout = 1200 });
             Assert.Throws<CredentialException>(() =>
             {
                 TestHelper.RunInstanceMethodAsync(typeof(EcsRamRoleCredentialProvider), "GetCredentialsAsync", providerConfig, new object[] { });

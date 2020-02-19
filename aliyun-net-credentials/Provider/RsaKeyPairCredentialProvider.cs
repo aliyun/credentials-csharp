@@ -21,7 +21,7 @@ namespace Aliyun.Credentials.Provider
         public RsaKeyPairCredentialProvider(Config config) : this(config.PublicKeyId, config.PrivateKeyFile)
         {
             this.connectTimeout = config.ConnectTimeout;
-            this.readTimeout = config.ReadTimeout;
+            this.readTimeout = config.Timeout;
         }
 
         public RsaKeyPairCredentialProvider(String publicKeyId, String privateKey)
