@@ -45,7 +45,7 @@ namespace Aliyun.Credentials.Provider
             config.RoleArn)
         {
             this.connectTimeout = config.ConnectTimeout;
-            this.readTimeout = config.ReadTimeout;
+            this.readTimeout = config.Timeout;
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)

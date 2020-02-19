@@ -23,6 +23,8 @@ namespace Aliyun.Credentials
                     return new AccessKeyCredential(config.AccessKeyId, config.AccessKeySecret);
                 case AuthConstant.Sts:
                     return new StsCredential(config.AccessKeyId, config.AccessKeySecret, config.SecurityToken);
+                case AuthConstant.BeareaToken:
+                    return new BearerTokenCredential(config.BearerToken);
                 default:
                     return this.GetProvider(config).GetCredentials();
             }

@@ -37,9 +37,9 @@ namespace Aliyun.Credentials.Provider
                 this.connectionTimeout = config.ConnectTimeout;
             }
 
-            if (config.ReadTimeout > 1000)
+            if (config.Timeout > 1000)
             {
-                this.readTimeout = config.ReadTimeout;
+                this.readTimeout = config.Timeout;
             }
 
             roleName = config.RoleName;

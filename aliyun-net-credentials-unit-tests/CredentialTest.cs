@@ -26,6 +26,13 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal(AuthConstant.AccessKey, credential.GetType());
             Assert.Null(credential.GetSecurityToken());
             Assert.Null(credential.GetBearerToken());
+
+            Config configBearerToken = new Config();
+            configBearerToken.Type = AuthConstant.BeareaToken;
+            configBearerToken.BearerToken = "bearer";
+            Client credentialBearer = new Client(configBearerToken);
+            Assert.NotNull(credentialBearer);
+            Assert.Equal("bearer", credentialBearer.GetBearerToken());
         }
 
         [Fact]
@@ -42,6 +49,13 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal(AuthConstant.AccessKey, await credential.GetTypeAsync());
             Assert.Null(await credential.GetSecurityTokenAsync());
             Assert.Null(await credential.GetBearerTokenAsync());
+
+            Config configBearerToken = new Config();
+            configBearerToken.Type = AuthConstant.BeareaToken;
+            configBearerToken.BearerToken = "bearer";
+            Client credentialBearer = new Client(configBearerToken);
+            Assert.NotNull(credentialBearer);
+            Assert.Equal("bearer", await credentialBearer.GetBearerTokenAsync());
         }
     }
 }
