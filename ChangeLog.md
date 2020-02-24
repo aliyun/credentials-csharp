@@ -1,3 +1,6 @@
+### 2020-02-24 Version 1.2.1
+* Improved Config
+
 ### 2020-02-17 Version 1.1.1
 * Supported Async
 
