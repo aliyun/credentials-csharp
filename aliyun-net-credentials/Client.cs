@@ -12,6 +12,12 @@ namespace Aliyun.Credentials
 
         public Client(Config config)
         {
+            if (null == config)
+            {
+                DefaultCredentialsProvider provider = new DefaultCredentialsProvider();
+                this.cloudCredential = provider.GetCredentials();
+                return;
+            }
             this.cloudCredential = GetCredential(config);
         }
 

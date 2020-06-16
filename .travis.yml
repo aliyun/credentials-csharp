@@ -7,8 +7,8 @@ branches:
   only:
     - master
 install:
-  - dotnet tool install --global altcover.visualizer
-  - cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../
+  - dotnet tool install --global altcover.visualizer --version 6.7.750
+  - cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover --version 6.7.750 && cd ../
   - dotnet restore && dotnet build
 script:
   - dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
