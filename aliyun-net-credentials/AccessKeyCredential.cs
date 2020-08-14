@@ -5,7 +5,7 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
-    public class AccessKeyCredential : IAlibabaCloudCredentials
+    public class AccessKeyCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string accessKeyId;
         private string accessKeySecret;

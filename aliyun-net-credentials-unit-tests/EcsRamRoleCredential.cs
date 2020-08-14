@@ -23,7 +23,7 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal("securityToken", ecsRamRoleCredential.GetSecurityToken());
             Assert.Equal(64090527132000L, ecsRamRoleCredential.GetExpiration());
             Assert.Equal(AuthConstant.EcsRamRole, ecsRamRoleCredential.GetCredentialType());
-            Assert.NotNull(ecsRamRoleCredential.GetNewCredential());
+            Assert.NotNull(ecsRamRoleCredential.GetNewCredential<EcsRamRoleCredential>());
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal("securityToken", await ecsRamRoleCredential.GetSecurityTokenAsync());
             Assert.Equal(64090527132000L, await ecsRamRoleCredential.GetExpirationAsync());
             Assert.Equal(AuthConstant.EcsRamRole, await ecsRamRoleCredential.GetCredentialTypeAsync());
-            Assert.NotNull(await ecsRamRoleCredential.GetNewCredentialAsync());
+            Assert.NotNull(await ecsRamRoleCredential.GetNewCredentialAsync<EcsRamRoleCredential>());
         }
 
         [Theory]

@@ -6,14 +6,12 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
-    public class RsaKeyPairCredential : IAlibabaCloudCredentials
+    public class RsaKeyPairCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string privateKeySecret;
         private string publicKeyId;
-        private long expiration;
-        private IAlibabaCloudCredentialsProvider provider;
 
-        public RsaKeyPairCredential(string publicKeyId, string privateKeySecret, long expiration, IAlibabaCloudCredentialsProvider provider)
+        public RsaKeyPairCredential(string publicKeyId, string privateKeySecret, long expiration, IAlibabaCloudCredentialsProvider provider) : base(expiration, provider)
         {
             if (publicKeyId == null || privateKeySecret == null)
             {
@@ -22,34 +20,51 @@ namespace Aliyun.Credentials
 
             this.publicKeyId = publicKeyId;
             this.privateKeySecret = privateKeySecret;
-            this.expiration = expiration;
-            this.provider = provider;
+        }
+
+        public void RefreshCredential()
+        {
+            if (WithShouldRefresh())
+            {
+                RsaKeyPairCredential credential = GetNewCredential<RsaKeyPairCredential>();
+                this.publicKeyId = credential.GetAccessKeyId();
+                this.expiration = credential.GetExpiration();
+                this.privateKeySecret = credential.GetAccessKeySecret();
+            }
+        }
+        public async Task RefreshCredentialAsync()
+        {
+            if (WithShouldRefresh())
+            {
+                RsaKeyPairCredential credential = await GetNewCredentialAsync<RsaKeyPairCredential>();
+                this.expiration = await credential.GetExpirationAsync();
+                this.publicKeyId = await credential.GetAccessKeyIdAsync();
+                this.privateKeySecret = await credential.GetAccessKeySecretAsync();
+            }
         }
 
         public string GetAccessKeyId()
         {
+            RefreshCredential();
             return publicKeyId;
         }
 
         public async Task<string> GetAccessKeyIdAsync()
         {
-            return await Task.Run(() =>
-            {
-                return publicKeyId;
-            });
+            await RefreshCredentialAsync();
+            return publicKeyId;
         }
 
         public string GetAccessKeySecret()
         {
+            RefreshCredential();
             return privateKeySecret;
         }
 
         public async Task<string> GetAccessKeySecretAsync()
         {
-            return await Task.Run(() =>
-            {
-                return privateKeySecret;
-            });
+            await RefreshCredentialAsync();
+            return privateKeySecret;
         }
 
         public string GetSecurityToken()
@@ -59,11 +74,8 @@ namespace Aliyun.Credentials
 
         public async Task<string> GetSecurityTokenAsync()
         {
-            return await Task.Run(() =>
-            {
-                string securityToken = null;
-                return securityToken;
-            });
+            await RefreshCredentialAsync();
+            return null;
         }
 
         public string GetCredentialType()
@@ -81,15 +93,14 @@ namespace Aliyun.Credentials
 
         public long GetExpiration()
         {
+            RefreshCredential();
             return expiration;
         }
 
         public async Task<long> GetExpirationAsync()
         {
-            return await Task.Run(() =>
-            {
-                return expiration;
-            });
+            await RefreshCredentialAsync();
+            return expiration;
         }
     }
 }
