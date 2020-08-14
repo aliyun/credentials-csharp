@@ -6,44 +6,25 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
-    public class RamRoleArnCredential : IAlibabaCloudCredentials
+    public class RamRoleArnCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string accessKeyId;
         private string accessKeySecret;
         private string securityToken;
-        private long expiration;
-        private IAlibabaCloudCredentialsProvider provider;
 
         public RamRoleArnCredential(string accessKeyId, string accessKeySecret, string securityToken, long expiration,
-            IAlibabaCloudCredentialsProvider provider)
+            IAlibabaCloudCredentialsProvider provider) : base(expiration, provider)
         {
             this.accessKeyId = accessKeyId;
             this.accessKeySecret = accessKeySecret;
             this.securityToken = securityToken;
-            this.expiration = expiration;
-            this.provider = provider;
-        }
-
-        public bool WithShouldRefresh()
-        {
-            return DateTime.Now.GetTimeMillis() >= (this.expiration - 180);
-        }
-
-        public RamRoleArnCredential GetNewCredential()
-        {
-            return (RamRoleArnCredential) provider.GetCredentials();
-        }
-
-        public async Task<RamRoleArnCredential> GetNewCredentialAsync()
-        {
-            return (RamRoleArnCredential) await provider.GetCredentialsAsync();
         }
 
         public void RefreshCredential()
         {
             if (WithShouldRefresh())
             {
-                RamRoleArnCredential credential = GetNewCredential();
+                RamRoleArnCredential credential = GetNewCredential<RamRoleArnCredential>();
                 this.expiration = credential.GetExpiration();
                 this.accessKeyId = credential.GetAccessKeyId();
                 this.accessKeySecret = credential.GetAccessKeySecret();
@@ -55,7 +36,7 @@ namespace Aliyun.Credentials
         {
             if (WithShouldRefresh())
             {
-                RamRoleArnCredential credential = await GetNewCredentialAsync();
+                RamRoleArnCredential credential = await GetNewCredentialAsync<RamRoleArnCredential>();
                 this.expiration = await credential.GetExpirationAsync();
                 this.accessKeyId = await credential.GetAccessKeyIdAsync();
                 this.accessKeySecret = await credential.GetAccessKeySecretAsync();

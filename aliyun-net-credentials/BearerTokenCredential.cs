@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Aliyun.Credentials
 {
-    public class BearerTokenCredential : IAlibabaCloudCredentials
+    public class BearerTokenCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string bearerToken;
         public BearerTokenCredential(string bearerToken)
