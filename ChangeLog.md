@@ -1,3 +1,7 @@
+### 2020-08-14 Version 1.3.1
+* Replenish Refresh Credential
+* Add `BaseCredential`
+
 ### 2020-02-24 Version 1.2.1
 * Improved Config
 
