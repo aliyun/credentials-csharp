@@ -6,43 +6,24 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
-    public class EcsRamRoleCredential : IAlibabaCloudCredentials
+    public class EcsRamRoleCredential : BaseCredential, IAlibabaCloudCredentials
     {
-        private long expiration;
         private string accessKeyId;
         private string accessKeySecret;
         private string securityToken;
-        private IAlibabaCloudCredentialsProvider provider;
 
-        public EcsRamRoleCredential(string accessKeyId, string accessKeySecret, string securityToken, long expiration, IAlibabaCloudCredentialsProvider provider)
+        public EcsRamRoleCredential(string accessKeyId, string accessKeySecret, string securityToken, long expiration, IAlibabaCloudCredentialsProvider provider) : base(expiration, provider)
         {
             this.accessKeyId = accessKeyId;
             this.accessKeySecret = accessKeySecret;
             this.securityToken = securityToken;
-            this.expiration = expiration;
-            this.provider = provider;
-        }
-
-        public bool WithShouldRefresh()
-        {
-            return DateTime.Now.GetTimeMillis() >= (this.expiration - 180);
-        }
-
-        public EcsRamRoleCredential GetNewCredential()
-        {
-            return (EcsRamRoleCredential) provider.GetCredentials();
-        }
-
-        public async Task<EcsRamRoleCredential> GetNewCredentialAsync()
-        {
-            return (EcsRamRoleCredential) await provider.GetCredentialsAsync();
         }
 
         public void RefreshCredential()
         {
             if (WithShouldRefresh())
             {
-                EcsRamRoleCredential credential = GetNewCredential();
+                EcsRamRoleCredential credential = GetNewCredential<EcsRamRoleCredential>();
                 this.expiration = credential.GetExpiration();
                 this.accessKeyId = credential.GetAccessKeyId();
                 this.accessKeySecret = credential.GetAccessKeySecret();
@@ -54,7 +35,7 @@ namespace Aliyun.Credentials
         {
             if (WithShouldRefresh())
             {
-                EcsRamRoleCredential credential = await GetNewCredentialAsync();
+                EcsRamRoleCredential credential = await GetNewCredentialAsync<EcsRamRoleCredential>();
                 this.expiration = await credential.GetExpirationAsync();
                 this.accessKeyId = await credential.GetAccessKeyIdAsync();
                 this.accessKeySecret = await credential.GetAccessKeySecretAsync();
