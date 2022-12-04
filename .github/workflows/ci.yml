@@ -1,0 +1,26 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.207
+    - name: install altcover
+      run: dotnet tool install --global altcover.visualizer
+    - name: Install dependencies
+      run: cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../ && dotnet restore && dotnet build
+    - name: Test
+      run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
+    - name: Codecov
+      run: bash <(curl -s https://codecov.io/bash) -c -F unittest
