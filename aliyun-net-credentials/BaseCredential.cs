@@ -24,7 +24,7 @@ namespace Aliyun.Credentials
 
         public bool WithShouldRefresh()
         {
-            return DateTime.Now.GetTimeMillis() >= (this.expiration - 180);
+            return DateTime.UtcNow.GetTimeMillis() >= (this.expiration - 180 * 1000);
         }
 
         public T GetNewCredential<T>()
