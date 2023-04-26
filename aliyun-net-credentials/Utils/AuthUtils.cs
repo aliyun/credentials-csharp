@@ -41,7 +41,17 @@ namespace Aliyun.Credentials.Utils
 
         public static string ClientType
         {
-            get { return authUtils.clientType; }
+            get
+            {
+                if (String.IsNullOrEmpty(authUtils.clientType))
+                {
+                    return "default";
+                }
+                else
+                {
+                    return authUtils.clientType;
+                }
+            }
             set { authUtils.clientType = value; }
         }
 

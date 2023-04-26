@@ -1,3 +1,5 @@
+using System;
+using System.Net;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials;
@@ -33,6 +35,17 @@ namespace aliyun_net_credentials_unit_tests
             Client credentialBearer = new Client(configBearerToken);
             Assert.NotNull(credentialBearer);
             Assert.Equal("bearer", credentialBearer.GetBearerToken());
+            Aliyun.Credentials.Models.Config creConfig = new Aliyun.Credentials.Models.Config()
+            {
+                Type = "ram_role_arn",
+                AccessKeyId = "testkey",
+                AccessKeySecret = "testSecret",
+                RoleArn = "acs:ram::userId:role/testla",
+                RoleSessionName = "justHello",
+                Policy = "test",
+                RoleSessionExpiration = 1800
+            };
+            Assert.Throws<CredentialException>(() =>  new Aliyun.Credentials.Client(creConfig));
         }
 
         [Fact]

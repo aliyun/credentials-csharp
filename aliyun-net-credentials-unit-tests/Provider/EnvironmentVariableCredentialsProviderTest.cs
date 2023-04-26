@@ -21,7 +21,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             AuthUtils.ClientType = string.Empty;
             Assert.Null(provider.GetCredentials());
 
-            AuthUtils.ClientType = "default";
+            //AuthUtils.ClientType = "default";
             AuthUtils.EnvironmentAccessKeyId = null;
             Assert.Null(provider.GetCredentials());
 

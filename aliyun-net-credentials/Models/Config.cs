@@ -46,5 +46,11 @@ namespace Aliyun.Credentials.Models
 
         [NameInMap("proxy")]
         public string Proxy { get; set; }
+
+        [NameInMap("policy")]
+        public string Policy { get; set; }
+
+        [NameInMap("roleSessionExpiration")]
+        public int RoleSessionExpiration { get; set; }
     }
 }

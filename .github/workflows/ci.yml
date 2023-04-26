@@ -17,7 +17,7 @@ jobs:
       with:
         dotnet-version: 2.2.207
     - name: install altcover
-      run: dotnet tool install --global altcover.visualizer
+      run: dotnet tool install --global altcover.visualizer --version  8.6.14
     - name: Install dependencies
       run: cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../ && dotnet restore && dotnet build
     - name: Test
