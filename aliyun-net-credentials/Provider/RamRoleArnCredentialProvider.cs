@@ -46,6 +46,11 @@ namespace Aliyun.Credentials.Provider
         {
             this.connectTimeout = config.ConnectTimeout;
             this.readTimeout = config.Timeout;
+            this.policy = config.Policy;
+            if(config.RoleSessionExpiration > 0)
+            {
+                this.durationSeconds = config.RoleSessionExpiration;
+            }
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
