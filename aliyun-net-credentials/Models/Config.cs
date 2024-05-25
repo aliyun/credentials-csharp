@@ -26,6 +26,12 @@ namespace Aliyun.Credentials.Models
         [NameInMap("role_name")]
         public string RoleName { get; set; }
 
+        [NameInMap("enable_imds_v2")]
+        public bool EnableIMDSv2 { get; set; }
+
+        [NameInMap("metadata_token_duration")]
+        public int MetadataTokenDuration { get; set; }
+
         [NameInMap("private_key_file")]
         public string PrivateKeyFile { get; set; }
 

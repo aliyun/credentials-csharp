@@ -256,5 +256,10 @@ namespace Aliyun.Credentials.Provider
         {
             get { return credentialUrl; }
         }
+
+        private bool NeedToRefresh()
+        {
+            return DateTime.UtcNow.GetTimeMillis() >= (this.expiration - 180 * 1000);
+        }
     }
 }
