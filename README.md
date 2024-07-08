@@ -143,36 +143,6 @@ namespace credentials_demo
 }
 ```
 
-#### RsaKeyPair
-
-By specifying the public key Id and the private key file, the credential will be able to automatically request maintenance of the AccessKey before sending the request. Only Japan station is supported.
-
-```csharp
-using Aliyun.Credentials.Models;
-
-namespace credentials_demo
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Config config = new Config()
-            {
-                Type = "rsa_key_pair",                  // Which type of credential you want
-                PrivateKeyFile = "<PrivateKeyFile>",    // The file path to store the PrivateKey
-                PublicKeyId = "<PublicKeyId>"           // PublicKeyId of your account
-            };
-            var rsaCredential = new Aliyun.Credentials.Client(config);
-
-            string accessKeyId = rsaCredential.GetAccessKeyId();
-            string accessSecret = rsaCredential.GetAccessKeySecret();
-            string credentialType = rsaCredential.GetType();
-            string securityToken = rsaCredential.GetSecurityToken();
-        }
-    }
-}
-```
-
 #### Bearer Token
 
 If credential is required by the Cloud Call Centre (CCC), please apply for Bearer Token maintenance by yourself.
