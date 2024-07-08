@@ -22,5 +22,7 @@ jobs:
       run: cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../ && dotnet restore && dotnet build
     - name: Test
       run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
-    - name: Codecov
-      run: bash <(curl -s https://codecov.io/bash) -c -F unittest
+    - name: Upload code coverage report
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
