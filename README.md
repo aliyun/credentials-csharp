@@ -4,26 +4,28 @@ English | [简体中文](./README-CN.md)
 
 ## Alibaba Cloud Credentials for .NET
 
-[![Travis Build Status](https://travis-ci.org/aliyun/credentials-csharp.svg?branch=master)](https://travis-ci.org/aliyun/credentials-csharp)
-[![codecov](https://codecov.io/gh/aliyun/credentials-csharp/branch/master/graph/badge.svg)](https://codecov.io/gh/aliyun/credentials-csharp)
+[![.NET CI](https://github.com/aliyun/credentials-csharp/actions/workflows/ci.yml/badge.svg)](https://github.com/aliyun/credentials-csharp/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/aliyun/credentials-csharp/graph/badge.svg?token=gZjatna6gL)](https://codecov.io/gh/aliyun/credentials-csharp)
+[![Nuget Version](https://badge.fury.io/nu/Aliyun.Credentials.svg)](https://www.nuget.org/packages/Aliyun.Credentials)
 
 ## Installation
 
 Use .NET CLI ( Recommand )
 
-    dotnet add package Aliyun.Credentials
-
-Use Package Manager
-
-    Install-Package Aliyun.Credentials
+```sh
+dotnet add package Aliyun.Credentials
+```
 
 ## Quick Examples
+
 Before you begin, you need to sign up for an Alibaba Cloud account and retrieve your [Credentials](https://usercenter.console.aliyun.com/#/manage/ak).
 
 ### Credential Type
 
 #### AccessKey
+
 Setup access_key credential through [User Information Management][ak], it have full authority over the account, please keep it safe. Sometimes for security reasons, you cannot hand over a primary account AccessKey with full access to the developer of a project. You may create a sub-account [RAM Sub-account][ram] , grant its [authorization][permissions]，and use the AccessKey of RAM Sub-account.
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -50,7 +52,9 @@ namespace credentials_demo
 ```
 
 #### STS
+
 Create a temporary security credential by applying Temporary Security Credentials (TSC) through the Security Token Service (STS).
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -79,7 +83,9 @@ namespace credentials_demo
 ```
 
 #### RamRoleArn
+
 By specifying [RAM Role][RAM Role], the credential will be able to automatically request maintenance of STS Token. If you want to limit the permissions([How to make a policy][policy]) of STS Token, you can assign value for `Policy`.
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -109,7 +115,9 @@ namespace credentials_demo
 ```
 
 #### EcsRamRole
+
 By specifying the role name, the credential will be able to automatically request maintenance of STS Token.
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -136,7 +144,9 @@ namespace credentials_demo
 ```
 
 #### RsaKeyPair
-By specifying the public key Id and the private key file, the credential will be able to automatically request maintenance of the AccessKey before sending the request. Only Japan station is supported. 
+
+By specifying the public key Id and the private key file, the credential will be able to automatically request maintenance of the AccessKey before sending the request. Only Japan station is supported.
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -164,7 +174,9 @@ namespace credentials_demo
 ```
 
 #### Bearer Token
+
 If credential is required by the Cloud Call Centre (CCC), please apply for Bearer Token maintenance by yourself.
+
 ```csharp
 using Aliyun.Credentials.Models;
 
@@ -189,12 +201,15 @@ namespace credentials_demo
 ```
 
 ### Provider
+
 If you call `new Client(config)` with null, it will use provider chain to get credential for you.
 
 #### 1. Environment Credentials
+
 The program first looks for environment credentials in the environment variable. If the `ALICLOUD_ACCESS_KEY` and `ALICLOUD_SECRET_KEY` environment variables are defined and are not empty, the program will use them to create the default credential. If not, the program loads and looks for the client in the configuration file.
 
 #### 2. Config File
+
 If there is `~/.alibabacloud/credentials` default file (Windows shows `C:\Users\USER_NAME\.alibabacloud\credentials`), the program will automatically create credential with the name of 'default'. The default file may not exist, but a parse error throws an exception. The specified files can also be loaded indefinitely: `AlibabaCloud::load('/data/credentials', 'vfs://AlibabaCloud/credentials', ...);` This configuration file can be shared between different projects and between different tools. Because it is outside the project and will not be accidentally committed to the version control. Environment variables can be used on Windows to refer to the home directory %UserProfile%. Unix-like systems can use the environment variable $HOME or ~ (tilde). The path to the default file can be modified by defining the `ALIBABA_CLOUD_CREDENTIALS_FILE` environment variable.
 
 ```ini
@@ -205,20 +220,24 @@ access_key_secret = bar            # access key secret
 ```
 
 #### 3. Instance RAM Role
+
 If the environment variable `ALIBABA_CLOUD_ECS_METADATA` is defined and not empty, the program will take the value of the environment variable as the role name and request `http://100.100.100.200/latest/meta-data/ram/security-credentials/` to get the temporary Security credential.
 
-
 ## Issues
+
 [Opening an Issue](https://github.com/aliyun/credentials-csharp/issues/new), Issues not conforming to the guidelines may be closed immediately.
 
 ## Changelog
+
 Detailed changes for each release are documented in the [release notes](./ChangeLog.md).
 
 ## References
+
 * [OpenAPI Developer Portal](https://next.api.aliyun.com/)
 * [Latest Release](https://github.com/aliyun/credentials-csharp)
 
 ## License
+
 [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
