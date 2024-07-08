@@ -143,36 +143,6 @@ namespace credentials_demo
 }
 ```
 
-#### RsaKeyPair
-
-通过指定公钥Id和私钥文件，让凭证自动申请维护 AccessKey。仅支持日本站。
-
-```csharp
-using Aliyun.Credentials.Models;
-
-namespace credentials_demo
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Config config = new Config()
-            {
-                Type = "rsa_key_pair",                  // 凭证类型
-                PrivateKeyFile = "<PrivateKeyFile>",    // PrivateKey文件路径
-                PublicKeyId = "<PublicKeyId>"           // 账户PublicKeyId
-            };
-            var rsaCredential = new Aliyun.Credentials.Client(config);
-
-            string accessKeyId = rsaCredential.GetAccessKeyId();
-            string accessSecret = rsaCredential.GetAccessKeySecret();
-            string credentialType = rsaCredential.GetType();
-            string securityToken = rsaCredential.GetSecurityToken();
-        }
-    }
-}
-```
-
 #### Bearer Token
 
 如呼叫中心(CCC)需用此凭证，请自行申请维护 Bearer Token。
