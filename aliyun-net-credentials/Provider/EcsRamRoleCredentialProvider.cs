@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
@@ -11,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
-    public class EcsRamRoleCredentialProvider : IAlibabaCloudCredentialsProvider
+    public class EcsRamRoleCredentialProvider : SessionCredentialsProvider
     {
         private const string UrlInEcsMetadata = "/latest/meta-data/ram/security-credentials/";
 
@@ -34,12 +33,12 @@ namespace Aliyun.Credentials.Provider
         {
             if (config.ConnectTimeout > 1000)
             {
-                this.connectionTimeout = config.ConnectTimeout;
+                connectionTimeout = config.ConnectTimeout;
             }
 
             if (config.Timeout > 1000)
             {
-                this.readTimeout = config.Timeout;
+                readTimeout = config.Timeout;
             }
 
             roleName = config.RoleName;
@@ -51,7 +50,7 @@ namespace Aliyun.Credentials.Provider
             credentialUrl = "http://" + MetadataServiceHost + UrlInEcsMetadata + roleName;
         }
 
-        public IAlibabaCloudCredentials GetCredentials()
+        public override RefreshResult<CredentialModel> RefreshCredentials()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             if (string.IsNullOrWhiteSpace(roleName))
@@ -62,7 +61,7 @@ namespace Aliyun.Credentials.Provider
             return CreateCredential(client);
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public override async Task<RefreshResult<CredentialModel>> RefreshCredentialsAsync()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             if (string.IsNullOrWhiteSpace(roleName))
@@ -73,23 +72,24 @@ namespace Aliyun.Credentials.Provider
             return await CreateCredentialAsync(client);
         }
 
-        public IAlibabaCloudCredentials CreateCredential(IConnClient client)
+        private RefreshResult<CredentialModel> CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
         }
-
-        public async Task<IAlibabaCloudCredentials> CreateCredentialAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> CreateCredentialAsync(IConnClient client)
         {
             return await GetNewSessionCredentialsAsync(client);
         }
 
         public void GetRoleName(IConnClient client)
         {
-            HttpRequest httpRequest = new HttpRequest();
-            httpRequest.Method = MethodType.Get;
-            httpRequest.ConnectTimeout = connectionTimeout;
-            httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = credentialUrl;
+            HttpRequest httpRequest = new HttpRequest
+            {
+                Method = MethodType.Get,
+                ConnectTimeout = connectionTimeout,
+                ReadTimeout = readTimeout,
+                Url = credentialUrl
+            };
             HttpResponse httpResponse;
 
             try
@@ -111,11 +111,13 @@ namespace Aliyun.Credentials.Provider
 
         public async Task GetRoleNameAsync(IConnClient client)
         {
-            HttpRequest httpRequest = new HttpRequest();
-            httpRequest.Method = MethodType.Get;
-            httpRequest.ConnectTimeout = connectionTimeout;
-            httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = credentialUrl;
+            HttpRequest httpRequest = new HttpRequest
+            {
+                Method = MethodType.Get,
+                ConnectTimeout = connectionTimeout,
+                ReadTimeout = readTimeout,
+                Url = credentialUrl
+            };
             HttpResponse httpResponse;
 
             try
@@ -135,13 +137,15 @@ namespace Aliyun.Credentials.Provider
             roleName = httpResponse.GetHttpContentString();
         }
 
-        private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
+        private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
-            HttpRequest httpRequest = new HttpRequest();
-            httpRequest.Method = MethodType.Get;
-            httpRequest.ConnectTimeout = connectionTimeout;
-            httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = credentialUrl;
+            HttpRequest httpRequest = new HttpRequest
+            {
+                Method = MethodType.Get,
+                ConnectTimeout = connectionTimeout,
+                ReadTimeout = readTimeout,
+                Url = credentialUrl
+            };
             HttpResponse httpResponse;
             string jsonContent;
             string contentCode;
@@ -187,17 +191,26 @@ namespace Aliyun.Credentials.Provider
             string expirationStr = contentExpiration.Replace('T', ' ').Replace('Z', ' ');
             var dt = Convert.ToDateTime(expirationStr);
             long expiration = dt.GetTimeMillis();
-            return new EcsRamRoleCredential(contentAccessKeyId, contentAccessKeySecret, contentSecurityToken,
-                expiration, this);
+            CredentialModel credentialModel = new CredentialModel
+            {
+                AccessKeyId = contentAccessKeyId,
+                AccessKeySecret = contentAccessKeySecret,
+                SecurityToken = contentSecurityToken,
+                Expiration = expiration,
+                Type = AuthConstant.EcsRamRole
+            };
+            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
 
-        private async Task<IAlibabaCloudCredentials> GetNewSessionCredentialsAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
-            HttpRequest httpRequest = new HttpRequest();
-            httpRequest.Method = MethodType.Get;
-            httpRequest.ConnectTimeout = connectionTimeout;
-            httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = credentialUrl;
+            HttpRequest httpRequest = new HttpRequest
+            {
+                Method = MethodType.Get,
+                ConnectTimeout = connectionTimeout,
+                ReadTimeout = readTimeout,
+                Url = credentialUrl
+            };
             HttpResponse httpResponse;
             string jsonContent;
             string contentCode;
@@ -243,8 +256,15 @@ namespace Aliyun.Credentials.Provider
             string expirationStr = contentExpiration.Replace('T', ' ').Replace('Z', ' ');
             var dt = Convert.ToDateTime(expirationStr);
             long expiration = dt.GetTimeMillis();
-            return new EcsRamRoleCredential(contentAccessKeyId, contentAccessKeySecret, contentSecurityToken,
-                expiration, this);
+            CredentialModel credentialModel = new CredentialModel
+            {
+                AccessKeyId = contentAccessKeyId,
+                AccessKeySecret = contentAccessKeySecret,
+                SecurityToken = contentSecurityToken,
+                Expiration = expiration,
+                Type = AuthConstant.EcsRamRole
+            };
+            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
 
         public string RoleName

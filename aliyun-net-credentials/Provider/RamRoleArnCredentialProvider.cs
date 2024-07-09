@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
-    public class RamRoleArnCredentialProvider : IAlibabaCloudCredentialsProvider
+    public class RamRoleArnCredentialProvider : SessionCredentialsProvider
     {
         /// <summary>
         /// Default duration for started sessions. Unit of Second
@@ -44,20 +44,20 @@ namespace Aliyun.Credentials.Provider
         public RamRoleArnCredentialProvider(Config config) : this(config.AccessKeyId, config.AccessKeySecret,
             config.RoleArn)
         {
-            this.connectTimeout = config.ConnectTimeout;
-            this.readTimeout = config.Timeout;
-            this.policy = config.Policy;
-            if(config.RoleSessionExpiration > 0)
+            connectTimeout = config.ConnectTimeout;
+            readTimeout = config.Timeout;
+            policy = config.Policy;
+            if (config.RoleSessionExpiration > 0)
             {
-                this.durationSeconds = config.RoleSessionExpiration;
+                durationSeconds = config.RoleSessionExpiration;
             }
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
         {
             this.roleArn = roleArn;
-            this.accessKeyId = accessKeyId;
-            this.accessKeySecret = accessKeySecret;
+            this.accessKeyId = ParameterHelper.ValidateNotNull(accessKeyId, "accessKeyI", "AccessKeyId must not be null.");
+            this.accessKeySecret = ParameterHelper.ValidateNotNull(accessKeySecret, "accessKeySecret", "AccessKeySecret must not be null.");
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleSessionName,
@@ -68,29 +68,29 @@ namespace Aliyun.Credentials.Provider
             this.policy = policy;
         }
 
-        public IAlibabaCloudCredentials GetCredentials()
+        public override RefreshResult<CredentialModel> RefreshCredentials()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             return CreateCredential(client);
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public override async Task<RefreshResult<CredentialModel>> RefreshCredentialsAsync()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             return await CreateCredentialAsync(client);
         }
 
-        private IAlibabaCloudCredentials CreateCredential(IConnClient client)
+        private RefreshResult<CredentialModel> CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
         }
 
-        private async Task<IAlibabaCloudCredentials> CreateCredentialAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> CreateCredentialAsync(IConnClient client)
         {
             return await GetNewSessionCredentialsAsync(client);
         }
 
-        private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
+        private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
@@ -130,13 +130,21 @@ namespace Aliyun.Credentials.Provider
                 accessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId");
                 accessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret");
                 securityToken = DictionaryUtil.Get(credentials, "SecurityToken");
-                return new RamRoleArnCredential(accessKeyId, accessKeySecret, securityToken, expiration, this);
+                CredentialModel credentialModel = new CredentialModel
+                {
+                    AccessKeyId = accessKeyId,
+                    AccessKeySecret = accessKeySecret,
+                    SecurityToken = securityToken,
+                    Expiration = expiration,
+                    Type = AuthConstant.RamRoleArn
+                };
+                return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
 
             throw new CredentialException(JsonConvert.SerializeObject(map));
         }
 
-        private async Task<IAlibabaCloudCredentials> GetNewSessionCredentialsAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
@@ -176,7 +184,15 @@ namespace Aliyun.Credentials.Provider
                 accessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId");
                 accessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret");
                 securityToken = DictionaryUtil.Get(credentials, "SecurityToken");
-                return new RamRoleArnCredential(accessKeyId, accessKeySecret, securityToken, expiration, this);
+                CredentialModel credentialModel = new CredentialModel
+                {
+                    AccessKeyId = accessKeyId,
+                    AccessKeySecret = accessKeySecret,
+                    SecurityToken = securityToken,
+                    Expiration = expiration,
+                    Type = AuthConstant.RamRoleArn
+                };
+                return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
 
             throw new CredentialException(JsonConvert.SerializeObject(map));

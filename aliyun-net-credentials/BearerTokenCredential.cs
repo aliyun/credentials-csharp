@@ -1,7 +1,9 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Aliyun.Credentials
 {
+    [Obsolete]
     public class BearerTokenCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string bearerToken;

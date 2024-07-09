@@ -1,11 +1,13 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
-
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
+    [Obsolete]
     public class RsaKeyPairCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string privateKeySecret;
@@ -26,20 +28,20 @@ namespace Aliyun.Credentials
         {
             if (WithShouldRefresh())
             {
-                RsaKeyPairCredential credential = GetNewCredential<RsaKeyPairCredential>();
-                this.publicKeyId = credential.GetAccessKeyId();
-                this.expiration = credential.GetExpiration();
-                this.privateKeySecret = credential.GetAccessKeySecret();
+                CredentialModel credential = GetNewCredential();
+                this.expiration = credential.Expiration;
+                this.publicKeyId = credential.AccessKeyId;
+                this.privateKeySecret = credential.AccessKeySecret;
             }
         }
         public async Task RefreshCredentialAsync()
         {
             if (WithShouldRefresh())
             {
-                RsaKeyPairCredential credential = await GetNewCredentialAsync<RsaKeyPairCredential>();
-                this.expiration = await credential.GetExpirationAsync();
-                this.publicKeyId = await credential.GetAccessKeyIdAsync();
-                this.privateKeySecret = await credential.GetAccessKeySecretAsync();
+                CredentialModel credential = await GetNewCredentialAsync();
+                this.expiration = credential.Expiration;
+                this.publicKeyId = credential.AccessKeyId;
+                this.privateKeySecret = credential.AccessKeySecret;
             }
         }
 

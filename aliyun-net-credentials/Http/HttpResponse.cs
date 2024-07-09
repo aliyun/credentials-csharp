@@ -32,7 +32,7 @@ namespace Aliyun.Credentials.Http
         private static void ParseHttpResponse(HttpResponse httpResponse, HttpWebResponse httpWebResponse)
         {
             httpResponse.Content = ReadContent(httpWebResponse);
-            httpResponse.Status = (int) httpWebResponse.StatusCode;
+            httpResponse.Status = (int)httpWebResponse.StatusCode;
             httpResponse.Headers = new Dictionary<string, string>();
             httpResponse.Method = ParameterHelper.StringToMethodType(httpWebResponse.Method);
 
@@ -55,7 +55,7 @@ namespace Aliyun.Credentials.Http
         private static async Task ParseHttpResponseAsync(HttpResponse httpResponse, HttpWebResponse httpWebResponse)
         {
             httpResponse.Content = await ReadContentAsync(httpWebResponse);
-            httpResponse.Status = (int) httpWebResponse.StatusCode;
+            httpResponse.Status = (int)httpWebResponse.StatusCode;
             httpResponse.Headers = new Dictionary<string, string>();
             httpResponse.Method = ParameterHelper.StringToMethodType(httpWebResponse.Method);
 
@@ -77,8 +77,8 @@ namespace Aliyun.Credentials.Http
 
         private static byte[] ReadContent(WebResponse rsp)
         {
-            using(var ms = new MemoryStream())
-            using(var stream = rsp.GetResponseStream())
+            using (var ms = new MemoryStream())
+            using (var stream = rsp.GetResponseStream())
             {
                 {
                     var buffer = new byte[BufferLength];
@@ -104,8 +104,8 @@ namespace Aliyun.Credentials.Http
 
         private static async Task<byte[]> ReadContentAsync(WebResponse rsp)
         {
-            using(var ms = new MemoryStream())
-            using(var stream = rsp.GetResponseStream())
+            using (var ms = new MemoryStream())
+            using (var stream = rsp.GetResponseStream())
             {
                 {
                     var buffer = new byte[BufferLength];
@@ -136,7 +136,7 @@ namespace Aliyun.Credentials.Http
 
             if (timeout != null)
             {
-                httpWebRequest.Timeout = (int) timeout;
+                httpWebRequest.Timeout = (int)timeout;
             }
 
             HttpWebResponse httpWebResponse;
@@ -144,7 +144,7 @@ namespace Aliyun.Credentials.Http
 
             try
             {
-                using(httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse())
+                using (httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse())
                 {
                     ParseHttpResponse(httpResponse, httpWebResponse);
                     return httpResponse;
@@ -162,18 +162,16 @@ namespace Aliyun.Credentials.Http
         {
             CheckHttpRequest(request);
             var httpWebRequest = await GetWebRequestAsync(request);
-
             if (timeout != null)
             {
-                httpWebRequest.Timeout = (int) timeout;
+                httpWebRequest.Timeout = (int)timeout;
             }
 
             HttpWebResponse httpWebResponse;
             var httpResponse = new HttpResponse(httpWebRequest.RequestUri.AbsoluteUri);
-
             try
             {
-                using(httpWebResponse = (HttpWebResponse) await httpWebRequest.GetResponseAsync())
+                using (httpWebResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync())
                 {
                     await ParseHttpResponseAsync(httpResponse, httpWebResponse);
                     return httpResponse;
@@ -190,7 +188,7 @@ namespace Aliyun.Credentials.Http
         public static HttpWebRequest GetWebRequest(HttpRequest request)
         {
             var uri = new Uri(request.Url);
-            var httpWebRequest = (HttpWebRequest) WebRequest.Create(uri);
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(uri);
 
             httpWebRequest.Method = request.Method.ToString();
             httpWebRequest.KeepAlive = true;
@@ -231,7 +229,7 @@ namespace Aliyun.Credentials.Http
 
             if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
                 return httpWebRequest;
-            using(var stream = httpWebRequest.GetRequestStream())
+            using (var stream = httpWebRequest.GetRequestStream())
             {
                 stream.Write(request.Content, 0, request.Content.Length);
             }
@@ -242,7 +240,7 @@ namespace Aliyun.Credentials.Http
         public static async Task<HttpWebRequest> GetWebRequestAsync(HttpRequest request)
         {
             var uri = new Uri(request.Url);
-            var httpWebRequest = (HttpWebRequest) WebRequest.Create(uri);
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(uri);
 
             httpWebRequest.Method = request.Method.ToString();
             httpWebRequest.KeepAlive = true;
@@ -283,7 +281,7 @@ namespace Aliyun.Credentials.Http
 
             if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
                 return httpWebRequest;
-            using(var stream = await httpWebRequest.GetRequestStreamAsync())
+            using (var stream = await httpWebRequest.GetRequestStreamAsync())
             {
                 await stream.WriteAsync(request.Content, 0, request.Content.Length);
             }

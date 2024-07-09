@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 
 using Aliyun.Credentials;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
@@ -16,21 +17,33 @@ namespace aliyun_net_credentials_unit_tests
         public void TestEcsRamRoleCredential()
         {
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentials()).Returns(new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentials()).Returns(new CredentialModel
+            {
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             EcsRamRoleCredential ecsRamRoleCredential = new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, mockProvider.Object);
             Assert.Equal("accessKeyId", ecsRamRoleCredential.GetAccessKeyId());
             Assert.Equal("accessKeySecret", ecsRamRoleCredential.GetAccessKeySecret());
             Assert.Equal("securityToken", ecsRamRoleCredential.GetSecurityToken());
             Assert.Equal(64090527132000L, ecsRamRoleCredential.GetExpiration());
             Assert.Equal(AuthConstant.EcsRamRole, ecsRamRoleCredential.GetCredentialType());
-            Assert.NotNull(ecsRamRoleCredential.GetNewCredential<EcsRamRoleCredential>());
+            Assert.NotNull(ecsRamRoleCredential.GetNewCredential());
         }
 
         [Fact]
         public async Task TestEcsRamRoleCredentialAsync()
         {
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new CredentialModel
+            {
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             EcsRamRoleCredential ecsRamRoleCredential = new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, mockProvider.Object);
 
             Assert.Equal("accessKeyId", await ecsRamRoleCredential.GetAccessKeyIdAsync());
@@ -38,7 +51,7 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal("securityToken", await ecsRamRoleCredential.GetSecurityTokenAsync());
             Assert.Equal(64090527132000L, await ecsRamRoleCredential.GetExpirationAsync());
             Assert.Equal(AuthConstant.EcsRamRole, await ecsRamRoleCredential.GetCredentialTypeAsync());
-            Assert.NotNull(await ecsRamRoleCredential.GetNewCredentialAsync<EcsRamRoleCredential>());
+            Assert.NotNull(await ecsRamRoleCredential.GetNewCredentialAsync());
         }
 
         [Theory]
@@ -47,7 +60,12 @@ namespace aliyun_net_credentials_unit_tests
         public void TestEcsRamRoleCredentialShouldRefresh(long expiration)
         {
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentials()).Returns(new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentials()).Returns(new CredentialModel{
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             EcsRamRoleCredential ecsRamRoleCredential = new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", expiration, mockProvider.Object);
             if (expiration == 0)
             {
@@ -67,7 +85,12 @@ namespace aliyun_net_credentials_unit_tests
         public async Task TestEcsRamRoleCredentialShouldRefreshAsync(long expiration)
         {
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new CredentialModel{
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             EcsRamRoleCredential ecsRamRoleCredential = new EcsRamRoleCredential("accessKeyId", "accessKeySecret", "securityToken", expiration, mockProvider.Object);
             if (expiration == 0)
             {

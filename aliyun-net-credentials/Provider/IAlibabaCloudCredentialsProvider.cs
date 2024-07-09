@@ -1,11 +1,12 @@
 using System.Threading.Tasks;
+using Aliyun.Credentials.Models;
 
 namespace Aliyun.Credentials.Provider
 {
     public interface IAlibabaCloudCredentialsProvider
     {
-        IAlibabaCloudCredentials GetCredentials();
+        CredentialModel GetCredentials();
 
-        Task<IAlibabaCloudCredentials> GetCredentialsAsync();
+        Task<CredentialModel> GetCredentialsAsync();
     }
 }

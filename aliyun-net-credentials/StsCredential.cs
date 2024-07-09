@@ -1,9 +1,10 @@
+using System;
 using System.Threading.Tasks;
-
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
+    [Obsolete]
     public class StsCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private readonly string accessKeyId;

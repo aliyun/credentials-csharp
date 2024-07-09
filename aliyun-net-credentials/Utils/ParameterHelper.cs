@@ -155,5 +155,13 @@ namespace Aliyun.Credentials.Utils
             return urlBuilder.Append(query).ToString();
         }
 
+        public static T ValidateNotNull<T>(T obj, string paramName, string message)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(paramName, message);
+            }
+            return obj;
+        }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
@@ -20,9 +21,9 @@ namespace Aliyun.Credentials.Provider
             UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
         }
 
-        public IAlibabaCloudCredentials GetCredentials()
+        public CredentialModel GetCredentials()
         {
-            IAlibabaCloudCredentials credential;
+            CredentialModel credential;
             foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
             {
                 credential = provider.GetCredentials();
@@ -35,9 +36,9 @@ namespace Aliyun.Credentials.Provider
             throw new CredentialException("not found credentials");
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public async Task<CredentialModel> GetCredentialsAsync()
         {
-            IAlibabaCloudCredentials credential;
+            CredentialModel credential;
             foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
             {
                 credential = await provider.GetCredentialsAsync();

@@ -1,15 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
     public class ProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
-        public IAlibabaCloudCredentials GetCredentials()
+        public CredentialModel GetCredentials()
         {
             string filePath = AuthUtils.EnvironmentCredentialsFile;
             if (filePath == null)
@@ -38,7 +40,7 @@ namespace Aliyun.Credentials.Provider
             return CreateCredential(iniFile.Ini[AuthUtils.ClientType]);
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public async Task<CredentialModel> GetCredentialsAsync()
         {
             string filePath = AuthUtils.EnvironmentCredentialsFile;
             if (filePath == null)
@@ -67,7 +69,7 @@ namespace Aliyun.Credentials.Provider
             return await CreateCredentialAsync(iniFile.Ini[AuthUtils.ClientType]);
         }
 
-        private IAlibabaCloudCredentials CreateCredential(Dictionary<string, string> clientConfig)
+        private CredentialModel CreateCredential(Dictionary<string, string> clientConfig)
         {
 
             string configType = clientConfig[AuthConstant.IniType];
@@ -93,12 +95,16 @@ namespace Aliyun.Credentials.Provider
                 return null;
             }
 
-            return new AccessKeyCredential(accessKeyId, accessKeySecret);
+            return new CredentialModel
+            {
+                AccessKeyId = accessKeyId,
+                AccessKeySecret = accessKeySecret,
+                Type = AuthConstant.AccessKey
+            };
         }
 
-        private async Task<IAlibabaCloudCredentials> CreateCredentialAsync(Dictionary<string, string> clientConfig)
+        private async Task<CredentialModel> CreateCredentialAsync(Dictionary<string, string> clientConfig)
         {
-
             string configType = clientConfig[AuthConstant.IniType];
             if (string.IsNullOrWhiteSpace(configType))
             {
@@ -122,10 +128,15 @@ namespace Aliyun.Credentials.Provider
                 return null;
             }
 
-            return new AccessKeyCredential(accessKeyId, accessKeySecret);
+            return new CredentialModel
+            {
+                AccessKeyId = accessKeyId,
+                AccessKeySecret = accessKeySecret,
+                Type = AuthConstant.AccessKey
+            };
         }
 
-        public IAlibabaCloudCredentials GetSTSAssumeRoleSessionCredentials(Dictionary<string, string> clientConfig)
+        public CredentialModel GetSTSAssumeRoleSessionCredentials(Dictionary<string, string> clientConfig)
         {
             string accessKeyId = DictionaryUtil.Get(clientConfig, AuthConstant.IniAccessKeyId);
             string accessKeySecret = DictionaryUtil.Get(clientConfig, AuthConstant.IniAccessKeyIdsecret);
@@ -149,7 +160,7 @@ namespace Aliyun.Credentials.Provider
             return provider.GetCredentials();
         }
 
-        public async Task<IAlibabaCloudCredentials> GetSTSAssumeRoleSessionCredentialsAsync(Dictionary<string, string> clientConfig)
+        public async Task<CredentialModel> GetSTSAssumeRoleSessionCredentialsAsync(Dictionary<string, string> clientConfig)
         {
             string accessKeyId = DictionaryUtil.Get(clientConfig, AuthConstant.IniAccessKeyId);
             string accessKeySecret = DictionaryUtil.Get(clientConfig, AuthConstant.IniAccessKeyIdsecret);
@@ -157,7 +168,6 @@ namespace Aliyun.Credentials.Provider
             string roleArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleArn);
             string regionId = DictionaryUtil.Get(clientConfig, AuthConstant.DefaultRegion);
             string policy = DictionaryUtil.Get(clientConfig, AuthConstant.IniPolicy);
-
             if (string.IsNullOrWhiteSpace(accessKeyId) || string.IsNullOrWhiteSpace(accessKeySecret))
             {
                 throw new CredentialException("The configured access_key_id or access_key_secret is empty");
@@ -173,7 +183,7 @@ namespace Aliyun.Credentials.Provider
             return await provider.GetCredentialsAsync();
         }
 
-        public IAlibabaCloudCredentials GetSTSGetSessionAccessKeyCredentials(Dictionary<string, string> clientConfig)
+        public CredentialModel GetSTSGetSessionAccessKeyCredentials(Dictionary<string, string> clientConfig)
         {
             string publicKeyId = DictionaryUtil.Get(clientConfig, AuthConstant.IniPublicKeyId);
             string privateKeyFile = DictionaryUtil.Get(clientConfig, AuthConstant.IniPrivateKeyFile);
@@ -192,7 +202,7 @@ namespace Aliyun.Credentials.Provider
             return provider.GetCredentials();
         }
 
-        public async Task<IAlibabaCloudCredentials> GetSTSGetSessionAccessKeyCredentialsAsync(Dictionary<string, string> clientConfig)
+        public async Task<CredentialModel> GetSTSGetSessionAccessKeyCredentialsAsync(Dictionary<string, string> clientConfig)
         {
             string publicKeyId = DictionaryUtil.Get(clientConfig, AuthConstant.IniPublicKeyId);
             string privateKeyFile = DictionaryUtil.Get(clientConfig, AuthConstant.IniPrivateKeyFile);
@@ -211,7 +221,7 @@ namespace Aliyun.Credentials.Provider
             return await provider.GetCredentialsAsync();
         }
 
-        public IAlibabaCloudCredentials GetInstanceProfileCredentials(Dictionary<string, string> clientConfig)
+        public CredentialModel GetInstanceProfileCredentials(Dictionary<string, string> clientConfig)
         {
             string roleName = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleName);
             if (string.IsNullOrWhiteSpace(roleName))
@@ -223,7 +233,7 @@ namespace Aliyun.Credentials.Provider
             return provider.GetCredentials();
         }
 
-        public async Task<IAlibabaCloudCredentials> GetInstanceProfileCredentialsAsync(Dictionary<string, string> clientConfig)
+        public async Task<CredentialModel> GetInstanceProfileCredentialsAsync(Dictionary<string, string> clientConfig)
         {
             string roleName = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleName);
             if (string.IsNullOrWhiteSpace(roleName))
