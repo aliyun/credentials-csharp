@@ -1,13 +1,15 @@
+using System;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
     public class EnvironmentVariableCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
-        public IAlibabaCloudCredentials GetCredentials()
+        public CredentialModel GetCredentials()
         {
             if (AuthUtils.ClientType != "default")
             {
@@ -29,10 +31,14 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Environment variable accessKeySecret cannot be empty");
             }
 
-            return new AccessKeyCredential(accessKeyId, accessKeySecret);
+            return new CredentialModel{
+                AccessKeyId = accessKeyId,
+                AccessKeySecret = accessKeySecret,
+                Type = AuthConstant.AccessKey
+            };
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public async Task<CredentialModel> GetCredentialsAsync()
         {
             return await Task.Run(() =>
             {

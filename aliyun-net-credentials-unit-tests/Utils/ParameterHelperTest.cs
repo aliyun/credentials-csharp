@@ -63,7 +63,6 @@ namespace aliyun_net_credentials_unit_tests.Utils
             var str = "md5 sum";
             var buff = Encoding.Default.GetBytes(str);
             var result = ParameterHelper.Md5SumAndBase64(buff);
-            // Console.WriteLine(result);
             Assert.Equal("AYp/x0VvQO4NCDz8vx7kcg==", result);
         }
 
@@ -106,6 +105,14 @@ namespace aliyun_net_credentials_unit_tests.Utils
             dic.Add("key", "value");
             dic.Add("keyNull", null);
             Assert.NotNull(ParameterHelper.ComposeUrl("www.aliyun.com", dic, "http"));
+        }
+
+        [Fact]
+        public void TestValidateNotNull()
+        {
+            string str = null;
+            var ex = Assert.Throws<ArgumentNullException>(() => ParameterHelper.ValidateNotNull(str, "str", "str must not be null."));
+            Assert.StartsWith("str must not be null.", ex.Message);
         }
     }
 }

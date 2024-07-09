@@ -14,23 +14,11 @@ namespace aliyun_net_credentials_unit_tests
         public async Task TesetAccessKeyCredential()
         {
             AccessKeyCredential accessKeyCredential;
-            try
-            {
-                Assert.Throws<ArgumentNullException>(() => new AccessKeyCredential(null, "test"));
-            }
-            catch (ArgumentNullException e)
-            {
-                Assert.Equal("Access key ID cannot be null.", e.Message);
-            }
+            var exception = Assert.Throws<ArgumentNullException>(() => new AccessKeyCredential(null, "test"));
+            Assert.StartsWith("Access key ID cannot be null.", exception.Message);
 
-            try
-            {
-                Assert.Throws<ArgumentNullException>(() => new AccessKeyCredential("test", null));
-            }
-            catch (ArgumentNullException e)
-            {
-                Assert.Equal("Access key secret cannot be null.", e.Message);
-            }
+            exception = Assert.Throws<ArgumentNullException>(() => new AccessKeyCredential("test", null));
+            Assert.StartsWith("Access key secret cannot be null.", exception.Message);
 
             accessKeyCredential = new AccessKeyCredential("accessKeyId", "accessKeySecret");
             Assert.NotNull(accessKeyCredential);

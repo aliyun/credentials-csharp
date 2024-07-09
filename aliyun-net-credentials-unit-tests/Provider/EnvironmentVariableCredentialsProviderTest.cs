@@ -1,7 +1,9 @@
+using System;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
@@ -36,7 +38,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
 
             AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
-            Assert.IsType<AccessKeyCredential>(provider.GetCredentials());
+            Assert.IsType<CredentialModel>(provider.GetCredentials());
 
             AuthUtils.ClientType = tempClientType;
             AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;
@@ -68,7 +70,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
 
             AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
-            Assert.IsType<AccessKeyCredential>(await provider.GetCredentialsAsync());
+            Assert.IsType<CredentialModel>(await provider.GetCredentialsAsync());
 
             AuthUtils.ClientType = tempClientType;
             AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;

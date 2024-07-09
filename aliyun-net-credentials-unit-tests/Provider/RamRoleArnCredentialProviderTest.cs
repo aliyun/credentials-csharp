@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
-
+using Aliyun.Credentials.Utils;
 using Moq;
 
 using Xunit;
@@ -15,6 +16,53 @@ namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class RamRoleArnCredentialProviderTest
     {
+        [Fact]
+        public async Task TestNewRamRoleArnProvider()
+        {
+            Config config = new Config() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
+            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
+            provider = new RamRoleArnCredentialProvider("accessKeyID", "accessKeySecret", "roleSessionName", "roleArn", "regionId", "policy");
+
+            Mock<IConnClient> mock = new Mock<IConnClient>();
+            HttpResponse response = new HttpResponse("http://www.aliyun.com")
+            {
+                Status = 200,
+                Encoding = "UTF-8",
+                Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
+                "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}}")
+            };
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
+
+            RefreshResult<CredentialModel> mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
+            
+            var mockRefreshFunc = new Mock<Func<RefreshResult<CredentialModel>>>();
+            mockRefreshFunc.Setup(f => f()).Returns(() => mockRefreshResult);
+
+            var mockAsyncRefreshFunc = new Mock<Func<Task<RefreshResult<CredentialModel>>>>();
+            mockAsyncRefreshFunc.Setup(f => f()).ReturnsAsync(mockRefreshResult);
+
+            var supplier = new RefreshCachedSupplier<CredentialModel>(
+                mockRefreshFunc.Object,
+                mockAsyncRefreshFunc.Object);
+
+            var resultAsync = await supplier.GetAsync();
+
+            Assert.Equal("test", resultAsync.AccessKeyId);
+            Assert.Equal("test", resultAsync.AccessKeySecret);
+            Assert.Equal("test", resultAsync.SecurityToken);
+            Assert.Equal(1546304461000, resultAsync.Expiration);
+            mockAsyncRefreshFunc.Verify(f => f(), Times.Once);
+
+            var result = supplier.Get();
+
+            Assert.Equal("test", result.AccessKeyId);
+            Assert.Equal("test", result.AccessKeySecret);
+            Assert.Equal("test", result.SecurityToken);
+            Assert.Equal(1546304461000, result.Expiration);
+            mockRefreshFunc.Verify(f => f(), Times.Once);
+        }
+
         [Fact]
         public void RamRoleArnProviderTest()
         {
@@ -28,14 +76,22 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse response = new HttpResponse("http://www.aliyun.com")
             {
-                Status = 200, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
+                Status = 200,
+                Encoding = "UTF-8",
+                Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
                 "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
-            Assert.IsType<RamRoleArnCredential>(TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
 
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentials()).Returns(new RamRoleArnCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentials()).Returns(new CredentialModel
+            {
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             RamRoleArnCredential credentialMock = new RamRoleArnCredential("accessKeyId", "accessKeySecret", "securityToken", 1000L, mockProvider.Object);
             credentialMock.RefreshCredential();
             Assert.NotNull(credentialMock);
@@ -49,7 +105,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.NotNull(provider);
 
             provider = new RamRoleArnCredentialProvider("accessKeyID", "accessKeySecret", "roleSessionName", "roleArn", "regionId", "policy");
-            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async () => { await provider.RefreshCredentialsAsync(); });
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse response = new HttpResponse("http://www.aliyun.com")
@@ -60,13 +116,78 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}}")
             };
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
-            Assert.IsType<RamRoleArnCredential>(TestHelper.RunInstanceMethodAsync(typeof(RamRoleArnCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethodAsync(typeof(RamRoleArnCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
 
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new RamRoleArnCredential("accessKeyId", "accessKeySecret", "securityToken", 64090527132000L, null));
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new CredentialModel
+            {
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            });
             RamRoleArnCredential credentialMock = new RamRoleArnCredential("accessKeyId", "accessKeySecret", "securityToken", 1000L, mockProvider.Object);
             await credentialMock.RefreshCredentialAsync();
             Assert.NotNull(credentialMock);
+        }
+
+        [Fact]
+        public async Task TestCacheIsStale()
+        {
+            var staleTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 1;
+            var refreshResult = new RefreshResult<CredentialModel>(new CredentialModel
+            {
+                AccessKeyId = "accessKeyId",
+                AccessKeySecret = "accessKeySecret",
+                SecurityToken = "securityToken",
+                Expiration = 64090527132000L
+            }, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + 10000);
+
+            var mockSyncRefreshFunc = new Mock<Func<RefreshResult<CredentialModel>>>();
+            mockSyncRefreshFunc.Setup(f => f()).Returns(() => refreshResult);
+
+            var mockAsyncRefreshFunc = new Mock<Func<Task<RefreshResult<CredentialModel>>>>();
+            mockAsyncRefreshFunc.Setup(f => f()).ReturnsAsync(refreshResult);
+
+            var supplier = new RefreshCachedSupplier<CredentialModel>(
+                mockSyncRefreshFunc.Object,
+                mockAsyncRefreshFunc.Object);
+
+            typeof(RefreshCachedSupplier<CredentialModel>)
+                .GetField("cachedValue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(supplier, new RefreshResult<CredentialModel>(new CredentialModel
+                {
+                    AccessKeyId = "accessKeyId",
+                    AccessKeySecret = "accessKeySecret",
+                    SecurityToken = "securityToken",
+                    Expiration = 64090527132000L
+                }, staleTime));
+
+            var result = await supplier.GetAsync();
+
+            Assert.Equal("accessKeyId", result.AccessKeyId);
+            Assert.Equal("accessKeySecret", result.AccessKeySecret);
+            Assert.Equal("securityToken", result.SecurityToken);
+            Assert.Equal(64090527132000L, result.Expiration);
+            mockAsyncRefreshFunc.Verify(f => f(), Times.Once);
+
+            // 重置cachedValue
+            typeof(RefreshCachedSupplier<CredentialModel>)
+                .GetField("cachedValue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(supplier, new RefreshResult<CredentialModel>(new CredentialModel
+                {
+                    AccessKeyId = "accessKeyId",
+                    AccessKeySecret = "accessKeySecret",
+                    SecurityToken = "securityToken",
+                    Expiration = 64090527132000L
+                }, staleTime));
+
+            var result1 = supplier.Get();
+            Assert.Equal("accessKeyId", result1.AccessKeyId);
+            Assert.Equal("accessKeySecret", result1.AccessKeySecret);
+            Assert.Equal("securityToken", result1.SecurityToken);
+            Assert.Equal(64090527132000L, result1.Expiration);
+            mockSyncRefreshFunc.Verify(f => f(), Times.Once);
         }
     }
 }

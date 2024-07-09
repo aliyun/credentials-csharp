@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
@@ -27,14 +27,14 @@ namespace Aliyun.Credentials
             return DateTime.UtcNow.GetTimeMillis() >= (this.expiration - 180 * 1000);
         }
 
-        public T GetNewCredential<T>()
+        public CredentialModel GetNewCredential()
         {
-            return (T) provider.GetCredentials();
+            return provider.GetCredentials();
         }
 
-        public async Task<T> GetNewCredentialAsync<T>()
+        public async Task<CredentialModel> GetNewCredentialAsync()
         {
-            return (T) await provider.GetCredentialsAsync();
+            return await provider.GetCredentialsAsync();
         }
     }
 }

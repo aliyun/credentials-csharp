@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
-    public class RsaKeyPairCredentialProvider : IAlibabaCloudCredentialsProvider
+    public class RsaKeyPairCredentialProvider : SessionCredentialsProvider
     {
         private int durationSeconds = 3600;
         private string regionId = "cn-hangzhou";
@@ -20,39 +20,39 @@ namespace Aliyun.Credentials.Provider
 
         public RsaKeyPairCredentialProvider(Config config) : this(config.PublicKeyId, config.PrivateKeyFile)
         {
-            this.connectTimeout = config.ConnectTimeout;
-            this.readTimeout = config.Timeout;
+            connectTimeout = config.ConnectTimeout;
+            readTimeout = config.Timeout;
         }
 
-        public RsaKeyPairCredentialProvider(String publicKeyId, String privateKey)
+        public RsaKeyPairCredentialProvider(string publicKeyId, string privateKey)
         {
-            PublicKeyId = publicKeyId;
-            PrivateKey = privateKey;
+            PublicKeyId = ParameterHelper.ValidateNotNull(publicKeyId, "publicKeyId", "PublicKeyId must not be null.");
+            PrivateKey = ParameterHelper.ValidateNotNull(privateKey, "privateKey", "PrivateKeyFile must not be null.");
         }
 
-        public IAlibabaCloudCredentials GetCredentials()
+        public override RefreshResult<CredentialModel> RefreshCredentials()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             return CreateCredential(client);
         }
 
-        public async Task<IAlibabaCloudCredentials> GetCredentialsAsync()
+        public override async Task<RefreshResult<CredentialModel>> RefreshCredentialsAsync()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
             return await CreateCredentialAsync(client);
         }
 
-        private IAlibabaCloudCredentials CreateCredential(IConnClient client)
+        private RefreshResult<CredentialModel> CreateCredential(IConnClient client)
         {
             return GetNewSessionCredentials(client);
         }
 
-        private async Task<IAlibabaCloudCredentials> CreateCredentialAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> CreateCredentialAsync(IConnClient client)
         {
             return await GetNewSessionCredentialsAsync(client);
         }
 
-        private IAlibabaCloudCredentials GetNewSessionCredentials(IConnClient client)
+        private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
@@ -93,10 +93,17 @@ namespace Aliyun.Credentials.Provider
             expirationStr = expirationStr.Replace('T', ' ').Replace('Z', ' ');
             var dt = Convert.ToDateTime(expirationStr);
             long expiration = dt.GetTimeMillis();
-            return new RsaKeyPairCredential(sessionAccessKeyId, sessionAccessKeySecret, expiration, this);
+            CredentialModel credentialModel = new CredentialModel
+            {
+                AccessKeyId = sessionAccessKeyId,
+                AccessKeySecret = sessionAccessKeySecret,
+                Expiration = expiration,
+                Type = AuthConstant.RsaKeyPair
+            };
+            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
 
-        private async Task<IAlibabaCloudCredentials> GetNewSessionCredentialsAsync(IConnClient client)
+        private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
@@ -137,7 +144,14 @@ namespace Aliyun.Credentials.Provider
             expirationStr = expirationStr.Replace('T', ' ').Replace('Z', ' ');
             var dt = Convert.ToDateTime(expirationStr);
             long expiration = dt.GetTimeMillis();
-            return new RsaKeyPairCredential(sessionAccessKeyId, sessionAccessKeySecret, expiration, this);
+            CredentialModel credentialModel = new CredentialModel
+            {
+                AccessKeyId = sessionAccessKeyId,
+                AccessKeySecret = sessionAccessKeySecret,
+                Expiration = expiration,
+                Type = AuthConstant.RsaKeyPair
+            };
+            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
 
         public int DurationSeconds

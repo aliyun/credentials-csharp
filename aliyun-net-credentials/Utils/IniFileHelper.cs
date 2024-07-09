@@ -18,7 +18,7 @@ namespace Aliyun.Credentials.Utils
 
             ini[""] = currentSection;
 
-            foreach (var line in txt.Split(new [] { "\n" }, StringSplitOptions.RemoveEmptyEntries)
+            foreach (var line in txt.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries)
                     .Where(t => !string.IsNullOrWhiteSpace(t))
                     .Select(t => t.Trim()))
             {

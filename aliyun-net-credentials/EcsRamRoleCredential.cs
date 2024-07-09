@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
-
+using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials
 {
+    [Obsolete]
     public class EcsRamRoleCredential : BaseCredential, IAlibabaCloudCredentials
     {
         private string accessKeyId;
@@ -23,11 +24,11 @@ namespace Aliyun.Credentials
         {
             if (WithShouldRefresh())
             {
-                EcsRamRoleCredential credential = GetNewCredential<EcsRamRoleCredential>();
-                this.expiration = credential.GetExpiration();
-                this.accessKeyId = credential.GetAccessKeyId();
-                this.accessKeySecret = credential.GetAccessKeySecret();
-                this.securityToken = credential.GetSecurityToken();
+                CredentialModel credential = GetNewCredential();
+                this.expiration = credential.Expiration;
+                this.accessKeyId = credential.AccessKeyId;
+                this.accessKeySecret = credential.AccessKeySecret;
+                this.securityToken = credential.SecurityToken;
             }
         }
 
@@ -35,11 +36,11 @@ namespace Aliyun.Credentials
         {
             if (WithShouldRefresh())
             {
-                EcsRamRoleCredential credential = await GetNewCredentialAsync<EcsRamRoleCredential>();
-                this.expiration = await credential.GetExpirationAsync();
-                this.accessKeyId = await credential.GetAccessKeyIdAsync();
-                this.accessKeySecret = await credential.GetAccessKeySecretAsync();
-                this.securityToken = await credential.GetSecurityTokenAsync();
+                CredentialModel credential = await GetNewCredentialAsync();
+                this.expiration = credential.Expiration;
+                this.accessKeyId = credential.AccessKeyId;
+                this.accessKeySecret = credential.AccessKeySecret;
+                this.securityToken = credential.SecurityToken;
             }
         }
 

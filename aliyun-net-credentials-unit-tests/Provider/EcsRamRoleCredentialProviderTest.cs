@@ -38,7 +38,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.NotNull(providerRoleName.CredentialUrl);
 
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(new Config() { RoleName = "roleName" });
-            await Assert.ThrowsAsync<CredentialException>(async() => { await providerConfig.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async() => { await providerConfig.RefreshCredentialsAsync(); });
 
         }
 
@@ -76,8 +76,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
             httpResponse = new HttpResponse("http://www.aliyun.com") { Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json, Content = Encoding.UTF8.GetBytes("{\"Code\":\"Success\",  \"AccessKeyId\":\"test\", \"AccessKeySecret\":\"test\", \"SecurityToken\":\"test\",  \"Expiration\":\"2019-08-08T1:1:1Z\"}") };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
 
-            EcsRamRoleCredential credential = (EcsRamRoleCredential) TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "CreateCredential", providerConfig, new object[] { mock.Object });
+            RefreshResult<CredentialModel> credential = (RefreshResult<CredentialModel>) TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "CreateCredential", providerConfig, new object[] { mock.Object });
             Assert.NotNull(credential);
+            Assert.Equal("test", credential.Value.AccessKeyId);
         }
 
         [Fact]
@@ -114,8 +115,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
             httpResponse = new HttpResponse("http://www.aliyun.com") { Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json, Content = Encoding.UTF8.GetBytes("{\"Code\":\"Success\",  \"AccessKeyId\":\"test\", \"AccessKeySecret\":\"test\", \"SecurityToken\":\"test\",  \"Expiration\":\"2019-08-08T1:1:1Z\"}") };
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(httpResponse);
 
-            EcsRamRoleCredential credential = (EcsRamRoleCredential) TestHelper.RunInstanceMethodAsync(typeof(EcsRamRoleCredentialProvider), "CreateCredentialAsync", providerConfig, new object[] { mock.Object });
-            Assert.NotNull(credential);
+            RefreshResult<CredentialModel> credentialModel = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(typeof(EcsRamRoleCredentialProvider), "CreateCredentialAsync", providerConfig, new object[] { mock.Object });
+            Assert.NotNull(credentialModel);
+            Assert.Equal("test", credentialModel.Value.AccessKeyId);
         }
 
         [Fact]

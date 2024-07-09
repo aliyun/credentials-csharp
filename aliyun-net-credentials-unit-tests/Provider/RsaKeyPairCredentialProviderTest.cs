@@ -1,7 +1,4 @@
 using System.Text;
-using System.Threading.Tasks;
-
-using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Models;
@@ -61,7 +58,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 "\"SessionAccessKeySecret\":\"test\"}}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
-            Assert.IsType<RsaKeyPairCredential>(TestHelper.RunInstanceMethod(typeof(RsaKeyPairCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RsaKeyPairCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
         }
 
         [Fact]
@@ -110,7 +107,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 "\"SessionAccessKeySecret\":\"test\"}}")
             };
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
-            Assert.IsType<RsaKeyPairCredential>(TestHelper.RunInstanceMethodAsync(typeof(RsaKeyPairCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethodAsync(typeof(RsaKeyPairCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
         }
     }
 }
