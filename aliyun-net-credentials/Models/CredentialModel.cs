@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Tea;
 
 namespace  Aliyun.Credentials.Models

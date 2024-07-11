@@ -41,11 +41,12 @@ namespace credentials_demo
                 AccessKeyId = "<AccessKeyId>",          // AccessKeyId
                 AccessKeySecret = "<AccessKeySecret>"   // AccessKeySecret
             };
-            var akCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = akCredential.GetAccessKeyId();
-            string accessSecret = akCredential.GetAccessKeySecret();
-            string credentialType = akCredential.GetType();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
         }
     }
 }
@@ -71,12 +72,13 @@ namespace credentials_demo
                 AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret
                 SecurityToken = "<SecurityToken>"       // STS Token
             };
-            var stsCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = stsCredential.GetAccessKeyId();
-            string accessSecret = stsCredential.GetAccessKeySecret();
-            string credentialType = stsCredential.GetType();
-            string securityToken = stsCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -102,13 +104,15 @@ namespace credentials_demo
                 AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret
                 RoleArn = "<RoleArn>",                  // 格式: acs:ram::用户Id:role/角色名
                 RoleSessionName = "<RoleSessionName>",  // 角色会话名称
+                Policy = "<Policy>,"                    // 可选, 限制 STS Token 的权限
             };
-            var arnCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = arnCredential.GetAccessKeyId();
-            string accessSecret = arnCredential.GetAccessKeySecret();
-            string credentialType = arnCredential.GetType();
-            string securityToken = arnCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -132,12 +136,13 @@ namespace credentials_demo
                 Type = "ecs_ram_role",      // 凭证类型
                 RoleName = "<RoleName>"     // 账户RoleName，非必填，不填则自动获取，建议设置，可以减少请求up to reduce requests
             };
-            var ecsCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = ecsCredential.GetAccessKeyId();
-            string accessSecret = ecsCredential.GetAccessKeySecret();
-            string credentialType = ecsCredential.GetType();
-            string securityToken = ecsCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -161,10 +166,11 @@ namespace credentials_demo
                 Type = "bearer",                    // 凭证类型
                 BearerToken = "<BearerToken>"       // BearerToken
             };
-            var bearerCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string bearerToken = bearerCredential.GetBearerToken();
-            string credentialType = bearerCredential.GetType();
+            string accessKeyId = credential.BearerToken;
+            string credentialType = credential.Type;
         }
     }
 }
