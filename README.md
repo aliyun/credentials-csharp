@@ -41,11 +41,12 @@ namespace credentials_demo
                 AccessKeyId = "<AccessKeyId>",          // AccessKeyId of your account
                 AccessKeySecret = "<AccessKeySecret>"   // AccessKeySecret of your account
             };
-            var akCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = akCredential.GetAccessKeyId();
-            string accessSecret = akCredential.GetAccessKeySecret();
-            string credentialType = akCredential.GetType();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
         }
     }
 }
@@ -71,12 +72,13 @@ namespace credentials_demo
                 AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret of your account
                 SecurityToken = "<SecurityToken>"       // Temporary Security Token
             };
-            var stsCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = stsCredential.GetAccessKeyId();
-            string accessSecret = stsCredential.GetAccessKeySecret();
-            string credentialType = stsCredential.GetType();
-            string securityToken = stsCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -102,13 +104,15 @@ namespace credentials_demo
                 AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret of your account
                 RoleArn = "<RoleArn>",                  // Format: acs:ram::USER_Id:role/ROLE_NAME
                 RoleSessionName = "<RoleSessionName>",  // Role Session Name
+                Policy = "<Policy>,"                    // Optional, limit the permissions of STS Token
             };
-            var arnCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = arnCredential.GetAccessKeyId();
-            string accessSecret = arnCredential.GetAccessKeySecret();
-            string credentialType = arnCredential.GetType();
-            string securityToken = arnCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -132,12 +136,13 @@ namespace credentials_demo
                 Type = "ecs_ram_role",      // Which type of credential you want
                 RoleName = "<RoleName>"     // `roleName` is optional. It will be retrieved automatically if not set. It is highly recommended to set it up to reduce requests
             };
-            var ecsCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string accessKeyId = ecsCredential.GetAccessKeyId();
-            string accessSecret = ecsCredential.GetAccessKeySecret();
-            string credentialType = ecsCredential.GetType();
-            string securityToken = ecsCredential.GetSecurityToken();
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
         }
     }
 }
@@ -161,10 +166,11 @@ namespace credentials_demo
                 Type = "bearer",                    // Which type of credential you want
                 BearerToken = "<BearerToken>"       // BearerToken of your account
             };
-            var bearerCredential = new Aliyun.Credentials.Client(config);
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
 
-            string bearerToken = bearerCredential.GetBearerToken();
-            string credentialType = bearerCredential.GetType();
+            string accessKeyId = credential.BearerToken;
+            string credentialType = credential.Type;
         }
     }
 }
