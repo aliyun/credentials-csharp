@@ -62,10 +62,10 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("AccessKeyId", PublicKeyId);
             httpRequest.AddUrlParameter("RegionId", regionId);
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
-            String signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
+            string signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
             httpRequest.AddUrlParameter("Signature", signature);
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");
@@ -113,10 +113,10 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("AccessKeyId", PublicKeyId);
             httpRequest.AddUrlParameter("RegionId", regionId);
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             String signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
             httpRequest.AddUrlParameter("Signature", signature);
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");

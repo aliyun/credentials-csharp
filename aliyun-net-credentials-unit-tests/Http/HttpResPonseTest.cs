@@ -22,10 +22,10 @@ namespace aliyun_net_credentials_unit_tests.Http
             var request = new HttpResponse(requestUrl);
             var content = Encoding.ASCII.GetBytes("someString");
             request.SetContent(content, "UTF-8", FormatType.Form);
-            request.Method = MethodType.Get;
+            request.Method = MethodType.GET;
             var response = HttpResponse.GetResponse(request);
             Assert.Equal("UTF-8", response.Encoding);
-            Assert.Equal(MethodType.Get, response.Method);
+            Assert.Equal(MethodType.GET, response.Method);
             HttpResponse.GetResponse(request, 30000);
         }
 
@@ -35,10 +35,10 @@ namespace aliyun_net_credentials_unit_tests.Http
             var request = new HttpResponse(requestUrl);
             var content = Encoding.ASCII.GetBytes("someString");
             request.SetContent(content, "UTF-8", FormatType.Form);
-            request.Method = MethodType.Get;
+            request.Method = MethodType.GET;
             var response = await HttpResponse.GetResponseAsync(request);
             Assert.Equal("UTF-8", response.Encoding);
-            Assert.Equal(MethodType.Get, response.Method);
+            Assert.Equal(MethodType.GET, response.Method);
 
             response = await HttpResponse.GetResponseAsync(request, 30000);
             Assert.NotNull(response);
@@ -55,7 +55,7 @@ namespace aliyun_net_credentials_unit_tests.Http
             request.Headers.Add("Accept", "accept");
             request.Headers.Add("Date", "Thu, 24 Jan 2019 05:16:46 GMT");
 
-            request.Method = MethodType.Post;
+            request.Method = MethodType.POST;
             httpWebRequest = HttpResponse.GetWebRequest(request);
             Assert.IsType<HttpWebRequest>(httpWebRequest);
             Assert.Equal("text/json", httpWebRequest.ContentType);
@@ -72,7 +72,7 @@ namespace aliyun_net_credentials_unit_tests.Http
             request.Headers.Add("Accept", "accept");
             request.Headers.Add("Date", "Thu, 24 Jan 2019 05:16:46 GMT");
 
-            request.Method = MethodType.Post;
+            request.Method = MethodType.POST;
             httpWebRequest = await HttpResponse.GetWebRequestAsync(request);
             Assert.IsType<HttpWebRequest>(httpWebRequest);
             Assert.Equal("text/json", httpWebRequest.ContentType);
@@ -87,8 +87,8 @@ namespace aliyun_net_credentials_unit_tests.Http
                     { "Content-Type", "text/json" }
                 };
             var instance = new HttpRequest("https://www.alibabacloud.com", tmpHeaders);
-            instance.Method = MethodType.Get;
-            Assert.Equal(MethodType.Get, instance.Method);
+            instance.Method = MethodType.GET;
+            Assert.Equal(MethodType.GET, instance.Method);
 
             // when content is null
             instance.Content = null;

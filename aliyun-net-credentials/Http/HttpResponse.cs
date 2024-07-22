@@ -150,6 +150,22 @@ namespace Aliyun.Credentials.Http
                     return httpResponse;
                 }
             }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    httpWebResponse = (HttpWebResponse)ex.Response;
+                    ParseHttpResponse(httpResponse, httpWebResponse);
+                    return httpResponse;
+                }
+                else
+                {
+                    throw new CredentialException("Exception",
+                        string.Format("The request url is {0} {1}",
+                            httpWebRequest.RequestUri == null ? "empty" : httpWebRequest.RequestUri.Host, ex));
+                }
+
+            }
             catch (Exception ex)
             {
                 throw new CredentialException("Exception",
@@ -176,6 +192,22 @@ namespace Aliyun.Credentials.Http
                     await ParseHttpResponseAsync(httpResponse, httpWebResponse);
                     return httpResponse;
                 }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    httpWebResponse = (HttpWebResponse)ex.Response;
+                    ParseHttpResponse(httpResponse, httpWebResponse);
+                    return httpResponse;
+                }
+                else
+                {
+                    throw new CredentialException("Exception",
+                        string.Format("The request url is {0} {1}",
+                            httpWebRequest.RequestUri == null ? "empty" : httpWebRequest.RequestUri.Host, ex));
+                }
+
             }
             catch (Exception ex)
             {
@@ -227,7 +259,7 @@ namespace Aliyun.Credentials.Http
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             }
 
-            if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
+            if ((request.Method != MethodType.POST && request.Method != MethodType.PUT) || request.Content == null)
                 return httpWebRequest;
             using (var stream = httpWebRequest.GetRequestStream())
             {
@@ -279,7 +311,7 @@ namespace Aliyun.Credentials.Http
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             }
 
-            if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
+            if ((request.Method != MethodType.POST && request.Method != MethodType.PUT) || request.Content == null)
                 return httpWebRequest;
             using (var stream = await httpWebRequest.GetRequestStreamAsync())
             {
