@@ -107,10 +107,10 @@ namespace Aliyun.Credentials.Provider
                 httpRequest.AddUrlParameter("Policy", this.policy);
             }
 
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
@@ -161,10 +161,10 @@ namespace Aliyun.Credentials.Provider
                 httpRequest.AddUrlParameter("Policy", this.policy);
             }
 
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,

@@ -85,7 +85,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -113,7 +113,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -141,7 +141,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -206,7 +206,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl

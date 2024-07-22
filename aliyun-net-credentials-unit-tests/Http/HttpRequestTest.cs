@@ -33,8 +33,8 @@ namespace aliyun_net_credentials_unit_tests.Http
             httpRequest.Encoding = "UTF-8";
             Assert.Equal("UTF-8", httpRequest.Encoding);
 
-            httpRequest.Method = MethodType.Post;
-            Assert.Equal(MethodType.Post, httpRequest.Method);
+            httpRequest.Method = MethodType.POST;
+            Assert.Equal(MethodType.POST, httpRequest.Method);
 
             httpRequest.ReadTimeout = 20000;
             Assert.Equal(20000, httpRequest.ReadTimeout);

@@ -89,12 +89,12 @@ namespace aliyun_net_credentials_unit_tests.Utils
         [Fact]
         public void StringToMethodType()
         {
-            Assert.True(MethodType.Get == ParameterHelper.StringToMethodType("get"));
-            Assert.True(MethodType.Post == ParameterHelper.StringToMethodType("post"));
-            Assert.True(MethodType.Delete == ParameterHelper.StringToMethodType("delete"));
-            Assert.True(MethodType.Put == ParameterHelper.StringToMethodType("put"));
-            Assert.True(MethodType.Head == ParameterHelper.StringToMethodType("head"));
-            Assert.True(MethodType.Options == ParameterHelper.StringToMethodType("options"));
+            Assert.True(MethodType.GET == ParameterHelper.StringToMethodType("get"));
+            Assert.True(MethodType.POST == ParameterHelper.StringToMethodType("post"));
+            Assert.True(MethodType.DELETE == ParameterHelper.StringToMethodType("delete"));
+            Assert.True(MethodType.PUT == ParameterHelper.StringToMethodType("put"));
+            Assert.True(MethodType.HEAD == ParameterHelper.StringToMethodType("head"));
+            Assert.True(MethodType.OPTIONS == ParameterHelper.StringToMethodType("options"));
             Assert.True(null == ParameterHelper.StringToMethodType("test"));
         }
 

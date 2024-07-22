@@ -227,7 +227,7 @@ namespace Aliyun.Credentials.Http
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             }
 
-            if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
+            if ((request.Method != MethodType.POST && request.Method != MethodType.PUT) || request.Content == null)
                 return httpWebRequest;
             using (var stream = httpWebRequest.GetRequestStream())
             {
@@ -279,7 +279,7 @@ namespace Aliyun.Credentials.Http
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             }
 
-            if ((request.Method != MethodType.Post && request.Method != MethodType.Put) || request.Content == null)
+            if ((request.Method != MethodType.POST && request.Method != MethodType.PUT) || request.Content == null)
                 return httpWebRequest;
             using (var stream = await httpWebRequest.GetRequestStreamAsync())
             {
