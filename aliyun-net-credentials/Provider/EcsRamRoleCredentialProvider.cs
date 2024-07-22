@@ -85,7 +85,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -101,6 +101,11 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Failed to connect ECS Metadata Service: " + ex.Message);
             }
 
+            if (httpResponse != null && httpResponse.Status == 404)
+            {
+                throw new CredentialException("The role name was not found in the instance");
+            }
+
             if (httpResponse != null && httpResponse.Status != 200)
             {
                 throw new CredentialException(EcsMetadatFetchErrorMsg + " HttpCode=" + httpResponse.Status);
@@ -113,7 +118,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -129,6 +134,11 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Failed to connect ECS Metadata Service: " + ex.Message);
             }
 
+            if (httpResponse != null && httpResponse.Status == 404)
+            {
+                throw new CredentialException("The role name was not found in the instance");
+            }
+
             if (httpResponse != null && httpResponse.Status != 200)
             {
                 throw new CredentialException(EcsMetadatFetchErrorMsg + " HttpCode=" + httpResponse.Status);
@@ -141,7 +151,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -161,6 +171,11 @@ namespace Aliyun.Credentials.Provider
             catch (Exception ex)
             {
                 throw new CredentialException("Failed to connect ECS Metadata Service: " + ex.Message);
+            }
+
+            if (httpResponse != null && httpResponse.Status == 404)
+            {
+                throw new CredentialException("The role name was not found in the instance");
             }
 
             if (httpResponse != null && httpResponse.Status != 200)
@@ -206,7 +221,7 @@ namespace Aliyun.Credentials.Provider
         {
             HttpRequest httpRequest = new HttpRequest
             {
-                Method = MethodType.Get,
+                Method = MethodType.GET,
                 ConnectTimeout = connectionTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
@@ -226,6 +241,11 @@ namespace Aliyun.Credentials.Provider
             catch (Exception ex)
             {
                 throw new CredentialException("Failed to connect ECS Metadata Service: " + ex.Message);
+            }
+
+            if (httpResponse != null && httpResponse.Status == 404)
+            {
+                throw new CredentialException("The role name was not found in the instance");
             }
 
             if (httpResponse != null && httpResponse.Status != 200)

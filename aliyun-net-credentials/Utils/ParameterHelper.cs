@@ -80,17 +80,17 @@ namespace Aliyun.Credentials.Utils
             switch (method)
             {
                 case "GET":
-                    return MethodType.Get;
+                    return MethodType.GET;
                 case "PUT":
-                    return MethodType.Put;
+                    return MethodType.PUT;
                 case "POST":
-                    return MethodType.Post;
+                    return MethodType.POST;
                 case "DELETE":
-                    return MethodType.Delete;
+                    return MethodType.DELETE;
                 case "HEAD":
-                    return MethodType.Head;
+                    return MethodType.HEAD;
                 case "OPTIONS":
-                    return MethodType.Options;
+                    return MethodType.OPTIONS;
                 default:
                     return null;
             }

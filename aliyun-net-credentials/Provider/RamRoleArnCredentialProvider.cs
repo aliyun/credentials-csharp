@@ -107,10 +107,10 @@ namespace Aliyun.Credentials.Provider
                 httpRequest.AddUrlParameter("Policy", this.policy);
             }
 
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
@@ -127,14 +127,11 @@ namespace Aliyun.Credentials.Provider
                     DictionaryUtil.Get(credentials, "Expiration").Replace('T', ' ').Replace('Z', ' ');
                 var dt = Convert.ToDateTime(expirationStr);
                 long expiration = dt.GetTimeMillis();
-                accessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId");
-                accessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret");
-                securityToken = DictionaryUtil.Get(credentials, "SecurityToken");
                 CredentialModel credentialModel = new CredentialModel
                 {
-                    AccessKeyId = accessKeyId,
-                    AccessKeySecret = accessKeySecret,
-                    SecurityToken = securityToken,
+                    AccessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId"),
+                    AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
+                    SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
                     Type = AuthConstant.RamRoleArn
                 };
@@ -161,10 +158,10 @@ namespace Aliyun.Credentials.Provider
                 httpRequest.AddUrlParameter("Policy", this.policy);
             }
 
-            httpRequest.Method = MethodType.Get;
+            httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.Get, httpRequest.UrlParameters);
+            string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
@@ -181,14 +178,11 @@ namespace Aliyun.Credentials.Provider
                     DictionaryUtil.Get(credentials, "Expiration").Replace('T', ' ').Replace('Z', ' ');
                 var dt = Convert.ToDateTime(expirationStr);
                 long expiration = dt.GetTimeMillis();
-                accessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId");
-                accessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret");
-                securityToken = DictionaryUtil.Get(credentials, "SecurityToken");
                 CredentialModel credentialModel = new CredentialModel
                 {
-                    AccessKeyId = accessKeyId,
-                    AccessKeySecret = accessKeySecret,
-                    SecurityToken = securityToken,
+                    AccessKeyId = DictionaryUtil.Get(credentials, "AccessKeyId"),
+                    AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
+                    SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
                     Type = AuthConstant.RamRoleArn
                 };

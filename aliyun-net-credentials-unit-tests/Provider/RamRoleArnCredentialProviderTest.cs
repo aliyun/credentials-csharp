@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials;
@@ -7,9 +8,8 @@ using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
-using Aliyun.Credentials.Utils;
 using Moq;
-
+using Newtonsoft.Json;
 using Xunit;
 
 namespace aliyun_net_credentials_unit_tests.Provider
@@ -17,11 +17,35 @@ namespace aliyun_net_credentials_unit_tests.Provider
     public class RamRoleArnCredentialProviderTest
     {
         [Fact]
+        public async void TestRealRequest()
+        {
+            Config config = new Config() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
+            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
+            var supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
+            
+            var ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
+            Dictionary<string, object> msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
+            Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
+            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
+
+            ex = await Assert.ThrowsAsync<CredentialException>(async () => { await supplier.GetAsync(); });
+            msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
+            Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
+            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
+        }
+
+        [Fact]
         public async Task TestNewRamRoleArnProvider()
         {
             Config config = new Config() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
             RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
+            Assert.NotNull(provider);
             provider = new RamRoleArnCredentialProvider("accessKeyID", "accessKeySecret", "roleSessionName", "roleArn", "regionId", "policy");
+            Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
             HttpResponse response = new HttpResponse("http://www.aliyun.com")
