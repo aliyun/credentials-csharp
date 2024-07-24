@@ -1,3 +1,7 @@
+### 2024-07-24 Version 1.4.0
+* refactor: solve the inconsistency of credentials refresh
+* fix: capitalize methodType and pass through response info when catch webException
+
 ### 2023-05-04 Version 1.3.3
 * Fix default type for credentials
 * Bump Newtonsoft.Json from 9.0.1 to 13.0.1 in /aliyun-net-credentials
