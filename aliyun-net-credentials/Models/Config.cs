@@ -58,5 +58,8 @@ namespace Aliyun.Credentials.Models
 
         [NameInMap("oidcTokenFilePath")]
         public string OIDCTokenFilePath { get; set; }
+
+        [NameInMap("credentialsURI")]
+        public string CredentialsURI { get; set; }
     }
 }

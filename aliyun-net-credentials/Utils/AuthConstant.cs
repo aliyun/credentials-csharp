@@ -32,6 +32,7 @@ namespace Aliyun.Credentials.Utils
         public const string RsaKeyPair = "rsa_key_pair";
         public const string BeareaToken = "bearer";
         public const string OIDCRoleArn = "oidc_role_arn";
+        public const string URLSts = "credentials_uri";
 
         private static string GetHomePath()
         {

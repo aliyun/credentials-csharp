@@ -50,6 +50,11 @@ namespace aliyun_net_credentials_unit_tests
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<OIDCRoleArnCredentialProvider>(result);
 
+            config.Type = AuthConstant.URLSts;
+            config.CredentialsURI = "http://test";
+            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            Assert.IsType<URLCredentialProvider>(result);
+
             config.Type = null;
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<DefaultCredentialsProvider>(result);

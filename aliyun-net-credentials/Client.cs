@@ -61,6 +61,8 @@ namespace Aliyun.Credentials
                     return new RsaKeyPairCredentialProvider(config);
                 case AuthConstant.OIDCRoleArn:
                     return new OIDCRoleArnCredentialProvider(config);
+                case AuthConstant.URLSts:
+                    return new URLCredentialProvider(config);
                 default:
                     return new DefaultCredentialsProvider();
             }

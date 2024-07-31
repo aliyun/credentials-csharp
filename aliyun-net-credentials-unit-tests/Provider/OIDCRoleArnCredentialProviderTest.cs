@@ -3,16 +3,17 @@ using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
-using Moq;
-using Newtonsoft.Json;
-using Xunit;
-using System.IO;
 using Aliyun.Credentials.Utils;
+
+using Newtonsoft.Json;
+
+using Moq;
+using Xunit;
+
 
 namespace aliyun_net_credentials_unit_tests.Provider
 {
@@ -63,7 +64,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         }
 
         [Fact]
-        public async Task TestCreateCredentialAsync()
+        public void TestCreateCredential()
         {
             Config config = new Config
             {
