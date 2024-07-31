@@ -21,12 +21,12 @@ namespace Aliyun.Credentials.Utils
 
         public static string GetRfc2616Date(DateTime datetime)
         {
-            return datetime.ToUniversalTime().GetDateTimeFormats('r') [0];
+            return datetime.ToUniversalTime().GetDateTimeFormats('r')[0];
         }
 
         public static string Md5Sum(byte[] buff)
         {
-            using(MD5 md5 = new MD5CryptoServiceProvider())
+            using (MD5 md5 = new MD5CryptoServiceProvider())
             {
                 var output = md5.ComputeHash(buff);
                 return BitConverter.ToString(output).Replace("-", "");
@@ -35,7 +35,7 @@ namespace Aliyun.Credentials.Utils
 
         public static string Md5SumAndBase64(byte[] buff)
         {
-            using(MD5 md5 = new MD5CryptoServiceProvider())
+            using (MD5 md5 = new MD5CryptoServiceProvider())
             {
                 var output = md5.ComputeHash(buff);
                 return Convert.ToBase64String(output, 0, output.Length);
@@ -122,7 +122,7 @@ namespace Aliyun.Credentials.Utils
 
         public static string SignString(string source, string accessSecret)
         {
-            using(KeyedHashAlgorithm algorithm = CryptoConfig.CreateFromName("HMACSHA1") as KeyedHashAlgorithm)
+            using (KeyedHashAlgorithm algorithm = CryptoConfig.CreateFromName("HMACSHA1") as KeyedHashAlgorithm)
             {
                 algorithm.Key = Encoding.UTF8.GetBytes(accessSecret.ToCharArray());
                 return Convert.ToBase64String(algorithm.ComputeHash(Encoding.UTF8.GetBytes(source.ToCharArray())));

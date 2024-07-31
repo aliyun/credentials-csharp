@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
-using System.Net.Cache;
 using System.Text;
+using System.Text.RegularExpressions;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Utils;
@@ -53,6 +54,12 @@ namespace aliyun_net_credentials_unit_tests.Http
             HttpRequest httpRequest = new HttpRequest("http://www.aliyun.com", headers);
             httpRequest.Encoding = "test";
             httpRequest.Content = new byte[] { };
+            
+            Regex regex = new Regex(@"AlibabaCloud (.+) .+/.+ Credentials/.+ TeaDSL/1");
+            string userAgent = httpRequest.Headers["User-Agent"];
+            Match match = regex.Match(userAgent);
+            Assert.True(match.Success);
+
             try
             {
                 Assert.Throws<CredentialException>(() => { httpRequest.GetHttpContentString(); });

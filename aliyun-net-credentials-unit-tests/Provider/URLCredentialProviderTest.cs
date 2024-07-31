@@ -94,7 +94,6 @@ namespace aliyun_net_credentials_unit_tests.Provider
                             "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}");
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
             ex = Assert.Throws<CredentialException>(() => { TestHelper.RunInstanceMethodAsync(typeof(URLCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }); });
-            Console.WriteLine("ex---{0}", ex);
             Assert.Equal("Failed to get credentials from server: http://10.10.10.10/\nHttpCode=100\nHttpRAWContent={\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\",\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}", ex.Message);
         }
     }
