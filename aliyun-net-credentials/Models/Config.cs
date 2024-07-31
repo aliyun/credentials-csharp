@@ -52,5 +52,11 @@ namespace Aliyun.Credentials.Models
 
         [NameInMap("roleSessionExpiration")]
         public int RoleSessionExpiration { get; set; }
+
+        [NameInMap("oidcProviderArn")]
+        public string OIDCProviderArn { get; set; }
+
+        [NameInMap("oidcTokenFilePath")]
+        public string OIDCTokenFilePath { get; set; }
     }
 }

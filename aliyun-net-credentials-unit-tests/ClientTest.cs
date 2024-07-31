@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Utils;
 using Aliyun.Credentials.Models;
@@ -6,6 +7,7 @@ using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Exceptions;
 
 using Xunit;
+using Newtonsoft.Json;
 
 namespace aliyun_net_credentials_unit_tests
 {
@@ -41,6 +43,13 @@ namespace aliyun_net_credentials_unit_tests
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<RsaKeyPairCredentialProvider>(result);
 
+            config.Type = AuthConstant.OIDCRoleArn;
+            config.RoleArn = "test";
+            config.OIDCProviderArn = "test";
+            config.OIDCTokenFilePath = TestHelper.GetOIDCTokenFilePath();
+            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            Assert.IsType<OIDCRoleArnCredentialProvider>(result);
+
             config.Type = null;
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<DefaultCredentialsProvider>(result);
@@ -59,10 +68,28 @@ namespace aliyun_net_credentials_unit_tests
         public void TestConstructor()
         {
             var ex = Assert.Throws<CredentialException>(() => new Client().GetCredential());
-            Assert.StartsWith("Failed to connect ECS Metadata Service: ", ex.Message);
+            Assert.StartsWith("not found credentials", ex.Message);
 
             ex = Assert.Throws<CredentialException>(() => new Client(null).GetCredential());
+            Assert.StartsWith("not found credentials", ex.Message);
+
+            AuthUtils.EnvironmentEcsMetaData = "test";
+            ex = Assert.Throws<CredentialException>(() => new Client(null).GetCredential());
             Assert.StartsWith("Failed to connect ECS Metadata Service: ", ex.Message);
+            AuthUtils.EnvironmentEcsMetaData = null;
+
+            AuthUtils.EnvironmentRoleArn = "role_arn";
+            AuthUtils.EnvironmentOIDCProviderArn = "oidc_provider_arn";
+            AuthUtils.EnvironmentOIDCTokenFilePath = TestHelper.GetOIDCTokenFilePath();
+            ex = Assert.Throws<CredentialException>(() => new Client().GetCredential());
+            var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
+            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+            AuthUtils.EnvironmentRoleArn = null;
+            AuthUtils.EnvironmentOIDCProviderArn = null;
+            AuthUtils.EnvironmentOIDCTokenFilePath = null;
         }
     }
 }

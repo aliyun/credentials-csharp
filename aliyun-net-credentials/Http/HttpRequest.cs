@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using System.Net.Http;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Utils;
 
@@ -70,6 +70,39 @@ namespace Aliyun.Credentials.Http
             }
 
             return stringContent;
+        }
+
+        public void SetHttpContent(byte[] content, string encoding, FormatType? format)
+        {
+            if (content == null) {
+                contentType = null;
+                Content = null;
+                Encoding = null;
+                Headers = new Dictionary<string, string>()
+                {
+                    { "Content-Length", "0" }
+                };
+                return;
+            }
+
+            if (Method == MethodType.GET)
+            {
+                content = new byte[0];
+            }
+
+            Content = content;
+            Encoding = encoding;
+            string contentLen = content.Length.ToString();
+            string strMd5 = ParameterHelper.Md5SumAndBase64(content);
+            Headers = new Dictionary<string, string>()
+            {
+                { "Content-MD5", strMd5 },
+                { "Content-Length", contentLen },
+            };
+            if (format != null)
+            {
+                Headers.Add("Content-Type", ParameterHelper.FormatTypeToString(format));
+            }
         }
 
         public Dictionary<string, string> Headers { get; set; }

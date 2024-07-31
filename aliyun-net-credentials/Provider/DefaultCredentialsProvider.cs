@@ -16,9 +16,21 @@ namespace Aliyun.Credentials.Provider
         {
             UserConfigurationProviders.Add(new EnvironmentVariableCredentialsProvider());
             UserConfigurationProviders.Add(new ProfileCredentialsProvider());
+            if (AuthUtils.EnvironmentEnableOIDC())
+            {
+                Config config = new Config
+                {
+                    RoleArn = AuthUtils.EnvironmentRoleArn,
+                    OIDCProviderArn = AuthUtils.EnvironmentOIDCProviderArn,
+                    OIDCTokenFilePath = AuthUtils.EnvironmentOIDCTokenFilePath
+                };
+                UserConfigurationProviders.Add(new OIDCRoleArnCredentialProvider(config));
+            }
             var roleName = AuthUtils.EnvironmentEcsMetaData;
-
-            UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
+            if (null != roleName)
+            {
+                UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
+            }
         }
 
         public CredentialModel GetCredentials()

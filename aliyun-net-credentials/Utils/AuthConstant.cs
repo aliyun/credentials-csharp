@@ -11,6 +11,7 @@ namespace Aliyun.Credentials.Utils
         public const string IniType = "type";
         public const string IniTypeRam = "ecs_ram_role";
         public const string IniTypeArn = "ram_role_arn";
+        public const string IniTypeOIDC = "oidc_role_arn";
         public const string IniTypeKeyPair = "rsa_key_pair";
         public const string IniPublicKeyId = "public_key_id";
         public const string IniPrivateKeyFile = "private_key_file";
@@ -19,6 +20,8 @@ namespace Aliyun.Credentials.Utils
         public const string IniRoleSessionName = "role_session_name";
         public const string IniRoleArn = "role_arn";
         public const string IniPolicy = "policy";
+        public const string IniOIDCProviderArn = "oidc_provider_arn";
+        public const string IniOIDCTokenFilePath = "oidc_token_file_path";
         public const string DefaultRegion = "region_id";
         public const string IniEnable = "enable";
 
@@ -28,6 +31,7 @@ namespace Aliyun.Credentials.Utils
         public const string RamRoleArn = "ram_role_arn";
         public const string RsaKeyPair = "rsa_key_pair";
         public const string BeareaToken = "bearer";
+        public const string OIDCRoleArn = "oidc_role_arn";
 
         private static string GetHomePath()
         {

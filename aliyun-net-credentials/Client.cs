@@ -59,6 +59,8 @@ namespace Aliyun.Credentials
                     return new RamRoleArnCredentialProvider(config);
                 case AuthConstant.RsaKeyPair:
                     return new RsaKeyPairCredentialProvider(config);
+                case AuthConstant.OIDCRoleArn:
+                    return new OIDCRoleArnCredentialProvider(config);
                 default:
                     return new DefaultCredentialsProvider();
             }
