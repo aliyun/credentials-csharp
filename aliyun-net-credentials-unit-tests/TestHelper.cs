@@ -163,5 +163,10 @@ namespace aliyun_net_credentials_unit_tests
         {
             return HomePath + Slash + "configTest.ini";
         }
+
+        public static string GetOIDCTokenFilePath()
+        {
+            return HomePath + Slash + "OIDCToken.txt";
+        }
     }
 }

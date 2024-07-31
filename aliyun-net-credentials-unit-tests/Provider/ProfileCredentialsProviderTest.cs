@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
+using Aliyun.Credentials.Models;
 
 using Xunit;
+using Moq;
 
 namespace aliyun_net_credentials_unit_tests.Provider
 {
@@ -29,7 +31,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.ClientType = "client2";
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
-            
+
             AuthUtils.ClientType = "client4";
             AuthUtils.SetPrivateKey("test");
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
@@ -50,6 +52,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.ClientType = "client7";
             Assert.Null(provider.GetCredentials());
+
+            AuthUtils.ClientType = "client8";
+            Assert.Equal("OIDCTokenFilePath path does not exist.",
+                Assert.Throws<CredentialException>(() => { provider.GetCredentials(); }).Message);
 
             AuthUtils.EnvironmentCredentialsFile = tempEnvironmentCredentialsFile;
             AuthUtils.ClientType = tempClientType;
@@ -93,6 +99,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.ClientType = "client7";
             Assert.Null(await provider.GetCredentialsAsync());
+
+            AuthUtils.ClientType = "client8";
+            Assert.Equal("OIDCTokenFilePath path does not exist.",
+                (await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); })).Message);
 
             AuthUtils.EnvironmentCredentialsFile = tempEnvironmentCredentialsFile;
             AuthUtils.ClientType = tempClientType;
@@ -188,5 +198,30 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetInstanceProfileCredentialsAsync(clientConfig); })).Message);
         }
 
+        [Fact]
+        public void GetSTSOIDCRoleSessionCredentialsTest()
+        {
+            ProfileCredentialsProvider provider = new ProfileCredentialsProvider();
+            Dictionary<string, string> clientConfig = new Dictionary<string, string>();
+            Assert.Equal("The configured role_arn is empty",
+                Assert.Throws<CredentialException>(() => { provider.GetSTSOIDCRoleSessionCredentials(clientConfig); }).Message);
+
+            clientConfig.Add(AuthConstant.IniRoleArn, "IniRoleArn");
+            Assert.Equal("The configured oidc_provider_arn is empty",
+                Assert.Throws<CredentialException>(() => { provider.GetSTSOIDCRoleSessionCredentials(clientConfig); }).Message);
+        }
+
+        [Fact]
+        public async Task GetSTSOIDCRoleSessionCredentialsAsyncTest()
+        {
+            ProfileCredentialsProvider provider = new ProfileCredentialsProvider();
+            Dictionary<string, string> clientConfig = new Dictionary<string, string>();
+            Assert.Equal("The configured role_arn is empty",
+                (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetSTSOIDCRoleSessionCredentialsAsync(clientConfig); })).Message);
+
+            clientConfig.Add(AuthConstant.IniRoleArn, "IniRoleArn");
+            Assert.Equal("The configured oidc_provider_arn is empty",
+                (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetSTSOIDCRoleSessionCredentialsAsync(clientConfig); })).Message);
+        }
     }
 }

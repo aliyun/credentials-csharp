@@ -86,6 +86,8 @@ namespace Aliyun.Credentials.Provider
                     return GetSTSGetSessionAccessKeyCredentials(clientConfig);
                 case AuthConstant.IniTypeRam:
                     return GetInstanceProfileCredentials(clientConfig);
+                case AuthConstant.OIDCRoleArn:
+                    return GetSTSOIDCRoleSessionCredentials(clientConfig);
             }
 
             string accessKeyId = clientConfig[AuthConstant.IniAccessKeyId];
@@ -119,6 +121,8 @@ namespace Aliyun.Credentials.Provider
                     return await GetSTSGetSessionAccessKeyCredentialsAsync(clientConfig);
                 case AuthConstant.IniTypeRam:
                     return await GetInstanceProfileCredentialsAsync(clientConfig);
+                case AuthConstant.OIDCRoleArn:
+                    return await GetSTSOIDCRoleSessionCredentialsAsync(clientConfig);
             }
 
             string accessKeyId = clientConfig[AuthConstant.IniAccessKeyId];
@@ -242,6 +246,54 @@ namespace Aliyun.Credentials.Provider
             }
 
             EcsRamRoleCredentialProvider provider = new EcsRamRoleCredentialProvider(roleName);
+            return await provider.GetCredentialsAsync();
+        }
+
+        public CredentialModel GetSTSOIDCRoleSessionCredentials(Dictionary<string, string> clientConfig)
+        {
+            string roleSessionName = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleSessionName);
+            string roleArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleArn);
+            string OIDCProviderArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniOIDCProviderArn);
+            string OIDCTokenFilePath = DictionaryUtil.Get(clientConfig, AuthConstant.IniOIDCTokenFilePath);
+            string regionId = DictionaryUtil.Get(clientConfig, AuthConstant.DefaultRegion);
+            string policy = DictionaryUtil.Get(clientConfig, AuthConstant.IniPolicy);
+
+            if (string.IsNullOrWhiteSpace(roleArn))
+            {
+                throw new CredentialException("The configured role_arn is empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(OIDCProviderArn))
+            {
+                throw new CredentialException("The configured oidc_provider_arn is empty");
+            }
+
+            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider(roleArn,
+                OIDCProviderArn, OIDCTokenFilePath, roleSessionName, regionId, policy);
+            return provider.GetCredentials();
+        }
+
+        public async Task<CredentialModel> GetSTSOIDCRoleSessionCredentialsAsync(Dictionary<string, string> clientConfig)
+        {
+            string roleSessionName = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleSessionName);
+            string roleArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleArn);
+            string OIDCProviderArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniOIDCProviderArn);
+            string OIDCTokenFilePath = DictionaryUtil.Get(clientConfig, AuthConstant.IniOIDCTokenFilePath);
+            string regionId = DictionaryUtil.Get(clientConfig, AuthConstant.DefaultRegion);
+            string policy = DictionaryUtil.Get(clientConfig, AuthConstant.IniPolicy);
+
+            if (string.IsNullOrWhiteSpace(roleArn))
+            {
+                throw new CredentialException("The configured role_arn is empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(OIDCProviderArn))
+            {
+                throw new CredentialException("The configured oidc_provider_arn is empty");
+            }
+
+            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider(roleArn,
+                OIDCProviderArn, OIDCTokenFilePath, roleSessionName, regionId, policy);
             return await provider.GetCredentialsAsync();
         }
     }
