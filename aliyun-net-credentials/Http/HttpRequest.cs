@@ -1,6 +1,8 @@
 using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Net.Http;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Utils;
 
@@ -9,17 +11,30 @@ namespace Aliyun.Credentials.Http
     public class HttpRequest
     {
         private FormatType? contentType;
+        protected static readonly string UserAgent = "User-Agent";
+        private static readonly string DefaultUserAgent;
+
+        static HttpRequest()
+        {
+            DefaultUserAgent = GetDefaultUserAgent();
+        }
 
         public HttpRequest()
         {
-            Headers = new Dictionary<string, string>();
+            Headers = new Dictionary<string, string>
+            {
+                { UserAgent, DefaultUserAgent }
+            };
             UrlParameters = new Dictionary<string, string>();
         }
 
         public HttpRequest(string strUrl)
         {
             Url = strUrl;
-            Headers = new Dictionary<string, string>();
+            Headers = new Dictionary<string, string>
+            {
+                { UserAgent, DefaultUserAgent }
+            };
             UrlParameters = new Dictionary<string, string>();
         }
 
@@ -29,8 +44,15 @@ namespace Aliyun.Credentials.Http
             if (null != tmpHeaders)
             {
                 Headers = tmpHeaders;
+                Headers[UserAgent] = DefaultUserAgent;
             }
-
+            else
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { UserAgent, DefaultUserAgent }
+                };
+            }
             UrlParameters = new Dictionary<string, string>();
         }
 
@@ -74,14 +96,14 @@ namespace Aliyun.Credentials.Http
 
         public void SetHttpContent(byte[] content, string encoding, FormatType? format)
         {
-            if (content == null) {
+            if (content == null)
+            {
                 contentType = null;
                 Content = null;
                 Encoding = null;
-                Headers = new Dictionary<string, string>()
-                {
-                    { "Content-Length", "0" }
-                };
+                Headers.Remove("Content-MD5");
+                Headers.Remove("Content-Type");
+                Headers["Content-Length"] = "0";
                 return;
             }
 
@@ -94,14 +116,11 @@ namespace Aliyun.Credentials.Http
             Encoding = encoding;
             string contentLen = content.Length.ToString();
             string strMd5 = ParameterHelper.Md5SumAndBase64(content);
-            Headers = new Dictionary<string, string>()
-            {
-                { "Content-MD5", strMd5 },
-                { "Content-Length", contentLen },
-            };
+            Headers["Content-MD5"] = strMd5;
+            Headers["Content-Length"] = contentLen;
             if (format != null)
             {
-                Headers.Add("Content-Type", ParameterHelper.FormatTypeToString(format));
+                Headers["Content-Type"] = ParameterHelper.FormatTypeToString(format);
             }
         }
 
@@ -120,6 +139,47 @@ namespace Aliyun.Credentials.Http
                     this.contentType = value;
                 }
             }
+        }
+
+        internal static string GetDefaultUserAgent()
+        {
+            string osVersion = Environment.OSVersion.ToString();
+            string clientVersion = GetRuntimeRegexValue(RuntimeEnvironment.GetRuntimeDirectory());
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            string defaultUserAgent = string.Format("AlibabaCloud ({0}) {1} Credentials/{2} TeaDSL/1",
+                osVersion,
+                clientVersion,
+                version
+            );
+            return defaultUserAgent;
+        }
+
+        internal static string GetRuntimeRegexValue(string value)
+        {
+            var rx = new Regex(@"(\.NET).*(\\|\/).*(\d)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var matches = rx.Match(value);
+            char[] separator = { '\\', '/' };
+
+            if (matches.Success)
+            {
+                var clientValueArray = matches.Value.Split(separator);
+                return BuildClientVersion(clientValueArray);
+            }
+
+            return "RuntimeNotFound";
+        }
+
+        internal static string BuildClientVersion(string[] value)
+        {
+            var finalValue = "";
+            for (var i = 0; i < value.Length - 1; ++i)
+            {
+                finalValue += value[i].Replace(".", "").ToLower();
+            }
+
+            finalValue += "/" + value[value.Length - 1];
+            return finalValue;
         }
 
         public byte[] Content { get; set; }
