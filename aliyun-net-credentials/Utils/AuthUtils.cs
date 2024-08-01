@@ -12,6 +12,7 @@ namespace Aliyun.Credentials.Utils
         private string clientType;
         private string environmentAccessKeyId;
         private string environmentAccesskeySecret;
+        private string environmentSecurityToken;
         private string environmentEcsMetaData;
         private string environmentCredentialsFile;
         private string environmentRoleArn;
@@ -27,6 +28,7 @@ namespace Aliyun.Credentials.Utils
             clientType = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE") ?? clientType;
             environmentAccessKeyId = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID") ?? environmentAccessKeyId;
             environmentAccesskeySecret = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_SECRET") ?? environmentAccesskeySecret;
+            environmentSecurityToken = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_SECURITY_TOKEN") ?? environmentSecurityToken;
             environmentEcsMetaData = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA") ?? environmentEcsMetaData;
             environmentCredentialsFile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_FILE") ?? environmentCredentialsFile;
             environmentRoleArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") ?? environmentRoleArn;
@@ -140,6 +142,13 @@ namespace Aliyun.Credentials.Utils
             get { return authUtils.environmentAccesskeySecret; }
 
             set { authUtils.environmentAccesskeySecret = value; }
+        }
+
+        public static string EnvironmentSecurityToken
+        {
+            get { return authUtils.environmentSecurityToken; }
+
+            set { authUtils.environmentSecurityToken = value; }
         }
 
         public static string EnvironmentEcsMetaData
