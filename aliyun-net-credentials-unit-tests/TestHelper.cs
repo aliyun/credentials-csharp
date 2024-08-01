@@ -143,6 +143,7 @@ namespace aliyun_net_credentials_unit_tests
         {
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID", null);
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_SECRET", null);
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_SECURITY_TOKEN", null);
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_REGION_ID", null);
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", null);
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA", null);
@@ -153,6 +154,7 @@ namespace aliyun_net_credentials_unit_tests
         {
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID", "ACCESS_KEY_ID");
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_SECRET", "ACCESS_KEY_SECRET");
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_SECURITY_TOKEN", "SECURITY_TOKEN");
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_REGION_ID", "cn-hangzhou");
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "profile");
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA", "metadata");

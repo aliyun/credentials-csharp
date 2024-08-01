@@ -6,6 +6,7 @@ namespace Aliyun.Credentials.Utils
     {
         public const string EnvAccessKeyId = "ALIBABA_CLOUD_ACCESS_KEY_ID";
         public const string EnvAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET";
+        public const string EnvSecurityToken = "ALIBABA_CLOUD_SECURITY_TOKEN";
         public const string IniAccessKeyId = "access_key_id";
         public const string IniAccessKeyIdsecret = "access_key_secret";
         public const string IniType = "type";

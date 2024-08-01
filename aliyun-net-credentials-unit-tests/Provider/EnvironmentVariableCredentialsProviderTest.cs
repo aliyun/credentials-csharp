@@ -20,6 +20,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             string tempClientType = AuthUtils.ClientType;
             string tempEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
             string tempEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
+            string tempEnvironmentSecurityToken = AuthUtils.EnvironmentSecurityToken;
             AuthUtils.ClientType = string.Empty;
             Assert.Null(provider.GetCredentials());
 
@@ -39,10 +40,18 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
             Assert.IsType<CredentialModel>(provider.GetCredentials());
+            CredentialModel credential = provider.GetCredentials();
+            Assert.Equal("access_key", credential.Type);
+
+            AuthUtils.EnvironmentSecurityToken = "SecurityToken";
+            credential = provider.GetCredentials();
+            Assert.Equal("sts", credential.Type);
+
 
             AuthUtils.ClientType = tempClientType;
             AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;
             AuthUtils.EnvironmentAccesskeySecret = tempEnvironmentAccesskeySecret;
+            AuthUtils.EnvironmentSecurityToken = tempEnvironmentSecurityToken;
         }
 
         [Fact]
@@ -52,6 +61,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             string tempClientType = AuthUtils.ClientType;
             string tempEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
             string tempEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
+            string tempEnvironmentSecurityToken = AuthUtils.EnvironmentSecurityToken;
             AuthUtils.ClientType = string.Empty;
             Assert.Null(await provider.GetCredentialsAsync());
 
@@ -71,10 +81,17 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.EnvironmentAccesskeySecret = "AccesskeySecret";
             Assert.IsType<CredentialModel>(await provider.GetCredentialsAsync());
+            CredentialModel credential = await provider.GetCredentialsAsync();
+            Assert.Equal("access_key", credential.Type);
+
+            AuthUtils.EnvironmentSecurityToken = "SecurityToken";
+            credential = await provider.GetCredentialsAsync();
+            Assert.Equal("sts", credential.Type);
 
             AuthUtils.ClientType = tempClientType;
             AuthUtils.EnvironmentAccessKeyId = tempEnvironmentAccessKeyId;
             AuthUtils.EnvironmentAccesskeySecret = tempEnvironmentAccesskeySecret;
+            AuthUtils.EnvironmentSecurityToken = tempEnvironmentSecurityToken;
         }
     }
 }
