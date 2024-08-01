@@ -37,9 +37,12 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "access_key",                    // 凭证类型
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId
-                AccessKeySecret = "<AccessKeySecret>"   // AccessKeySecret
+                // 凭证类型
+                Type = "access_key",  
+                // AccessKeyId
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret
+                AccessKeySecret = "<AccessKeySecret>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -67,10 +70,14 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "sts",                           // 凭证类型
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId
-                AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret
-                SecurityToken = "<SecurityToken>"       // STS Token
+                // 凭证类型
+                Type = "sts",
+                // AccessKeyId                        
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret
+                AccessKeySecret = "<AccessKeySecret>",
+                // STS Token
+                SecurityToken = "<SecurityToken>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -99,12 +106,67 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "ram_role_arn",                  // 凭证类型
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId
-                AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret
-                RoleArn = "<RoleArn>",                  // 格式: acs:ram::用户Id:role/角色名
-                RoleSessionName = "<RoleSessionName>",  // 角色会话名称
-                Policy = "<Policy>,"                    // 可选, 限制 STS Token 的权限
+                // 凭证类型
+                Type = "ram_role_arn",
+                // AccessKeyId                  
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret
+                AccessKeySecret = "<AccessKeySecret>",
+                // 格式: acs:ram::用户Id:role/角色名
+                // RoleArn 可不设，但需要通过设置 ALIBABA_CLOUD_ROLE_ARN 来代替
+                RoleArn = "<RoleArn>",
+                // 角色会话名称
+                RoleSessionName = "<RoleSessionName>",
+                // 可选, 限制 STS Token 的权限
+                Policy = "<Policy>",
+                // 可选, 限制 STS Token 的有效时间                   
+                RoleSessionExpiration = 3600
+            };
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
+
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
+        }
+    }
+}
+```
+
+#### OIDCRoleArn
+
+通过指定[OIDC 角色][OIDC Role]，让凭证自动申请维护 STS Token。你可以通过为 `Policy` 赋值来限制获取到的 STS Token 的权限。
+
+```csharp
+using Aliyun.Credentials.Models;
+
+namespace credentials_demo
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Config config = new Config()
+            {
+                // 凭证类型
+                Type = "oidc_role_arn",
+                // 格式: acs:ram::用户Id:role/角色名
+                // roleArn 可不设，但需要通过设置 ALIBABA_CLOUD_ROLE_ARN 来代替
+                RoleArn = "<RoleArn>",
+                // 格式: acs:ram::用户Id:oidc-provider/OIDC身份提供商名称
+                // OIDCProviderArn 可不设，但需要通过设置 ALIBABA_CLOUD_OIDC_PROVIDER_ARN 来代替
+                OIDCProviderArn = "<OIDCProviderArn>",
+                // 格式: path
+                // OIDCTokenFilePath 可不设，但需要通过设置 ALIBABA_CLOUD_OIDC_TOKEN_FILE 来代替
+                OIDCTokenFilePath = "/Users/xxx/xxx",
+                // 角色会话名称
+                RoleSessionName = "<RoleSessionName>",
+                // 可选, 限制 STS Token 的权限
+                Policy = "<Policy>,"
+                // 可选, 限制 STS Token 的有效时间
+                RoleSessionExpiration = 3600,
+
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -133,8 +195,43 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "ecs_ram_role",      // 凭证类型
-                RoleName = "<RoleName>"     // 账户RoleName，非必填，不填则自动获取，建议设置，可以减少请求up to reduce requests
+                // 凭证类型
+                Type = "ecs_ram_role",
+                // 账户RoleName，非必填，不填则自动获取，建议设置，可以减少请求up to reduce requests
+                RoleName = "<RoleName>"
+            };
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
+
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
+        }
+    }
+}
+```
+
+#### URLCredential
+
+通过指定提供凭证的自定义网络服务地址，让凭证自动申请维护 STS Token
+
+```csharp
+using Aliyun.Credentials.Models;
+
+namespace credentials_demo
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Config config = new Config()
+            {
+                // 凭证类型
+                Type = "credentials_uri",
+                // 格式：http url
+                // 提供凭证的 URL，可不设，但需要通过设置 ALIBABA_CLOUD_CREDENTIALS_URI 来代替
+                CredentialsUri = "http://xxx"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -163,8 +260,10 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "bearer",                    // 凭证类型
-                BearerToken = "<BearerToken>"       // BearerToken
+                // 凭证类型
+                Type = "bearer",
+                // BearerToken
+                BearerToken = "<BearerToken>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();

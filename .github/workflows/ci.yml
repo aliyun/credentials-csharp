@@ -5,6 +5,10 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
+permissions:
+  id-token: write
+
 jobs:
   build:
 
@@ -20,6 +24,23 @@ jobs:
       run: dotnet tool install --global altcover.visualizer --version  8.6.14
     - name: Install dependencies
       run: cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../ && dotnet restore && dotnet build
+    - name: Setup OIDC
+      run: npm install @actions/core@1.6.0 @actions/http-client
+    - name: Get Id Token
+      uses: actions/github-script@v6
+      id: idtoken
+      with:
+        script: |
+          const coreDemo = require('@actions/core');
+          const idToken = await coreDemo.getIDToken('sts.aliyuncs.com');
+          const fsx = require('fs/promises');
+          await fsx.writeFile('/tmp/oidc_token', idToken);
+    - name: Integration Test
+      run: dotnet test aliyun-net-credentials-integration-tests/
+      env:
+        ALIBABA_CLOUD_OIDC_PROVIDER_ARN: ${{ secrets.ALIBABA_CLOUD_OIDC_PROVIDER_ARN }}
+        ALIBABA_CLOUD_OIDC_TOKEN_FILE: "/tmp/oidc_token"
+        ALIBABA_CLOUD_ROLE_ARN: ${{ secrets.ALIBABA_CLOUD_ROLE_ARN }}
     - name: Test
       run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
     - name: Upload code coverage report

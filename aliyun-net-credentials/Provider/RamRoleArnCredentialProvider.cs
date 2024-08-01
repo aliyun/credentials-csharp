@@ -41,6 +41,11 @@ namespace Aliyun.Credentials.Provider
 
         private int readTimeout = 1000;
 
+        /// <summary>
+        /// Endpoint of RAM OpenAPI
+        /// </summary>
+        private string STSEndpoint = "sts.aliyuncs.com";
+
         public RamRoleArnCredentialProvider(Config config) : this(config.AccessKeyId, config.AccessKeySecret,
             config.RoleArn)
         {
@@ -51,11 +56,13 @@ namespace Aliyun.Credentials.Provider
             {
                 durationSeconds = config.RoleSessionExpiration;
             }
+            roleSessionName = config.RoleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? roleSessionName;
+            STSEndpoint = config.STSEndpoint ?? STSEndpoint;
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
         {
-            this.roleArn = roleArn;
+            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
             this.accessKeyId = ParameterHelper.ValidateNotNull(accessKeyId, "accessKeyId", "AccessKeyId must not be null.");
             this.accessKeySecret = ParameterHelper.ValidateNotNull(accessKeySecret, "accessKeySecret", "AccessKeySecret must not be null.");
         }
@@ -63,7 +70,7 @@ namespace Aliyun.Credentials.Provider
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleSessionName,
             string roleArn, string regionId, string policy) : this(accessKeyId, accessKeySecret, roleArn)
         {
-            this.roleSessionName = roleSessionName;
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.regionId = regionId;
             this.policy = policy;
         }
@@ -113,7 +120,7 @@ namespace Aliyun.Credentials.Provider
             string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
             string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
-            httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
+            httpRequest.Url = ParameterHelper.ComposeUrl(STSEndpoint, httpRequest.UrlParameters,
                 "https");
             HttpResponse httpResponse = client.DoAction(httpRequest);
             Dictionary<string, object> map =

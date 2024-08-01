@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
+    [Obsolete]
     public class RsaKeyPairCredentialProvider : SessionCredentialsProvider
     {
         private int durationSeconds = 3600;
