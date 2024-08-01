@@ -18,6 +18,7 @@ namespace Aliyun.Credentials.Provider
 
             string accessKeyId = AuthUtils.EnvironmentAccessKeyId;
             string accessKeySecret = AuthUtils.EnvironmentAccesskeySecret;
+            string securityToken = AuthUtils.EnvironmentSecurityToken;
             if (accessKeyId == null || accessKeySecret == null)
             {
                 return null;
@@ -31,7 +32,19 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Environment variable accessKeySecret cannot be empty");
             }
 
-            return new CredentialModel{
+            if (!string.IsNullOrWhiteSpace(securityToken))
+            {
+                return new CredentialModel
+                {
+                    AccessKeyId = accessKeyId,
+                    AccessKeySecret = accessKeySecret,
+                    SecurityToken = securityToken,
+                    Type = AuthConstant.Sts
+                };
+            }
+
+            return new CredentialModel
+            {
                 AccessKeyId = accessKeyId,
                 AccessKeySecret = accessKeySecret,
                 Type = AuthConstant.AccessKey
