@@ -61,5 +61,8 @@ namespace Aliyun.Credentials.Models
 
         [NameInMap("credentialsURI")]
         public string CredentialsURI { get; set; }
+
+        [NameInMap("stsEndpoint")]
+        public string STSEndpoint { get; set; }
     }
 }

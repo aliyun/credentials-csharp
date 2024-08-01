@@ -46,7 +46,7 @@ namespace Aliyun.Credentials.Provider
         private string STSEndpoint = "sts.aliyuncs.com";
         public OIDCRoleArnCredentialProvider(Config config) : this(config.RoleArn, config.OIDCProviderArn, config.OIDCTokenFilePath)
         {
-            roleSessionName = config.RoleSessionName;
+            roleSessionName = config.RoleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? roleSessionName;
             connectTimeout = config.ConnectTimeout;
             readTimeout = config.Timeout;
             policy = config.Policy;
@@ -54,20 +54,21 @@ namespace Aliyun.Credentials.Provider
             {
                 durationSeconds = config.RoleSessionExpiration;
             }
+            STSEndpoint = config.STSEndpoint ?? STSEndpoint;
         }
 
         public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath)
         {
-            this.roleArn = ParameterHelper.ValidateNotNull(roleArn, "roleArn", "RoleArn must not be null.");
-            this.oidcProviderArn = ParameterHelper.ValidateNotNull(oidcProviderArn, "oidcProviderArn", "OIDCProviderArn must not be null.");
-            this.oidcTokenFilePath = ParameterHelper.ValidateNotNull(oidcTokenFilePath, "oidcTokenFilePath", "OIDCTokenFilePath must not be null.");
+            this.roleArn = ParameterHelper.ValidateNotNull(roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN"), "roleArn", "RoleArn must not be null.");
+            this.oidcProviderArn = ParameterHelper.ValidateNotNull(oidcProviderArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN"), "oidcProviderArn", "OIDCProviderArn must not be null.");
+            this.oidcTokenFilePath = ParameterHelper.ValidateNotNull(oidcTokenFilePath ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE"), "oidcTokenFilePath", "OIDCTokenFilePath must not be null.");
         }
 
         public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath, 
             string roleSessionName, string regionId, string policy) : this(roleArn, oidcProviderArn, oidcTokenFilePath)
         {
-            this.roleSessionName = roleSessionName;
-            this.regionId = regionId;
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.regionId = regionId ?? this.regionId;
             this.policy = policy;
         }
 

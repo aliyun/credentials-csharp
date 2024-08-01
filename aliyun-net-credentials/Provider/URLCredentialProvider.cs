@@ -33,7 +33,9 @@ namespace Aliyun.Credentials.Provider
         {
             try
             {
+                string uriStr = credentialsURI ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI");
                 this.credentialsURI = new Uri(ParameterHelper.ValidateNotNull(credentialsURI, "credentialsURI", "Credentials URI is not valid."));
+
             }
             catch (UriFormatException)
             {

@@ -37,9 +37,12 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "access_key",                    // Which type of credential you want
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId of your account
-                AccessKeySecret = "<AccessKeySecret>"   // AccessKeySecret of your account
+                // Which type of credential you want
+                Type = "access_key",
+                // AccessKeyId of your account
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret of your account
+                AccessKeySecret = "<AccessKeySecret>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -67,10 +70,14 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "sts",                           // Which type of credential you want
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId of your account
-                AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret of your account
-                SecurityToken = "<SecurityToken>"       // Temporary Security Token
+                // Which type of credential you want
+                Type = "sts",
+                // AccessKeyId of your account
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret of your account
+                AccessKeySecret = "<AccessKeySecret>",
+                // Temporary Security Token
+                SecurityToken = "<SecurityToken>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -99,12 +106,67 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "ram_role_arn",                  // Which type of credential you want
-                AccessKeyId = "<AccessKeyId>",          // AccessKeyId of your account
-                AccessKeySecret = "<AccessKeySecret>",  // AccessKeySecret of your account
-                RoleArn = "<RoleArn>",                  // Format: acs:ram::USER_Id:role/ROLE_NAME
-                RoleSessionName = "<RoleSessionName>",  // Role Session Name
-                Policy = "<Policy>,"                    // Optional, limit the permissions of STS Token
+                // Which type of credential you want
+                Type = "ram_role_arn",
+                // AccessKeyId of your account
+                AccessKeyId = "<AccessKeyId>",
+                // AccessKeySecret of your account
+                AccessKeySecret = "<AccessKeySecret>",
+                // Format: acs:ram::USER_Id:role/ROLE_NAME
+                // RoleArn can be replaced by setting environment variable: ALIBABA_CLOUD_ROLE_ARN
+                RoleArn = "<RoleArn>",
+                // Role Session Name
+                RoleSessionName = "<RoleSessionName>",
+                // Optional, limit the permissions of STS Token
+                Policy = "<Policy>",
+                // Optional, limit the Valid time of STS Token
+                RoleSessionExpiration = 3600,
+            };
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
+
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
+        }
+    }
+}
+```
+
+#### OIDCRoleArn
+
+By specifying [OIDC Role][OIDC Role], the credential will be able to automatically request maintenance of STS Token. If you want to limit the permissions([How to make a policy][policy]) of STS Token, you can assign value for `Policy`.
+
+```csharp
+using Aliyun.Credentials.Models;
+
+namespace credentials_demo
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Config config = new Config()
+            {
+                // Which type of credential you want
+                Type = "oidc_role_arn",
+                // Format: acs:ram::USER_Id:role/ROLE_NAME
+                // RoleArn can be replaced by setting environment variable: ALIBABA_CLOUD_ROLE_ARN
+                RoleArn = "<RoleArn>",
+                // Format: acs:ram::USER_Id:oidc-provider/OIDC Providers 
+                // OIDCProviderArn can be replaced by setting environment variable: ALIBABA_CLOUD_OIDC_PROVIDER_ARN  
+                OIDCProviderArn = "<OIDCProviderArn>",
+                // Format: path
+                // OIDCTokenFilePath can be replaced by setting environment variable: ALIBABA_CLOUD_OIDC_TOKEN_FILE
+                OIDCTokenFilePath = "/Users/xxx/xxx",
+                // Role Session Name
+                RoleSessionName = "<RoleSessionName>",
+                // Optional, limit the permissions of STS Token
+                Policy = "<Policy>,"
+                // Optional, limit the Valid time of STS Token
+                RoleSessionExpiration = 3600,
+
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -133,8 +195,43 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "ecs_ram_role",      // Which type of credential you want
-                RoleName = "<RoleName>"     // `roleName` is optional. It will be retrieved automatically if not set. It is highly recommended to set it up to reduce requests
+                // Which type of credential you want
+                Type = "ecs_ram_role",
+                // Optional. It will be retrieved automatically if not set. It is highly recommended to set it up to reduce requests
+                RoleName = "<RoleName>"
+            };
+            var client = new Aliyun.Credentials.Client(config);
+            var credential = client.GetCredential();
+
+            string accessKeyId = credential.AccessKeyId;
+            string accessSecret = credential.AccessKeySecret;
+            string credentialType = credential.Type;
+            string securityToken = credential.SecurityToken;
+        }
+    }
+}
+```
+
+#### URLCredential
+
+By specifying the url, the credential will be able to automatically request maintenance of STS Token.
+
+```csharp
+using Aliyun.Credentials.Models;
+
+namespace credentials_demo
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Config config = new Config()
+            {
+                // Which type of credential you want
+                Type = "credentials_uri",
+                // Format: http url
+                // `CredentialsUri` can be replaced by setting environment variable: ALIBABA_CLOUD_CREDENTIALS_URI
+                CredentialsUri = "http://xxx"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();
@@ -163,8 +260,10 @@ namespace credentials_demo
         {
             Config config = new Config()
             {
-                Type = "bearer",                    // Which type of credential you want
-                BearerToken = "<BearerToken>"       // BearerToken of your account
+                // Which type of credential you want
+                Type = "bearer",        
+                // BearerToken of your account
+                BearerToken = "<BearerToken>"
             };
             var client = new Aliyun.Credentials.Client(config);
             var credential = client.GetCredential();

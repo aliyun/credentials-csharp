@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 
 using Moq;
 using Xunit;
+using Aliyun.Credentials;
 
 
 namespace aliyun_net_credentials_unit_tests.Provider
