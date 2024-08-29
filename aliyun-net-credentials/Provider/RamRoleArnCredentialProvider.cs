@@ -28,9 +28,6 @@ namespace Aliyun.Credentials.Provider
         /// </summary>
         private string roleSessionName = "defaultSessionName";
 
-        private string accessKeyId;
-        private string accessKeySecret;
-        private string securityToken;
         private string regionId = "cn-hangzhou";
         private string policy;
 
@@ -46,9 +43,19 @@ namespace Aliyun.Credentials.Provider
         /// </summary>
         private string STSEndpoint = "sts.aliyuncs.com";
 
-        public RamRoleArnCredentialProvider(Config config) : this(config.AccessKeyId, config.AccessKeySecret,
-            config.RoleArn)
+        public IAlibabaCloudCredentialsProvider credentialsProvider {get; set;}
+
+        public RamRoleArnCredentialProvider(Config config)
         {
+            if (!string.IsNullOrEmpty(config.SecurityToken))
+            {
+                credentialsProvider = new StaticSTSCredentialsProvider(config);
+            }
+            else
+            {
+                credentialsProvider = new StaticAKCredentialsProvider(config);
+            }
+            roleArn = config.RoleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
             connectTimeout = config.ConnectTimeout;
             readTimeout = config.Timeout;
             policy = config.Policy;
@@ -62,13 +69,26 @@ namespace Aliyun.Credentials.Provider
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
         {
+            credentialsProvider = new StaticAKCredentialsProvider(accessKeyId, accessKeySecret);
             this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
-            this.accessKeyId = ParameterHelper.ValidateNotNull(accessKeyId, "accessKeyId", "AccessKeyId must not be null.");
-            this.accessKeySecret = ParameterHelper.ValidateNotNull(accessKeySecret, "accessKeySecret", "AccessKeySecret must not be null.");
+        }
+
+        public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleArn)
+        {
+            credentialsProvider = ParameterHelper.ValidateNotNull(provider, "Provider", "Must specify a previous credentials provider to asssume role.");
+            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleSessionName,
             string roleArn, string regionId, string policy) : this(accessKeyId, accessKeySecret, roleArn)
+        {
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.regionId = regionId;
+            this.policy = policy;
+        }
+
+        public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleSessionName,
+                    string roleArn, string regionId, string policy) : this(provider, roleArn)
         {
             this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.regionId = regionId;
@@ -106,7 +126,9 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("Version", "2015-04-01");
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
-            httpRequest.AddUrlParameter("AccessKeyId", this.accessKeyId);
+            CredentialModel previousCredentials = credentialsProvider.GetCredentials();
+            httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
+            httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);
             httpRequest.AddUrlParameter("RegionId", this.regionId);
             httpRequest.AddUrlParameter("RoleSessionName", this.roleSessionName);
             if (policy != null)
@@ -118,7 +140,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
             string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
-            string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
+            string signature = ParameterHelper.SignString(strToSign, previousCredentials.AccessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl(STSEndpoint, httpRequest.UrlParameters,
                 "https");
@@ -157,7 +179,9 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("Version", "2015-04-01");
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
-            httpRequest.AddUrlParameter("AccessKeyId", this.accessKeyId);
+            CredentialModel previousCredentials = await credentialsProvider.GetCredentialsAsync();
+            httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
+            httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);
             httpRequest.AddUrlParameter("RegionId", this.regionId);
             httpRequest.AddUrlParameter("RoleSessionName", this.roleSessionName);
             if (policy != null)
@@ -169,7 +193,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
             string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
-            string signature = ParameterHelper.SignString(strToSign, accessKeySecret + "&");
+            string signature = ParameterHelper.SignString(strToSign, previousCredentials.AccessKeySecret + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters,
                 "https");

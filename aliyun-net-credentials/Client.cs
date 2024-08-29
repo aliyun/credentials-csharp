@@ -35,16 +35,16 @@ namespace Aliyun.Credentials
                 case AuthConstant.AccessKey:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateNotNull(config.AccessKeyId, "AccessKeyId", "AccessKeyId must not be null."),
-                        AccessKeySecret = ParameterHelper.ValidateNotNull(config.AccessKeySecret, "AccessKeySecret", "AccessKeySecret must not be null."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotNull(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID",  "AccessKeyId", "AccessKeyId must not be null."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotNull(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null."),
                         Type = AuthConstant.AccessKey,
                     });
                 case AuthConstant.Sts:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateNotNull(config.AccessKeyId, "AccessKeyId", "AccessKeyId must not be null."),
-                        AccessKeySecret = ParameterHelper.ValidateNotNull(config.AccessKeySecret, "AccessKeySecret", "AccessKeySecret must not be null."),
-                        SecurityToken = ParameterHelper.ValidateNotNull(config.SecurityToken, "SecurityToken", "SecurityToken must not be null."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotNull(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID",  "AccessKeyId", "AccessKeyId must not be null."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotNull(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null."),
+                        SecurityToken = ParameterHelper.ValidateEnvNotNull(config.SecurityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null."),
                         Type = AuthConstant.Sts,
                     });
                 case AuthConstant.BeareaToken:

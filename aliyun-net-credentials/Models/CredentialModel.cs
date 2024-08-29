@@ -16,5 +16,7 @@ namespace  Aliyun.Credentials.Models
         public string Type { get; set; }
 
         public long Expiration { get; set; }
+        
+        public string ProviderName { get; set; }
     }
 }
