@@ -59,9 +59,9 @@ namespace Aliyun.Credentials.Provider
 
         public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath)
         {
-            this.roleArn = ParameterHelper.ValidateNotNull(roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN"), "roleArn", "RoleArn must not be null.");
-            this.oidcProviderArn = ParameterHelper.ValidateNotNull(oidcProviderArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN"), "oidcProviderArn", "OIDCProviderArn must not be null.");
-            this.oidcTokenFilePath = ParameterHelper.ValidateNotNull(oidcTokenFilePath ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE"), "oidcTokenFilePath", "OIDCTokenFilePath must not be null.");
+            this.roleArn = ParameterHelper.ValidateEnvNotNull(roleArn, "ALIBABA_CLOUD_ROLE_ARN", "roleArn", "RoleArn must not be null.");
+            this.oidcProviderArn = ParameterHelper.ValidateEnvNotNull(oidcProviderArn, "ALIBABA_CLOUD_OIDC_PROVIDER_ARN", "oidcProviderArn", "OIDCProviderArn must not be null.");
+            this.oidcTokenFilePath = ParameterHelper.ValidateEnvNotNull(oidcTokenFilePath, "ALIBABA_CLOUD_OIDC_TOKEN_FILE", "oidcTokenFilePath", "OIDCTokenFilePath must not be null.");
         }
 
         public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath, 

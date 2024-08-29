@@ -34,6 +34,8 @@ namespace Aliyun.Credentials.Utils
         public const string BeareaToken = "bearer";
         public const string OIDCRoleArn = "oidc_role_arn";
         public const string URLSts = "credentials_uri";
+        public const string StaticSts = "static_sts";
+        public const string StaticAK = "static_ak";
 
         private static string GetHomePath()
         {

@@ -17,12 +17,20 @@ namespace aliyun_net_credentials_unit_tests.Provider
     public class RamRoleArnCredentialProviderTest
     {
         [Fact]
+        public void TestProviderConstructor()
+        {
+            SessionCredentialsProvider nullProvider = null;
+            RamRoleArnCredentialProvider provider;
+            var ex = Assert.Throws<ArgumentNullException>(() => provider = new RamRoleArnCredentialProvider(nullProvider, "roleArn"));
+            Assert.StartsWith("Must specify a previous credentials provider to asssume role.", ex.Message);
+        }
+
+        [Fact]
         public async void TestRealRequest()
         {
             Config config = new Config() { AccessKeyId = "accessKeyId", AccessKeySecret = "accessKeySecret", RoleArn = "roleArn" };
             RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
             var supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
-            
             var ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
             Dictionary<string, object> msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
