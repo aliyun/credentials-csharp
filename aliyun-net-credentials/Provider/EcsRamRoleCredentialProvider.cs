@@ -184,7 +184,7 @@ namespace Aliyun.Credentials.Provider
             }
 
             jsonContent = httpResponse.GetHttpContentString();
-            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(jsonContent);
+            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(jsonContent, new JsonSerializerSettings() { DateParseHandling = DateParseHandling.None });
             try
             {
                 contentCode = contentObj.Code;
