@@ -127,6 +127,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
             CredentialModel previousCredentials = credentialsProvider.GetCredentials();
+            ParameterHelper.ValidateNotNull(previousCredentials, "OriginalCredentials", "Unable to load original credentials from the providers in RAM role arn.");
             httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
             httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);
             httpRequest.AddUrlParameter("RegionId", this.regionId);
@@ -180,6 +181,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
             CredentialModel previousCredentials = await credentialsProvider.GetCredentialsAsync();
+            ParameterHelper.ValidateNotNull(previousCredentials, "OriginalCredentials", "Unable to load original credentials from the providers in RAM role arn.");
             httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
             httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);
             httpRequest.AddUrlParameter("RegionId", this.regionId);
