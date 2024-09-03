@@ -1,8 +1,6 @@
-using System;
 using System.Text;
 using System.Threading.Tasks;
 
-using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
 using Aliyun.Credentials.Models;
@@ -73,7 +71,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "CreateCredential", providerConfig, new object[] { mock.Object });
             });
 
-            httpResponse = new HttpResponse("http://www.aliyun.com") { Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json, Content = Encoding.UTF8.GetBytes("{\"Code\":\"Success\",  \"AccessKeyId\":\"test\", \"AccessKeySecret\":\"test\", \"SecurityToken\":\"test\",  \"Expiration\":\"2019-08-08T1:1:1Z\"}") };
+            httpResponse = new HttpResponse("http://www.aliyun.com") { Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json, Content = Encoding.UTF8.GetBytes("{\"Code\":\"Success\",  \"AccessKeyId\":\"test\", \"AccessKeySecret\":\"test\", \"SecurityToken\":\"test\",  \"Expiration\":\"2019-08-08T01:01:01Z\"}") };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(httpResponse);
 
             RefreshResult<CredentialModel> credential = (RefreshResult<CredentialModel>) TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "CreateCredential", providerConfig, new object[] { mock.Object });
