@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
@@ -184,14 +185,14 @@ namespace Aliyun.Credentials.Provider
             }
 
             jsonContent = httpResponse.GetHttpContentString();
-            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(jsonContent);
+            Dictionary<string, string> contentObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
             try
             {
-                contentCode = contentObj.Code;
-                contentAccessKeyId = contentObj.AccessKeyId;
-                contentAccessKeySecret = contentObj.AccessKeySecret;
-                contentSecurityToken = contentObj.SecurityToken;
-                contentExpiration = contentObj.Expiration;
+                contentCode = contentObj["Code"];
+                contentAccessKeyId = contentObj["AccessKeyId"];
+                contentAccessKeySecret = contentObj["AccessKeySecret"];
+                contentSecurityToken = contentObj["SecurityToken"];
+                contentExpiration = contentObj["Expiration"];
             }
             catch
             {
@@ -254,14 +255,14 @@ namespace Aliyun.Credentials.Provider
             }
 
             jsonContent = httpResponse.GetHttpContentString();
-            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(jsonContent);
+            Dictionary<string, string> contentObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
             try
             {
-                contentCode = contentObj.Code;
-                contentAccessKeyId = contentObj.AccessKeyId;
-                contentAccessKeySecret = contentObj.AccessKeySecret;
-                contentSecurityToken = contentObj.SecurityToken;
-                contentExpiration = contentObj.Expiration;
+                contentCode = contentObj["Code"];
+                contentAccessKeyId = contentObj["AccessKeyId"];
+                contentAccessKeySecret = contentObj["AccessKeySecret"];
+                contentSecurityToken = contentObj["SecurityToken"];
+                contentExpiration = contentObj["Expiration"];
             }
             catch
             {

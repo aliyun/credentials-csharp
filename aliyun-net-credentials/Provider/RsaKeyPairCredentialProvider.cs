@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
@@ -77,31 +78,30 @@ namespace Aliyun.Credentials.Provider
             }
 
             Debug.Assert(httpResponse != null, "httpResponse != null");
-            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(httpResponse.GetHttpContentString());
+            Dictionary<string, object> contentObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(httpResponse.GetHttpContentString());
             string sessionAccessKeyId;
             string sessionAccessKeySecret;
             string expirationStr;
-            try
+            if (contentObj.ContainsKey("SessionAccessKey"))
             {
-                sessionAccessKeyId = contentObj.SessionAccessKey.SessionAccessKeyId;
-                sessionAccessKeySecret = contentObj.SessionAccessKey.SessionAccessKeySecret;
-                expirationStr = contentObj.SessionAccessKey.Expiration;
+                string sessionAccessKeyJson = JsonConvert.SerializeObject(DictionaryUtil.Get(contentObj, "SessionAccessKey"));
+                Dictionary<string, string> sessionAccessKey =
+                    JsonConvert.DeserializeObject<Dictionary<string, string>>(sessionAccessKeyJson);
+                sessionAccessKeyId = DictionaryUtil.Get(sessionAccessKey, "SessionAccessKeyId");
+                sessionAccessKeySecret = DictionaryUtil.Get(sessionAccessKey, "SessionAccessKeySecret");
+                expirationStr = DictionaryUtil.Get(sessionAccessKey, "Expiration").Replace('T', ' ').Replace('Z', ' ');
+                var dt = Convert.ToDateTime(expirationStr);
+                long expiration = dt.GetTimeMillis();
+                CredentialModel credentialModel = new CredentialModel
+                {
+                    AccessKeyId = sessionAccessKeyId,
+                    AccessKeySecret = sessionAccessKeySecret,
+                    Expiration = expiration,
+                    Type = AuthConstant.RsaKeyPair
+                };
+                return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
-            catch
-            {
-                throw new CredentialException("Invalid json got from service.");
-            }
-            expirationStr = expirationStr.Replace('T', ' ').Replace('Z', ' ');
-            var dt = Convert.ToDateTime(expirationStr);
-            long expiration = dt.GetTimeMillis();
-            CredentialModel credentialModel = new CredentialModel
-            {
-                AccessKeyId = sessionAccessKeyId,
-                AccessKeySecret = sessionAccessKeySecret,
-                Expiration = expiration,
-                Type = AuthConstant.RsaKeyPair
-            };
-            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
+            throw new CredentialException("Invalid json got from service.");
         }
 
         private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
@@ -115,7 +115,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("AccessKeyId", PublicKeyId);
             httpRequest.AddUrlParameter("RegionId", regionId);
             string strToSign = ParameterHelper.ComposeStringToSign(MethodType.GET, httpRequest.UrlParameters);
-            String signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
+            string signature = ParameterHelper.SignString(strToSign, PrivateKey + "&");
             httpRequest.AddUrlParameter("Signature", signature);
             httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
@@ -128,31 +128,30 @@ namespace Aliyun.Credentials.Provider
             }
 
             Debug.Assert(httpResponse != null, "httpResponse != null");
-            dynamic contentObj = JsonConvert.DeserializeObject<dynamic>(httpResponse.GetHttpContentString());
+            Dictionary<string, object> contentObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(httpResponse.GetHttpContentString());
             string sessionAccessKeyId;
             string sessionAccessKeySecret;
             string expirationStr;
-            try
+            if (contentObj.ContainsKey("SessionAccessKey"))
             {
-                sessionAccessKeyId = contentObj.SessionAccessKey.SessionAccessKeyId;
-                sessionAccessKeySecret = contentObj.SessionAccessKey.SessionAccessKeySecret;
-                expirationStr = contentObj.SessionAccessKey.Expiration;
+                string sessionAccessKeyJson = JsonConvert.SerializeObject(DictionaryUtil.Get(contentObj, "SessionAccessKey"));
+                Dictionary<string, string> sessionAccessKey =
+                    JsonConvert.DeserializeObject<Dictionary<string, string>>(sessionAccessKeyJson);
+                sessionAccessKeyId = DictionaryUtil.Get(sessionAccessKey, "SessionAccessKeyId");
+                sessionAccessKeySecret = DictionaryUtil.Get(sessionAccessKey, "SessionAccessKeySecret");
+                expirationStr = DictionaryUtil.Get(sessionAccessKey, "Expiration").Replace('T', ' ').Replace('Z', ' ');
+                var dt = Convert.ToDateTime(expirationStr);
+                long expiration = dt.GetTimeMillis();
+                CredentialModel credentialModel = new CredentialModel
+                {
+                    AccessKeyId = sessionAccessKeyId,
+                    AccessKeySecret = sessionAccessKeySecret,
+                    Expiration = expiration,
+                    Type = AuthConstant.RsaKeyPair
+                };
+                return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
-            catch
-            {
-                throw new CredentialException("Invalid json got from service.");
-            }
-            expirationStr = expirationStr.Replace('T', ' ').Replace('Z', ' ');
-            var dt = Convert.ToDateTime(expirationStr);
-            long expiration = dt.GetTimeMillis();
-            CredentialModel credentialModel = new CredentialModel
-            {
-                AccessKeyId = sessionAccessKeyId,
-                AccessKeySecret = sessionAccessKeySecret,
-                Expiration = expiration,
-                Type = AuthConstant.RsaKeyPair
-            };
-            return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
+            throw new CredentialException("Invalid json got from service.");
         }
 
         public int DurationSeconds
