@@ -18,6 +18,8 @@ namespace Aliyun.Credentials.Utils
         private string environmentRoleArn;
         private string environmentOIDCProviderArn;
         private string environmentOIDCTokenFilePath;
+        private string environmentCLIProfileDisabled;
+        private volatile string environmentCredentialsURI;
         private string privateKey;
         private static volatile string oidcToken;
 
@@ -32,8 +34,10 @@ namespace Aliyun.Credentials.Utils
             environmentEcsMetaData = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA") ?? environmentEcsMetaData;
             environmentCredentialsFile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_FILE") ?? environmentCredentialsFile;
             environmentRoleArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") ?? environmentRoleArn;
-            environmentOIDCProviderArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN")?? environmentOIDCProviderArn;
-            environmentOIDCTokenFilePath = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE")?? environmentOIDCTokenFilePath;
+            environmentOIDCProviderArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN") ?? environmentOIDCProviderArn;
+            environmentOIDCTokenFilePath = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE") ?? environmentOIDCTokenFilePath;
+            environmentCLIProfileDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CLI_PROFILE_DISABLED") ?? environmentCLIProfileDisabled;
+            environmentCredentialsURI = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") ?? environmentCredentialsURI;
         }
 
         public static string GetPrivateKey(string filePath)
@@ -191,6 +195,21 @@ namespace Aliyun.Credentials.Utils
             return !string.IsNullOrEmpty(authUtils.environmentRoleArn)
                 && !string.IsNullOrEmpty(authUtils.environmentOIDCProviderArn)
                 && !string.IsNullOrEmpty(authUtils.environmentOIDCTokenFilePath);
+        }
+
+        public static bool EnvironmentDisableCLIProfile
+        {
+            get {return !string.IsNullOrEmpty(authUtils.environmentCLIProfileDisabled) 
+                && bool.Parse(authUtils.environmentCLIProfileDisabled); }
+            
+            set {authUtils.environmentCLIProfileDisabled = value.ToString();}
+        }
+
+        public static string EnvironmentCredentialsURI
+        {
+            get { return authUtils.environmentCredentialsURI; }
+
+            set { authUtils.environmentCredentialsURI = value; }
         }
     }
 }

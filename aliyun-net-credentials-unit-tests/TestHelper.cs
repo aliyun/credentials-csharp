@@ -53,7 +53,7 @@ namespace aliyun_net_credentials_unit_tests
                 }
 
                 object objRet = m.Invoke(objInstance, aobjParams);
-                return objRet; 
+                return objRet;
             }
             catch (TargetInvocationException ex)
             {
@@ -61,7 +61,7 @@ namespace aliyun_net_credentials_unit_tests
                 {
                     throw ex.InnerException;
                 }
- 
+
                 throw;
             }
         }
@@ -147,6 +147,25 @@ namespace aliyun_net_credentials_unit_tests
         public static string GetOIDCTokenFilePath()
         {
             return HomePath + Slash + "OIDCToken.txt";
+        }
+
+        public static string GetCLIConfigFilePath(string type)
+        {
+            switch (type)
+            {
+                case "invalid":
+                    return HomePath + Slash + "invalid_cli_config.json";
+                case "empty":
+                    return HomePath + Slash + "empty_file.json";
+                case "mock_empty":
+                    return HomePath + Slash + "mock_empty_cli_config.json";
+                case "full":
+                    return HomePath + Slash + "full_cli_config.json";
+                case "aliyun":
+                    return HomePath + Slash + ".aliyun/config.json";
+                default:
+                    return "";
+            }
         }
     }
 }
