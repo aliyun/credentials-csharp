@@ -77,17 +77,23 @@ namespace aliyun_net_credentials_unit_tests
 
             ex = Assert.Throws<CredentialException>(() => new Client(null).GetCredential());
             Assert.StartsWith("not found credentials", ex.Message);
+            Assert.Contains("Unable to open credentials file: ", ex.Message);
 
             AuthUtils.EnvironmentEcsMetaData = "test";
             ex = Assert.Throws<CredentialException>(() => new Client(null).GetCredential());
-            Assert.StartsWith("Failed to connect ECS Metadata Service: ", ex.Message);
+            Assert.StartsWith("not found credentials", ex.Message);
+            Assert.Contains("Failed to connect ECS Metadata Service: ", ex.Message);
             AuthUtils.EnvironmentEcsMetaData = null;
 
             AuthUtils.EnvironmentRoleArn = "role_arn";
             AuthUtils.EnvironmentOIDCProviderArn = "oidc_provider_arn";
             AuthUtils.EnvironmentOIDCTokenFilePath = TestHelper.GetOIDCTokenFilePath();
             ex = Assert.Throws<CredentialException>(() => new Client().GetCredential());
-            var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            string keyword = "OIDCRoleArnCredentialProvider:";
+            int startIndex = ex.Message.IndexOf(keyword);
+            int endIndex = ex.Message.IndexOf("}", startIndex);
+            startIndex += keyword.Length;
+            var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message.Substring(startIndex, endIndex - startIndex  + 1).Trim());
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));

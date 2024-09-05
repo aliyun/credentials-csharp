@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,10 +13,25 @@ namespace Aliyun.Credentials.Provider
         private readonly List<IAlibabaCloudCredentialsProvider> UserConfigurationProviders =
             new List<IAlibabaCloudCredentialsProvider>();
 
+        private volatile IAlibabaCloudCredentialsProvider lastUsedCredentialsProvider;
+
+        private readonly bool reuseLastProviderEnabled;
+
         public DefaultCredentialsProvider()
         {
+            this.reuseLastProviderEnabled = true;
+            createDefaultChain();
+        }
+
+        public DefaultCredentialsProvider(bool reuseLastProviderEnabled)
+        {
+            this.reuseLastProviderEnabled = reuseLastProviderEnabled;
+            createDefaultChain();
+        }
+
+        private void createDefaultChain()
+        {
             UserConfigurationProviders.Add(new EnvironmentVariableCredentialsProvider());
-            UserConfigurationProviders.Add(new ProfileCredentialsProvider());
             if (AuthUtils.EnvironmentEnableOIDC())
             {
                 Config config = new Config
@@ -26,41 +42,75 @@ namespace Aliyun.Credentials.Provider
                 };
                 UserConfigurationProviders.Add(new OIDCRoleArnCredentialProvider(config));
             }
+            UserConfigurationProviders.Add(new CLIProfileCredentialsProvider());
+            UserConfigurationProviders.Add(new ProfileCredentialsProvider());
             var roleName = AuthUtils.EnvironmentEcsMetaData;
             if (null != roleName)
             {
                 UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
             }
+            string uri = AuthUtils.EnvironmentCredentialsURI;
+            if (!string.IsNullOrEmpty(uri))
+            {
+                UserConfigurationProviders.Add(new URLCredentialProvider(uri));
+            }
         }
 
         public CredentialModel GetCredentials()
         {
-            CredentialModel credential;
-            foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
+            if (this.reuseLastProviderEnabled && this.lastUsedCredentialsProvider != null)
             {
-                credential = provider.GetCredentials();
-                if (credential != null)
-                {
-                    return credential;
-                }
+                return this.lastUsedCredentialsProvider.GetCredentials();
             }
 
-            throw new CredentialException("not found credentials");
+            CredentialModel credential;
+            List<string> errorMessages = new List<string>();
+            foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
+            {
+                try
+                {
+                    credential = provider.GetCredentials();
+                    this.lastUsedCredentialsProvider = provider;
+                    if (credential != null)
+                    {
+                        return credential;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorMessages.Add(provider.GetType().Name + ": " + e.Message);
+                }
+            }
+            throw new CredentialException("not found credentials: [" + string.Join(", ", errorMessages) + "]");
         }
 
         public async Task<CredentialModel> GetCredentialsAsync()
         {
+            if (this.reuseLastProviderEnabled && this.lastUsedCredentialsProvider != null)
+            {
+                return await this.lastUsedCredentialsProvider.GetCredentialsAsync();
+            }
+
             CredentialModel credential;
+            List<string> errorMessages = new List<string>();
             foreach (IAlibabaCloudCredentialsProvider provider in UserConfigurationProviders)
             {
-                credential = await provider.GetCredentialsAsync();
-                if (credential != null)
+                try
                 {
-                    return credential;
+                    credential = await provider.GetCredentialsAsync();
+                    this.lastUsedCredentialsProvider = provider;
+                    if (credential != null)
+                    {
+                        return credential;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorMessages.Add(provider.GetType().Name + ": " + e.Message);
                 }
             }
 
-            throw new CredentialException("not found credentials");
+            throw new CredentialException("not found credentials: [" + string.Join(", ", errorMessages) + "]");
         }
 
         public void AddCredentialsProvider(IAlibabaCloudCredentialsProvider provider)

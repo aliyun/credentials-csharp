@@ -43,17 +43,17 @@ namespace Aliyun.Credentials.Provider
         /// </summary>
         private string STSEndpoint = "sts.aliyuncs.com";
 
-        public IAlibabaCloudCredentialsProvider credentialsProvider {get; set;}
+        public IAlibabaCloudCredentialsProvider CredentialsProvider {get; set;}
 
         public RamRoleArnCredentialProvider(Config config)
         {
             if (!string.IsNullOrEmpty(config.SecurityToken))
             {
-                credentialsProvider = new StaticSTSCredentialsProvider(config);
+                CredentialsProvider = new StaticSTSCredentialsProvider(config);
             }
             else
             {
-                credentialsProvider = new StaticAKCredentialsProvider(config);
+                CredentialsProvider = new StaticAKCredentialsProvider(config);
             }
             roleArn = config.RoleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
             connectTimeout = config.ConnectTimeout;
@@ -69,14 +69,21 @@ namespace Aliyun.Credentials.Provider
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
         {
-            credentialsProvider = new StaticAKCredentialsProvider(accessKeyId, accessKeySecret);
+            CredentialsProvider = new StaticAKCredentialsProvider(accessKeyId, accessKeySecret);
             this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
         }
 
         public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleArn)
         {
-            credentialsProvider = ParameterHelper.ValidateNotNull(provider, "Provider", "Must specify a previous credentials provider to asssume role.");
+            CredentialsProvider = ParameterHelper.ValidateNotNull(provider, "Provider", "Must specify a previous credentials provider to asssume role.");
             this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
+        }
+
+        public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleArn, int durationSeconds, 
+            string roleSessionName) : this(provider, roleArn)
+        {
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.durationSeconds = durationSeconds;
         }
 
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleSessionName,
@@ -126,7 +133,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("Version", "2015-04-01");
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
-            CredentialModel previousCredentials = credentialsProvider.GetCredentials();
+            CredentialModel previousCredentials = CredentialsProvider.GetCredentials();
             ParameterHelper.ValidateNotNull(previousCredentials, "OriginalCredentials", "Unable to load original credentials from the providers in RAM role arn.");
             httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
             httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);
@@ -180,7 +187,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.AddUrlParameter("Version", "2015-04-01");
             httpRequest.AddUrlParameter("DurationSeconds", durationSeconds.ToString());
             httpRequest.AddUrlParameter("RoleArn", this.roleArn);
-            CredentialModel previousCredentials = await credentialsProvider.GetCredentialsAsync();
+            CredentialModel previousCredentials = await CredentialsProvider.GetCredentialsAsync();
             ParameterHelper.ValidateNotNull(previousCredentials, "OriginalCredentials", "Unable to load original credentials from the providers in RAM role arn.");
             httpRequest.AddUrlParameter("AccessKeyId", previousCredentials.AccessKeyId);
             httpRequest.AddUrlParameter("SecurityToken", previousCredentials.SecurityToken);

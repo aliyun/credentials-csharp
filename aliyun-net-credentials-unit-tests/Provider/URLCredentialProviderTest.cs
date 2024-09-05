@@ -38,10 +38,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             URLCredentialProvider provider = new URLCredentialProvider(config);
             var ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
-            Assert.StartsWith("Failed to connect Server: ", ex.Message);
+            Assert.StartsWith("Failed to connect Server: http://10.10.10.10", ex.Message);
 
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
-            Assert.StartsWith("Failed to connect Server: ", ex.Message);
+            Assert.StartsWith("Failed to connect Server: http://10.10.10.10", ex.Message);
 
             var supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
             ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
