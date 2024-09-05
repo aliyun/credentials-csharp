@@ -15,7 +15,7 @@ namespace Aliyun.Credentials.Provider
 {
     public class URLCredentialProvider : SessionCredentialsProvider
     {
-        private Uri credentialsURI;
+        private readonly Uri credentialsURI;
 
         /// <summary>
         /// Unit of millsecond
@@ -80,7 +80,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (Exception e)
             {
-                throw new CredentialException("Failed to connect Server: " + e.ToString());
+                throw new CredentialException("Failed to connect Server: " + credentialsURI.ToString() + e.ToString());
             }
 
             if (httpResponse.Status >= 300 || httpResponse.Status < 200)
@@ -123,7 +123,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (Exception e)
             {
-                throw new CredentialException("Failed to connect Server: " + e.ToString());
+                throw new CredentialException("Failed to connect Server: " + credentialsURI.ToString() + e.ToString());
             }
 
             if (httpResponse.Status >= 300 || httpResponse.Status < 200)
