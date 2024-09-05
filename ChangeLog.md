@@ -1,3 +1,12 @@
+### 2024-09-05 Version 1.4.1
+* feat: support AssumeRoleWithOIDC
+* feat: support URLCredential
+* feat: add user-agnet for all credential requests
+* feat: support env ALIBABA_CLOUD_SECURITY_TOKEN 
+* feat: support internal static_ak/static_sts credentials provider
+* fix: solve refresh issue in EcsRamRoleCredentialProvider
+* fix: clean useless codes
+
 ### 2024-07-24 Version 1.4.0
 * refactor: solve the inconsistency of credentials refresh
 * fix: capitalize methodType and pass through response info when catch webException
