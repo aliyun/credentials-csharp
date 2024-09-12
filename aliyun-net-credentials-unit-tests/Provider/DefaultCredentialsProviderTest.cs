@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials;
@@ -53,13 +54,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             provider.ClearCredentialsProvider();
 
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentials()).Returns((CredentialModel) null);
+            mockProvider.Setup(p => p.GetCredentials()).Returns((CredentialModel)null);
             provider.AddCredentialsProvider(mockProvider.Object);
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             provider.ClearCredentialsProvider();
 
             mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentials()).Returns(new CredentialModel{
+            mockProvider.Setup(p => p.GetCredentials()).Returns(new CredentialModel
+            {
                 AccessKeyId = "accessKeyId",
                 AccessKeySecret = "accessKeySecret",
                 Type = AuthConstant.AccessKey
@@ -83,7 +85,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         {
             DefaultCredentialsProvider provider = new DefaultCredentialsProvider(false);
             Assert.NotNull(provider);
-            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
 
             RamRoleArnCredentialProvider testProvider = new RamRoleArnCredentialProvider("accessKeyId2", "accessKeySecret", "roleArn");
             provider.AddCredentialsProvider(testProvider);
@@ -92,13 +94,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             provider.ClearCredentialsProvider();
 
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync((CredentialModel) null);
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync((CredentialModel)null);
             provider.AddCredentialsProvider(mockProvider.Object);
-            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
             provider.ClearCredentialsProvider();
 
             mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
-            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new CredentialModel{
+            mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(new CredentialModel
+            {
                 AccessKeyId = "accessKeyId",
                 AccessKeySecret = "accessKeySecret",
                 Type = AuthConstant.AccessKey
@@ -107,7 +110,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<CredentialModel>(await provider.GetCredentialsAsync());
 
             provider.ClearCredentialsProvider();
-            await Assert.ThrowsAsync<CredentialException>(async() => { await provider.GetCredentialsAsync(); });
+            await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
 
             AuthUtils.EnvironmentEcsMetaData = null;
             AuthUtils.EnvironmentCredentialsURI = "http://test";
@@ -120,6 +123,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void ReuseLastProviderEnabledTest()
         {
+            string cacheEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
+            string cacheEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
             DefaultCredentialsProvider provider = new DefaultCredentialsProvider();
             AuthUtils.EnvironmentAccessKeyId = "accessKeyId";
             AuthUtils.EnvironmentAccesskeySecret = "accessKeySecret";
@@ -156,8 +161,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.True(providerField.GetValue(provider) is CredentialsProviderForTest);
             Assert.False((bool)reuseEnableField.GetValue(provider));
 
-            AuthUtils.EnvironmentAccessKeyId = null;
-            AuthUtils.EnvironmentAccesskeySecret = null;
+            AuthUtils.EnvironmentAccessKeyId = cacheEnvironmentAccessKeyId;
+            AuthUtils.EnvironmentAccesskeySecret = cacheEnvironmentAccesskeySecret;
             provider.ClearCredentialsProvider();
         }
     }

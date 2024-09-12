@@ -21,6 +21,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Null(provider.GetProfileName());
             provider = new CLIProfileCredentialsProvider("AK");
             Assert.Equal("AK", provider.GetProfileName());
+
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "TEST");
+            provider = new CLIProfileCredentialsProvider();
+            Assert.Equal("TEST", provider.GetProfileName());
         }
 
         [Fact]

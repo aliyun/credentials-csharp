@@ -1,3 +1,4 @@
+using System;
 using Aliyun.Credentials.Utils;
 
 using Xunit;
@@ -18,56 +19,53 @@ namespace aliyun_net_credentials_unit_tests.Utils
         [Fact]
         public void EnvironmentTest()
         {
-            AuthUtils.ClientType = null;
-            Assert.Equal("default", AuthUtils.ClientType);
+            var cacheClientType = AuthUtils.ClientType;
+            var cacheEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
+            var cacheEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
+            var cacheEnvironmentCredentialsFile = AuthUtils.EnvironmentCredentialsFile;
+            var cacheEnvironmentEcsMetaData = AuthUtils.EnvironmentEcsMetaData;
+            var cacheEnvironmentOIDCProviderArn = AuthUtils.EnvironmentOIDCProviderArn;
+            var cacheEnvironmentOIDCTokenFilePath = AuthUtils.EnvironmentOIDCTokenFilePath;
+            var cacheEnvironmentRoleArn = AuthUtils.EnvironmentRoleArn;
+
             AuthUtils.ClientType = "test";
             Assert.Equal("test", AuthUtils.ClientType);
+            AuthUtils.ClientType = cacheClientType;
 
-            Assert.Null(AuthUtils.EnvironmentAccessKeyId);
             AuthUtils.EnvironmentAccessKeyId = "test";
             Assert.Equal("test", AuthUtils.EnvironmentAccessKeyId);
-            AuthUtils.EnvironmentAccessKeyId = null;
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID", null);
+            AuthUtils.EnvironmentAccessKeyId = cacheEnvironmentAccessKeyId;
 
-            Assert.Null(AuthUtils.EnvironmentAccesskeySecret);
             AuthUtils.EnvironmentAccesskeySecret = "test";
             Assert.Equal("test", AuthUtils.EnvironmentAccesskeySecret);
-            AuthUtils.EnvironmentAccesskeySecret = null;
+            AuthUtils.EnvironmentAccesskeySecret = cacheEnvironmentAccesskeySecret;
 
             AuthUtils.EnvironmentCredentialsFile = "test";
             Assert.Equal("test", AuthUtils.EnvironmentCredentialsFile);
-            AuthUtils.EnvironmentCredentialsFile = null;
-            Assert.Null(AuthUtils.EnvironmentCredentialsFile);
+            AuthUtils.EnvironmentCredentialsFile = cacheEnvironmentCredentialsFile;
 
-            Assert.Null(AuthUtils.EnvironmentEcsMetaData);
             AuthUtils.EnvironmentEcsMetaData = "test";
             Assert.Equal("test", AuthUtils.EnvironmentEcsMetaData);
-            AuthUtils.EnvironmentEcsMetaData = null;
+            AuthUtils.EnvironmentEcsMetaData = cacheEnvironmentEcsMetaData;
 
-            Assert.Null(AuthUtils.EnvironmentOIDCProviderArn);
             AuthUtils.EnvironmentOIDCProviderArn = "test";
             Assert.Equal("test", AuthUtils.EnvironmentOIDCProviderArn);
-            AuthUtils.EnvironmentOIDCProviderArn = null;
+            AuthUtils.EnvironmentOIDCProviderArn = cacheEnvironmentOIDCProviderArn;
 
-            Assert.Null(AuthUtils.EnvironmentOIDCTokenFilePath);
             AuthUtils.EnvironmentOIDCTokenFilePath = TestHelper.GetOIDCTokenFilePath();
             Assert.NotNull(AuthUtils.EnvironmentOIDCTokenFilePath);
-            AuthUtils.EnvironmentOIDCTokenFilePath = null;
+            AuthUtils.EnvironmentOIDCTokenFilePath = cacheEnvironmentOIDCTokenFilePath;
 
-            Assert.Null(AuthUtils.EnvironmentRoleArn);
             AuthUtils.EnvironmentRoleArn = "test";
             Assert.Equal("test", AuthUtils.EnvironmentRoleArn);
-            AuthUtils.EnvironmentRoleArn = null;
-
-            
-            AuthUtils.EnvironmentRoleArn = "test";
             AuthUtils.EnvironmentOIDCProviderArn = "test";
             Assert.False(AuthUtils.EnvironmentEnableOIDC());
             AuthUtils.EnvironmentOIDCTokenFilePath = "test";
             Assert.True(AuthUtils.EnvironmentEnableOIDC());
-            AuthUtils.EnvironmentRoleArn = null;
-            AuthUtils.EnvironmentOIDCProviderArn = null;
-            AuthUtils.EnvironmentOIDCTokenFilePath = null;
-            Assert.False(AuthUtils.EnvironmentEnableOIDC());
+            AuthUtils.EnvironmentRoleArn = cacheEnvironmentRoleArn;
+            AuthUtils.EnvironmentOIDCProviderArn = cacheEnvironmentOIDCProviderArn;
+            AuthUtils.EnvironmentOIDCTokenFilePath = cacheEnvironmentOIDCTokenFilePath;
         }
     }
 }

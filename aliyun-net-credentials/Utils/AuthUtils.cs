@@ -20,6 +20,7 @@ namespace Aliyun.Credentials.Utils
         private string environmentOIDCTokenFilePath;
         private string environmentCLIProfileDisabled;
         private volatile string environmentCredentialsURI;
+        private volatile string disableECSIMDSv1;
         private string privateKey;
         private static volatile string oidcToken;
 
@@ -38,6 +39,7 @@ namespace Aliyun.Credentials.Utils
             environmentOIDCTokenFilePath = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE") ?? environmentOIDCTokenFilePath;
             environmentCLIProfileDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CLI_PROFILE_DISABLED") ?? environmentCLIProfileDisabled;
             environmentCredentialsURI = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") ?? environmentCredentialsURI;
+            disableECSIMDSv1 = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_IMDSV1_DISABLED") ?? disableECSIMDSv1;
         }
 
         public static string GetPrivateKey(string filePath)
@@ -122,7 +124,7 @@ namespace Aliyun.Credentials.Utils
         {
             get
             {
-                if (String.IsNullOrEmpty(authUtils.clientType))
+                if (string.IsNullOrEmpty(authUtils.clientType))
                 {
                     return "default";
                 }
@@ -199,10 +201,13 @@ namespace Aliyun.Credentials.Utils
 
         public static bool EnvironmentDisableCLIProfile
         {
-            get {return !string.IsNullOrEmpty(authUtils.environmentCLIProfileDisabled) 
-                && bool.Parse(authUtils.environmentCLIProfileDisabled); }
-            
-            set {authUtils.environmentCLIProfileDisabled = value.ToString();}
+            get
+            {
+                return !string.IsNullOrEmpty(authUtils.environmentCLIProfileDisabled)
+                    && bool.Parse(authUtils.environmentCLIProfileDisabled);
+            }
+
+            set { authUtils.environmentCLIProfileDisabled = value.ToString(); }
         }
 
         public static string EnvironmentCredentialsURI
@@ -210,6 +215,17 @@ namespace Aliyun.Credentials.Utils
             get { return authUtils.environmentCredentialsURI; }
 
             set { authUtils.environmentCredentialsURI = value; }
+        }
+
+        public static bool DisableIMDSv1
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(authUtils.disableECSIMDSv1)
+                    && bool.Parse(authUtils.disableECSIMDSv1);
+            }
+
+            set { authUtils.disableECSIMDSv1 = value.ToString(); }
         }
     }
 }
