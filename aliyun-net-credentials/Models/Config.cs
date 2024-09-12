@@ -26,6 +26,9 @@ namespace Aliyun.Credentials.Models
         [NameInMap("role_name")]
         public string RoleName { get; set; }
 
+        [NameInMap("disableIMDSv1")]
+        public bool? DisableIMDSv1 { get; set; }
+
         [NameInMap("private_key_file")]
         public string PrivateKeyFile { get; set; }
 

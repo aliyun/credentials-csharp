@@ -11,19 +11,10 @@ namespace Aliyun.Credentials.Provider
     {
         public CredentialModel GetCredentials()
         {
-            if (AuthUtils.ClientType != "default")
-            {
-                return null;
-            }
-
             string accessKeyId = AuthUtils.EnvironmentAccessKeyId;
             string accessKeySecret = AuthUtils.EnvironmentAccesskeySecret;
             string securityToken = AuthUtils.EnvironmentSecurityToken;
-            if (accessKeyId == null || accessKeySecret == null)
-            {
-                return null;
-            }
-            else if (string.IsNullOrWhiteSpace(accessKeyId))
+            if (string.IsNullOrWhiteSpace(accessKeyId))
             {
                 throw new CredentialException("Environment variable accessKeyId cannot be empty");
             }

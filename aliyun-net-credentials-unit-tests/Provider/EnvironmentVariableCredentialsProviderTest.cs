@@ -22,14 +22,16 @@ namespace aliyun_net_credentials_unit_tests.Provider
             string tempEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
             string tempEnvironmentSecurityToken = AuthUtils.EnvironmentSecurityToken;
             AuthUtils.ClientType = string.Empty;
-            Assert.Null(provider.GetCredentials());
+            var ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
-            //AuthUtils.ClientType = "default";
             AuthUtils.EnvironmentAccessKeyId = null;
-            Assert.Null(provider.GetCredentials());
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
             AuthUtils.EnvironmentAccesskeySecret = null;
-            Assert.Null(provider.GetCredentials());
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
             AuthUtils.EnvironmentAccessKeyId = string.Empty;
             AuthUtils.EnvironmentAccesskeySecret = string.Empty;
@@ -63,14 +65,17 @@ namespace aliyun_net_credentials_unit_tests.Provider
             string tempEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
             string tempEnvironmentSecurityToken = AuthUtils.EnvironmentSecurityToken;
             AuthUtils.ClientType = string.Empty;
-            Assert.Null(await provider.GetCredentialsAsync());
+            var ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
             AuthUtils.ClientType = "default";
             AuthUtils.EnvironmentAccessKeyId = null;
-            Assert.Null(await provider.GetCredentialsAsync());
+            ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
             AuthUtils.EnvironmentAccesskeySecret = null;
-            Assert.Null(await provider.GetCredentialsAsync());
+            ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
+            Assert.Equal("Environment variable accessKeyId cannot be empty", ex.Message);
 
             AuthUtils.EnvironmentAccessKeyId = string.Empty;
             AuthUtils.EnvironmentAccesskeySecret = string.Empty;
