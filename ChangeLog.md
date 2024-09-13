@@ -1,3 +1,7 @@
+### 2024-09-14 Version 1.4.2
+* feat: support cli credentials provider 
+* refactor: get metadata token every time refresh credentials
+
 ### 2024-09-05 Version 1.4.1
 * feat: support AssumeRoleWithOIDC
 * feat: support URLCredential
