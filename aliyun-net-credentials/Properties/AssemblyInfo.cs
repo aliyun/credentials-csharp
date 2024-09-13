@@ -29,8 +29,8 @@ using System.Runtime.CompilerServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.4.1.0")]
-[assembly: AssemblyFileVersion("1.4.1.0")]
+[assembly: AssemblyVersion("1.4.2.0")]
+[assembly: AssemblyFileVersion("1.4.2.0")]
 
 // Setting internal class visible to unitTests
 [assembly: InternalsVisibleTo("Aliyun.Net.Credentials.UnitTests")]
