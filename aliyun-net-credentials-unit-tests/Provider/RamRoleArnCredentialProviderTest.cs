@@ -83,6 +83,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("test", resultAsync.AccessKeyId);
             Assert.Equal("test", resultAsync.AccessKeySecret);
             Assert.Equal("test", resultAsync.SecurityToken);
+            Assert.Equal("ram_role_arn/static_ak", resultAsync.ProviderName);
             Assert.Equal(1546304461000, resultAsync.Expiration);
             mockAsyncRefreshFunc.Verify(f => f(), Times.Once);
 

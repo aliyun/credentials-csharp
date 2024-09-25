@@ -87,11 +87,13 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(OIDCRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
             RefreshResult<CredentialModel> mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(OIDCRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
             Assert.Equal(AuthConstant.OIDCRoleArn, mockRefreshResult.Value.Type);
+            Assert.Equal("oidc_role_arn", mockRefreshResult.Value.ProviderName);
 
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethodAsync(typeof(OIDCRoleArnCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
             RefreshResult<CredentialModel> mockRefreshResultAsync = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(typeof(OIDCRoleArnCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object });
             Assert.Equal(AuthConstant.OIDCRoleArn, mockRefreshResultAsync.Value.Type);
+            Assert.Equal("oidc_role_arn", mockRefreshResult.Value.ProviderName);
         }
     }
 }

@@ -24,5 +24,10 @@ namespace Aliyun.Credentials.Provider
                 return credential;
             });
         }
+
+        public string GetProviderName()
+        {
+            return "static";
+        }
     }
 }

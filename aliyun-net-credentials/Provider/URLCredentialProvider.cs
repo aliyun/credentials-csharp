@@ -43,6 +43,11 @@ namespace Aliyun.Credentials.Provider
             }
         }
 
+        public override string GetProviderName()
+        {
+            return "credentials_uri";
+        }
+
         public override RefreshResult<CredentialModel> RefreshCredentials()
         {
             CompatibleUrlConnClient client = new CompatibleUrlConnClient();
@@ -100,7 +105,8 @@ namespace Aliyun.Credentials.Provider
                 CredentialModel credentialModel = new CredentialModel
                 {
                     Expiration = expiration,
-                    Type = AuthConstant.URLSts
+                    Type = AuthConstant.URLSts,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
@@ -143,7 +149,8 @@ namespace Aliyun.Credentials.Provider
                 CredentialModel credentialModel = new CredentialModel
                 {
                     Expiration = expiration,
-                    Type = AuthConstant.URLSts
+                    Type = AuthConstant.URLSts,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }

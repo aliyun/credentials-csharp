@@ -30,7 +30,8 @@ namespace Aliyun.Credentials.Provider
                     AccessKeyId = accessKeyId,
                     AccessKeySecret = accessKeySecret,
                     SecurityToken = securityToken,
-                    Type = AuthConstant.Sts
+                    Type = AuthConstant.Sts,
+                    ProviderName = GetProviderName()
                 };
             }
 
@@ -38,7 +39,8 @@ namespace Aliyun.Credentials.Provider
             {
                 AccessKeyId = accessKeyId,
                 AccessKeySecret = accessKeySecret,
-                Type = AuthConstant.AccessKey
+                Type = AuthConstant.AccessKey,
+                ProviderName = GetProviderName()
             };
         }
 
@@ -48,6 +50,11 @@ namespace Aliyun.Credentials.Provider
             {
                 return GetCredentials();
             });
+        }
+
+        public string GetProviderName()
+        {
+            return "env";
         }
     }
 }

@@ -29,6 +29,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("accessKeyId", credentialModel.AccessKeyId);
             Assert.Equal("accessKeySecret", credentialModel.AccessKeySecret);
             Assert.Equal("securityToken", credentialModel.SecurityToken);
+            Assert.Equal("static_sts", credentialModel.ProviderName);
         }
     }
 }
