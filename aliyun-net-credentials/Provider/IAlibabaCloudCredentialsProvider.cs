@@ -8,5 +8,7 @@ namespace Aliyun.Credentials.Provider
         CredentialModel GetCredentials();
 
         Task<CredentialModel> GetCredentialsAsync();
+
+        string GetProviderName();
     }
 }

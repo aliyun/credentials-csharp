@@ -36,6 +36,11 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Type = AuthConstant.AccessKey
             });
         }
+
+        public string GetProviderName()
+        {
+            return "test";
+        }
     }
 
     public class DefaultCredentialsProviderTest
@@ -131,6 +136,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             CredentialModel credential = provider.GetCredentials();
             Assert.Equal("accessKeyId", credential.AccessKeyId);
             Assert.Equal("accessKeySecret", credential.AccessKeySecret);
+            Assert.Equal("default/env", credential.ProviderName);
 
             Type providerType = typeof(DefaultCredentialsProvider);
             FieldInfo providerField = providerType.GetField("lastUsedCredentialsProvider", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -142,6 +148,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credential = provider.GetCredentials();
             Assert.Equal("accessKeyId", credential.AccessKeyId);
             Assert.Equal("accessKeySecret", credential.AccessKeySecret);
+            Assert.Equal("env", credential.ProviderName);
             Assert.True(providerField.GetValue(provider) is EnvironmentVariableCredentialsProvider);
             Assert.True((bool)reuseEnableField.GetValue(provider));
 
@@ -151,6 +158,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credential = provider.GetCredentials();
             Assert.Equal("accessKeyId", credential.AccessKeyId);
             Assert.Equal("accessKeySecret", credential.AccessKeySecret);
+            Assert.Equal("default/env", credential.ProviderName);
             Assert.True(providerField.GetValue(provider) is EnvironmentVariableCredentialsProvider);
             Assert.False((bool)reuseEnableField.GetValue(provider));
 
@@ -158,6 +166,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credential = provider.GetCredentials();
             Assert.Equal("", credential.AccessKeyId);
             Assert.Equal("", credential.AccessKeySecret);
+            Assert.Equal("default/test", credential.ProviderName);
             Assert.True(providerField.GetValue(provider) is CredentialsProviderForTest);
             Assert.False((bool)reuseEnableField.GetValue(provider));
 

@@ -97,7 +97,8 @@ namespace Aliyun.Credentials.Provider
                     AccessKeyId = sessionAccessKeyId,
                     AccessKeySecret = sessionAccessKeySecret,
                     Expiration = expiration,
-                    Type = AuthConstant.RsaKeyPair
+                    Type = AuthConstant.RsaKeyPair,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
@@ -147,11 +148,17 @@ namespace Aliyun.Credentials.Provider
                     AccessKeyId = sessionAccessKeyId,
                     AccessKeySecret = sessionAccessKeySecret,
                     Expiration = expiration,
-                    Type = AuthConstant.RsaKeyPair
+                    Type = AuthConstant.RsaKeyPair,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
             throw new CredentialException("Invalid json got from service.");
+        }
+
+        public override string GetProviderName()
+        {
+            return "rsa_key_pair";
         }
 
         public int DurationSeconds

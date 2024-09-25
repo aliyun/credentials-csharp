@@ -30,18 +30,18 @@ namespace Aliyun.Credentials.Utils
                 if (line.StartsWith("[") && line.EndsWith("]"))
                 {
                     currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-                    ini[line.Substring(1, line.LastIndexOf("]", StringComparison.Ordinal) - 1)] = currentSection;
+                    ini[line.Substring(1, line.LastIndexOf("]", StringComparison.Ordinal) - 1).Trim()] = currentSection;
                     continue;
                 }
 
                 var idx = line.IndexOf("=", StringComparison.Ordinal);
                 if (idx == -1)
                 {
-                    currentSection[line] = "";
+                    currentSection[line.Trim()] = "";
                 }
                 else
                 {
-                    currentSection[line.Substring(0, idx)] = line.Substring(idx + 1);
+                    currentSection[line.Substring(0, idx).Trim()] = line.Substring(idx + 1).Trim();
                 }
             }
         }
