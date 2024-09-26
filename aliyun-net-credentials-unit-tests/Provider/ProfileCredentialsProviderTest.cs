@@ -28,6 +28,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             AuthUtils.EnvironmentCredentialsFile = TestHelper.GetIniFilePath();
             AuthUtils.ClientType = "default";
             Assert.NotNull(provider.GetCredentials());
+            Assert.Equal("profile", provider.GetProviderName());
 
             AuthUtils.ClientType = "client2";
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });

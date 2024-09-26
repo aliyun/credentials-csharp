@@ -153,7 +153,8 @@ namespace Aliyun.Credentials.Provider
                     AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
-                    Type = AuthConstant.OIDCRoleArn
+                    Type = AuthConstant.OIDCRoleArn,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
@@ -220,12 +221,18 @@ namespace Aliyun.Credentials.Provider
                     AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
-                    Type = AuthConstant.OIDCRoleArn
+                    Type = AuthConstant.OIDCRoleArn,
+                    ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
 
             throw new CredentialException(JsonConvert.SerializeObject(map));
+        }
+
+        public override string GetProviderName()
+        {
+            return "oidc_role_arn";
         }
     }
 }

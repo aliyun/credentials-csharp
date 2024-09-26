@@ -71,7 +71,6 @@ namespace Aliyun.Credentials.Provider
 
         private CredentialModel CreateCredential(Dictionary<string, string> clientConfig)
         {
-
             string configType = clientConfig[AuthConstant.IniType];
             if (string.IsNullOrWhiteSpace(configType))
             {
@@ -296,5 +295,11 @@ namespace Aliyun.Credentials.Provider
                 OIDCProviderArn, OIDCTokenFilePath, roleSessionName, regionId, policy);
             return await provider.GetCredentialsAsync();
         }
+
+        public string GetProviderName()
+        {
+            return "profile";
+        }
+
     }
 }

@@ -68,6 +68,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(URLCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
             RefreshResult<CredentialModel> mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(URLCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
             Assert.Equal(AuthConstant.URLSts, mockRefreshResult.Value.Type);
+            Assert.Equal("credentials_uri", mockRefreshResult.Value.ProviderName);
 
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethodAsync(typeof(URLCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));

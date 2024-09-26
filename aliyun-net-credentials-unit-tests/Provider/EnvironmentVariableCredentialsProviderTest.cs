@@ -44,10 +44,12 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<CredentialModel>(provider.GetCredentials());
             CredentialModel credential = provider.GetCredentials();
             Assert.Equal("access_key", credential.Type);
+            Assert.Equal("env", credential.ProviderName);
 
             AuthUtils.EnvironmentSecurityToken = "SecurityToken";
             credential = provider.GetCredentials();
             Assert.Equal("sts", credential.Type);
+            Assert.Equal("env", credential.ProviderName);
 
 
             AuthUtils.ClientType = tempClientType;

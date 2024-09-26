@@ -170,7 +170,8 @@ namespace Aliyun.Credentials.Provider
                     AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
-                    Type = AuthConstant.RamRoleArn
+                    Type = AuthConstant.RamRoleArn,
+                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(), CredentialsProvider.GetProviderName())
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
@@ -224,12 +225,18 @@ namespace Aliyun.Credentials.Provider
                     AccessKeySecret = DictionaryUtil.Get(credentials, "AccessKeySecret"),
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
-                    Type = AuthConstant.RamRoleArn
+                    Type = AuthConstant.RamRoleArn,
+                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(), CredentialsProvider.GetProviderName())
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
 
             throw new CredentialException(JsonConvert.SerializeObject(map));
+        }
+
+        public override string GetProviderName()
+        {
+            return "ram_role_arn";
         }
     }
 }

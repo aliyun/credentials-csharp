@@ -96,6 +96,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             EcsRamRoleCredentialProvider providerRoleName = new EcsRamRoleCredentialProvider("roleName");
             Assert.NotNull(providerRoleName);
             Assert.Equal("roleName", providerRoleName.RoleName);
+            Assert.Equal("ecs_ram_role", providerRoleName.GetProviderName());
             Assert.NotNull(providerRoleName.CredentialUrl);
             Assert.False(providerRoleName.DisableIMDSv1);
 
@@ -213,6 +214,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             RefreshResult<CredentialModel> credentialModel = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(typeof(EcsRamRoleCredentialProvider), "CreateCredentialAsync", providerConfig, new object[] { mock.Object });
             Assert.NotNull(credentialModel);
             Assert.Equal("test", credentialModel.Value.AccessKeyId);
+            Assert.Equal("ecs_ram_role", credentialModel.Value.ProviderName);
         }
 
         [Fact]

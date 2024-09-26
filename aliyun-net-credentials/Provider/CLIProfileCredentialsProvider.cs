@@ -16,7 +16,6 @@ namespace Aliyun.Credentials.Provider
     internal class CLIProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly string CLI_CREDENTIALS_CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aliyun", "config.json");
-
         private volatile IAlibabaCloudCredentialsProvider credentialsProvider;
         private volatile string currentProfileName;
         private readonly object credentialsProviderLock = new object();
@@ -53,10 +52,17 @@ namespace Aliyun.Credentials.Provider
                     }
                 }
             }
-            return this.credentialsProvider.GetCredentials();
+            var credentials = this.credentialsProvider.GetCredentials();
+            return new CredentialModel
+            {
+                AccessKeyId = credentials.AccessKeyId,
+                AccessKeySecret = credentials.AccessKeySecret,
+                SecurityToken = credentials.SecurityToken,
+                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentialsProvider.GetProviderName())
+            };
         }
 
-        public Task<CredentialModel> GetCredentialsAsync()
+        public async Task<CredentialModel> GetCredentialsAsync()
         {
             if (AuthUtils.EnvironmentDisableCLIProfile)
             {
@@ -83,7 +89,14 @@ namespace Aliyun.Credentials.Provider
                     }
                 }
             }
-            return this.credentialsProvider.GetCredentialsAsync();
+            var credentials = await this.credentialsProvider.GetCredentialsAsync();
+            return new CredentialModel
+            {
+                AccessKeyId = credentials.AccessKeyId,
+                AccessKeySecret = credentials.AccessKeySecret,
+                SecurityToken = credentials.SecurityToken,
+                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentialsProvider.GetProviderName())
+            };
         }
 
         internal string GetProfileName()
@@ -110,7 +123,12 @@ namespace Aliyun.Credentials.Provider
                                     AccessKeySecret = ParameterHelper.ValidateNotNull(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null."),
                                     Type = AuthConstant.AccessKey
                                 };
-                                return new StaticCredentialsProvider(credentialModel);
+                                Models.Config credentialsConfig = new Models.Config
+                                {
+                                    AccessKeyId = profile.GetAccessKeyId(),
+                                    AccessKeySecret = profile.GetAccessKeySecret()
+                                };
+                                return new StaticAKCredentialsProvider(credentialsConfig);
                             case "RamRoleArn":
                                 credentialModel = new CredentialModel
                                 {
@@ -192,6 +210,11 @@ namespace Aliyun.Credentials.Provider
         internal bool ShouldReloadCredentialsProvider(string profileName)
         {
             return credentialsProvider == null || (!string.IsNullOrEmpty(currentProfileName) && !string.IsNullOrEmpty(profileName) && !currentProfileName.Equals(profileName));
+        }
+
+        public string GetProviderName()
+        {
+            return "cli_profile";
         }
 
         internal class Config

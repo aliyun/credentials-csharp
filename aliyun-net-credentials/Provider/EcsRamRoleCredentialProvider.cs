@@ -278,7 +278,8 @@ namespace Aliyun.Credentials.Provider
                 AccessKeySecret = contentAccessKeySecret,
                 SecurityToken = contentSecurityToken,
                 Expiration = expiration,
-                Type = AuthConstant.EcsRamRole
+                Type = AuthConstant.EcsRamRole,
+                ProviderName = GetProviderName()
             };
             return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
@@ -321,7 +322,8 @@ namespace Aliyun.Credentials.Provider
                 AccessKeySecret = contentAccessKeySecret,
                 SecurityToken = contentSecurityToken,
                 Expiration = expiration,
-                Type = AuthConstant.EcsRamRole
+                Type = AuthConstant.EcsRamRole,
+                ProviderName = GetProviderName()
             };
             return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
         }
@@ -339,6 +341,11 @@ namespace Aliyun.Credentials.Provider
         public bool DisableIMDSv1
         {
             get { return disableIMDSv1; }
+        }
+        
+        public override string GetProviderName()
+        {
+            return "ecs_ram_role";
         }
     }
 }

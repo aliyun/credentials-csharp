@@ -25,6 +25,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal(15000, provider.ReadTimeout);
             Assert.Equal(3650, provider.DurationSeconds);
             Assert.Equal("regionId", provider.RegionId);
+            Assert.Equal("rsa_key_pair", provider.GetProviderName());
 
             provider.ConnectTimeout = 20001;
             provider.ReadTimeout = 15001;
@@ -59,6 +60,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RsaKeyPairCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
+            var credential = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(RsaKeyPairCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
+            Assert.Equal("rsa_key_pair", credential.Value.ProviderName);
         }
 
         [Fact]

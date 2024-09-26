@@ -73,7 +73,13 @@ namespace Aliyun.Credentials.Provider
                     this.lastUsedCredentialsProvider = provider;
                     if (credential != null)
                     {
-                        return credential;
+                        return new CredentialModel
+                        {
+                            AccessKeyId = credential.AccessKeyId,
+                            AccessKeySecret = credential.AccessKeySecret,
+                            SecurityToken = credential.SecurityToken,
+                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(), provider.GetProviderName())
+                        };
                     }
                 }
                 catch (Exception e)
@@ -101,7 +107,13 @@ namespace Aliyun.Credentials.Provider
                     this.lastUsedCredentialsProvider = provider;
                     if (credential != null)
                     {
-                        return credential;
+                        return new CredentialModel
+                        {
+                            AccessKeyId = credential.AccessKeyId,
+                            AccessKeySecret = credential.AccessKeySecret,
+                            SecurityToken = credential.SecurityToken,
+                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(), provider.GetProviderName())
+                        };
                     }
                 }
                 catch (Exception e)
@@ -131,6 +143,11 @@ namespace Aliyun.Credentials.Provider
         public void ClearCredentialsProvider()
         {
             UserConfigurationProviders.Clear();
+        }
+
+        public string GetProviderName()
+        {
+            return "default";
         }
     }
 }

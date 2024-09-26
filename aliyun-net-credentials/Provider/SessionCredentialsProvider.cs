@@ -47,5 +47,6 @@ namespace Aliyun.Credentials.Provider
                 expiration - 3 * 60 * 1000;
         }
 
+        public abstract string GetProviderName();
     }
 }

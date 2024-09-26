@@ -6,7 +6,6 @@ using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
-
 using Newtonsoft.Json;
 using Xunit;
 
@@ -21,6 +20,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Null(provider.GetProfileName());
             provider = new CLIProfileCredentialsProvider("AK");
             Assert.Equal("AK", provider.GetProfileName());
+            Assert.Equal("cli_profile", provider.GetProviderName());
 
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "TEST");
             provider = new CLIProfileCredentialsProvider();
@@ -78,7 +78,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         }
 
         [Fact]
-        public void ReloadCredentialsProviderTest()
+        public async void ReloadCredentialsProviderTest()
         {
             CLIProfileCredentialsProvider provider = new CLIProfileCredentialsProvider();
             string configPath = TestHelper.GetCLIConfigFilePath("aliyun");
@@ -87,15 +87,25 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Contains("Unable to get profile with 'notExist' form CLI credentials file.", ex.Message);
 
             IAlibabaCloudCredentialsProvider credentialsProvider = provider.ReloadCredentialsProvider(config, "AK");
-            Assert.True(credentialsProvider is StaticCredentialsProvider);
+            Assert.True(credentialsProvider is StaticAKCredentialsProvider);
             CredentialModel credential = credentialsProvider.GetCredentials();
             Assert.Equal("akid", credential.AccessKeyId);
             Assert.Equal("secret", credential.AccessKeySecret);
+            Assert.Equal("static_ak", credential.ProviderName);
+            Assert.Null(credential.SecurityToken);
+
+            credential = await credentialsProvider.GetCredentialsAsync();
+            Assert.Equal("akid", credential.AccessKeyId);
+            Assert.Equal("secret", credential.AccessKeySecret);
+            Assert.Equal("static_ak", credential.ProviderName);
             Assert.Null(credential.SecurityToken);
 
             credentialsProvider = provider.ReloadCredentialsProvider(config, "RamRoleArn");
             Assert.True(credentialsProvider is RamRoleArnCredentialProvider);
             ex = Assert.Throws<CredentialException>(() => { credentialsProvider.GetCredentials(); });
+            Assert.Contains("InvalidAccessKeyId.NotFound", ex.Message);
+
+            var exAsync = await Assert.ThrowsAsync<CredentialException>(async() => {await credentialsProvider.GetCredentialsAsync(); });
             Assert.Contains("InvalidAccessKeyId.NotFound", ex.Message);
 
             var ex1 = Assert.Throws<ArgumentNullException>(() => { provider.ReloadCredentialsProvider(config, "Invalid_RamRoleArn"); });
