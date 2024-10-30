@@ -30,7 +30,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (IOException)
             {
-                return null;
+                throw new CredentialException(String.Format("Unable to open credentials file: {0}.", filePath));
             }
 
             if (!iniFile.Ini.ContainsKey(AuthUtils.ClientType))
