@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-
+using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
@@ -16,15 +16,28 @@ namespace Aliyun.Credentials
             credentialsProvider = new DefaultCredentialsProvider();
         }
 
-        public Client(Config config)
+        /// <summary>
+        /// param should be instance of <see cref="Config"/> or <see cref="IAlibabaCloudCredentialsProvider"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <exception cref="CredentialException"></exception>
+        public Client(object obj)
         {
-            if (null == config)
+            if (null == obj)
             {
                 credentialsProvider = new DefaultCredentialsProvider();
             }
+            else if (obj is Config)
+            {
+                credentialsProvider = GetProvider((Config)obj);
+            } 
+            else if (obj is IAlibabaCloudCredentialsProvider)
+            {
+                credentialsProvider = (IAlibabaCloudCredentialsProvider)obj;
+            } 
             else
             {
-                credentialsProvider = GetProvider(config);
+                throw new CredentialException("Ivalid initialization parameter");
             }
         }
 

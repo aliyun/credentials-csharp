@@ -18,7 +18,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void ProfileGetCredentialTest()
         {
             ProfileCredentialsProvider provider = new ProfileCredentialsProvider();
-            Assert.Null(provider.GetCredentials());
+            var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials());
+            Assert.StartsWith("Unable to open credentials file:", ex.Message);
 
             string tempEnvironmentCredentialsFile = AuthUtils.EnvironmentCredentialsFile;
             string tempClientType = AuthUtils.ClientType;

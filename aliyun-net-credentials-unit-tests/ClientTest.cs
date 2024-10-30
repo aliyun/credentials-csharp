@@ -73,7 +73,55 @@ namespace aliyun_net_credentials_unit_tests
         [Fact]
         public void TestConstructor()
         {
-            var ex = Assert.Throws<CredentialException>(() => new Client().GetCredential());
+            var ex = Assert.Throws<CredentialException>(() => new Client(new DefaultCredentialsProvider()).GetCredential());
+            string[] expectedMessage = new[]
+            {
+                "not found credentials:",
+                "[EnvironmentVariableCredentialsProvider: Environment variable accessKeyId cannot be empty,",
+                "CLIProfileCredentialsProvider: Unable to open credentials file:",
+                "ProfileCredentialsProvider: Unable to open credentials file:"
+            };
+
+            foreach (var subMessage in expectedMessage)
+            {
+                Assert.Contains(subMessage, ex.Message);
+            }
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new ProfileCredentialsProvider()).GetCredential());
+            Assert.StartsWith("Unable to open credentials file:", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new CLIProfileCredentialsProvider()).GetCredential());
+            Assert.StartsWith("Unable to open credentials file:", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new EcsRamRoleCredentialProvider("test")).GetCredential());
+            Assert.StartsWith("Failed to connect ECS Metadata Service:", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new EnvironmentVariableCredentialsProvider()).GetCredential());
+            Assert.StartsWith("Environment variable accessKeyId cannot be empty", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new OIDCRoleArnCredentialProvider("test", "test", "test")).GetCredential());
+            Assert.StartsWith("OIDCTokenFilePath test does not exist.", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new RamRoleArnCredentialProvider("test", "test", "test")).GetCredential());
+
+            var credential = new Client(new StaticAKCredentialsProvider("test", "test")).GetCredential();
+            Assert.Equal("test", credential.AccessKeyId);
+            Assert.Equal("test", credential.AccessKeySecret);
+
+            credential = new Client(new StaticSTSCredentialsProvider(new Config {
+                AccessKeyId = "test",
+                AccessKeySecret = "test",
+                SecurityToken = "test"
+            })).GetCredential();
+
+            Assert.Equal("test", credential.AccessKeyId);
+            Assert.Equal("test", credential.AccessKeySecret);
+            Assert.Equal("test", credential.SecurityToken);
+
+            ex = Assert.Throws<CredentialException>(() => new Client(new Client()).GetCredential());
+            Assert.StartsWith("Ivalid initialization parameter", ex.Message);
+
+            ex = Assert.Throws<CredentialException>(() => new Client().GetCredential());
             Assert.StartsWith("not found credentials", ex.Message);
 
             ex = Assert.Throws<CredentialException>(() => new Client(null).GetCredential());
@@ -94,7 +142,7 @@ namespace aliyun_net_credentials_unit_tests
             int startIndex = ex.Message.IndexOf(keyword);
             int endIndex = ex.Message.IndexOf("}", startIndex);
             startIndex += keyword.Length;
-            var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message.Substring(startIndex, endIndex - startIndex  + 1).Trim());
+            var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message.Substring(startIndex, endIndex - startIndex + 1).Trim());
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
