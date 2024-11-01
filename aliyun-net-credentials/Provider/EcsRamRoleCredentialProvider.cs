@@ -26,6 +26,7 @@ namespace Aliyun.Credentials.Provider
         private readonly bool disableIMDSv1;
         private const int metadataTokenDuration = 21600;
 
+        [Obsolete("Use builder instead.")]
         public EcsRamRoleCredentialProvider(string roleName)
         {
             this.roleName = roleName;
@@ -33,6 +34,7 @@ namespace Aliyun.Credentials.Provider
             SetCredentialUrl();
         }
 
+        [Obsolete("Use builder instead.")]
         public EcsRamRoleCredentialProvider(Config config)
         {
             if (config.ConnectTimeout > 1000)
@@ -46,6 +48,52 @@ namespace Aliyun.Credentials.Provider
             this.disableIMDSv1 = config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1;
             roleName = config.RoleName;
             SetCredentialUrl();
+        }
+
+        private EcsRamRoleCredentialProvider(Builder builder)
+        {
+            this.roleName = builder.roleName;
+            this.disableIMDSv1 = builder.disableIMDSv1;
+            this.connectionTimeout = builder.connectionTimeout;
+            this.readTimeout = builder.readTimeout;
+            SetCredentialUrl();
+        }
+
+        public class Builder
+        {
+            internal string roleName;
+            internal bool disableIMDSv1 = AuthUtils.DisableIMDSv1;
+            internal int connectionTimeout = 1000;
+            internal int readTimeout = 1000;
+
+            public Builder RoleName(string roleName)
+            {
+                this.roleName = roleName;
+                return this;
+            }
+
+            public Builder DisableIMDSv1(bool disableIMDSv1)
+            {
+                this.disableIMDSv1 = disableIMDSv1;
+                return this;
+            }
+
+            public Builder ConnectionTimeout(int connectionTimeout)
+            {
+                this.connectionTimeout = connectionTimeout > 0 ? connectionTimeout : 1000;
+                return this;
+            }
+
+            public Builder ReadTimeout(int readTimeout)
+            {
+                this.readTimeout = readTimeout > 0 ? readTimeout : 1000;
+                return this;
+            }
+
+            public EcsRamRoleCredentialProvider Build()
+            {
+                return new EcsRamRoleCredentialProvider(this);
+            }
         }
 
         private void SetCredentialUrl()
@@ -346,6 +394,16 @@ namespace Aliyun.Credentials.Provider
         public override string GetProviderName()
         {
             return "ecs_ram_role";
+        }
+
+        public int ConnectionTimeout
+        {
+            get { return connectionTimeout; }
+        }
+
+        public int ReadTimeout
+        {
+            get { return readTimeout; }
         }
     }
 }
