@@ -13,10 +13,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
             StaticAKCredentialsProvider provider;
             Config config = new Config();
             var ex = Assert.Throws<ArgumentNullException>(() => provider = new StaticAKCredentialsProvider(config));
-            Assert.StartsWith("AccessKeyId must not be null.", ex.Message);
+            Assert.StartsWith("AccessKeyId must not be null or empty.", ex.Message);
             config.AccessKeyId = "accessKeyId";
             ex = Assert.Throws<ArgumentNullException>(() => provider = new StaticAKCredentialsProvider(config));
-            Assert.StartsWith("AccessKeySecret must not be null.", ex.Message);
+            Assert.StartsWith("AccessKeySecret must not be null or empty.", ex.Message);
             config.AccessKeySecret = "accessKeySecret";
             provider = new StaticAKCredentialsProvider(config);
             Assert.NotNull(provider);

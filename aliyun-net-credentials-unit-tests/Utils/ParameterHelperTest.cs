@@ -114,5 +114,16 @@ namespace aliyun_net_credentials_unit_tests.Utils
             var ex = Assert.Throws<ArgumentNullException>(() => ParameterHelper.ValidateNotNull(str, "str", "str must not be null."));
             Assert.StartsWith("str must not be null.", ex.Message);
         }
+
+        [Fact]
+        public void TestValidateNotEmpty()
+        {
+            string str = null;
+            var ex = Assert.Throws<ArgumentNullException>(() => ParameterHelper.ValidateNotEmpty(str, "str", "str must not be null or empty."));
+            Assert.StartsWith("str must not be null or empty.", ex.Message);
+            str = "";
+            ex = Assert.Throws<ArgumentNullException>(() => ParameterHelper.ValidateNotEmpty(str, "str", "str must not be null or empty."));
+            Assert.StartsWith("str must not be null or empty.", ex.Message);
+        }
     }
 }

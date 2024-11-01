@@ -33,7 +33,9 @@ namespace Aliyun.Credentials.Utils
         public const string RsaKeyPair = "rsa_key_pair";
         public const string BeareaToken = "bearer";
         public const string OIDCRoleArn = "oidc_role_arn";
+        [Obsolete("use CredentialsURI instead")]
         public const string URLSts = "credentials_uri";
+        public const string CredentialsURI = "credentials_uri";
         public const string StaticSts = "static_sts";
         public const string StaticAK = "static_ak";
 

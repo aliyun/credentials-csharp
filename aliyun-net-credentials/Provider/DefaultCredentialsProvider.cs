@@ -34,25 +34,23 @@ namespace Aliyun.Credentials.Provider
             UserConfigurationProviders.Add(new EnvironmentVariableCredentialsProvider());
             if (AuthUtils.EnvironmentEnableOIDC())
             {
-                Config config = new Config
-                {
-                    RoleArn = AuthUtils.EnvironmentRoleArn,
-                    OIDCProviderArn = AuthUtils.EnvironmentOIDCProviderArn,
-                    OIDCTokenFilePath = AuthUtils.EnvironmentOIDCTokenFilePath
-                };
-                UserConfigurationProviders.Add(new OIDCRoleArnCredentialProvider(config));
+                UserConfigurationProviders.Add(new OIDCRoleArnCredentialProvider.Builder()
+                    .RoleArn(AuthUtils.EnvironmentRoleArn)
+                    .OIDCProviderArn(AuthUtils.EnvironmentOIDCProviderArn)
+                    .OIDCTokenFilePath(AuthUtils.EnvironmentOIDCTokenFilePath)
+                    .Build());
             }
             UserConfigurationProviders.Add(new CLIProfileCredentialsProvider());
             UserConfigurationProviders.Add(new ProfileCredentialsProvider());
             var roleName = AuthUtils.EnvironmentEcsMetaData;
             if (null != roleName)
             {
-                UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider(roleName));
+                UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider.Builder().RoleName(roleName).Build());
             }
             string uri = AuthUtils.EnvironmentCredentialsURI;
             if (!string.IsNullOrEmpty(uri))
             {
-                UserConfigurationProviders.Add(new URLCredentialProvider(uri));
+                UserConfigurationProviders.Add(new URLCredentialProvider.Builder().CredentialsURI(uri).Build());
             }
         }
 

@@ -120,6 +120,18 @@ namespace Aliyun.Credentials.Utils
             return oidcToken;
         }
 
+        public static string GetStsRegionWithVpc(string stsRegionId, bool? enableVpc)
+        {
+            string regionId = string.IsNullOrEmpty(stsRegionId) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_STS_REGION") : stsRegionId;
+            bool enableVpcEnv = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED") == "true";
+            string isVpc = (enableVpc == null ? enableVpcEnv : (bool)enableVpc) ? "-vpc" : "";
+            if (!string.IsNullOrEmpty(regionId))
+            {
+                return string.Format("{0}.{1}", isVpc, regionId);
+            }
+            return "";
+        }
+
         public static string ClientType
         {
             get

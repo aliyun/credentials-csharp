@@ -37,6 +37,17 @@ namespace aliyun_net_credentials_unit_tests
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<RamRoleArnCredentialProvider>(result);
 
+            config.Type = AuthConstant.RamRoleArn;
+            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            Assert.IsType<RamRoleArnCredentialProvider>(result);
+            Assert.Equal("StaticAKCredentialsProvider", ((RamRoleArnCredentialProvider)result).CredentialsProvider.GetType().Name);
+
+            config.Type = AuthConstant.RamRoleArn;
+            config.SecurityToken = "test";
+            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            Assert.IsType<RamRoleArnCredentialProvider>(result);
+            Assert.Equal("StaticSTSCredentialsProvider", ((RamRoleArnCredentialProvider)result).CredentialsProvider.GetType().Name);
+
             config.Type = AuthConstant.RsaKeyPair;
             config.PublicKeyId = "test";
             config.PrivateKeyFile = "/test";
@@ -55,13 +66,24 @@ namespace aliyun_net_credentials_unit_tests
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<URLCredentialProvider>(result);
 
-            config.Type = null;
+            config.Type = AuthConstant.CredentialsURI;
+            config.CredentialsURI = "http://test";
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
-            Assert.IsType<DefaultCredentialsProvider>(result);
+            Assert.IsType<URLCredentialProvider>(result);
+
+            config.Type = null;
+            var ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            });
+            Assert.Equal("Unsupported credential type option: , support: access_key, sts, bearer, ecs_ram_role, ram_role_arn, rsa_key_pair, oidc_role_arn, credentials_uri", ex.Message);
 
             config.Type = "default";
-            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
-            Assert.IsType<DefaultCredentialsProvider>(result);
+            ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            });
+            Assert.Equal("Unsupported credential type option: default, support: access_key, sts, bearer, ecs_ram_role, ram_role_arn, rsa_key_pair, oidc_role_arn, credentials_uri", ex.Message);
 
             config.Type = AuthConstant.Sts;
             config.SecurityToken = "test";

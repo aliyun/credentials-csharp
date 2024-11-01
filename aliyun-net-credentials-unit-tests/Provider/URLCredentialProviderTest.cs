@@ -19,11 +19,17 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestConstructor()
         {
             URLCredentialProvider provider;
-            var ex = Assert.Throws<CredentialException>(() => provider = new URLCredentialProvider(""));
-            Assert.StartsWith("Credential URI is not valid.", ex.Message);
-            ex = Assert.Throws<CredentialException>(() => provider = new URLCredentialProvider("url"));
-            Assert.StartsWith("Credential URI is not valid.", ex.Message);
+            var ex = Assert.Throws<ArgumentNullException>(() => provider = new URLCredentialProvider(""));
+            Assert.StartsWith("Credentials URI must not be null or empty.", ex.Message);
+            ex = Assert.Throws<ArgumentNullException>(() => provider = new URLCredentialProvider.Builder().CredentialsURI("").Build());
+            Assert.StartsWith("Credentials URI must not be null or empty.", ex.Message);
+            var ex1 = Assert.Throws<CredentialException>(() => provider = new URLCredentialProvider("url"));
+            Assert.StartsWith("Credential URI is not valid.", ex1.Message);
+            ex1 = Assert.Throws<CredentialException>(() => provider = new URLCredentialProvider.Builder().CredentialsURI("url").Build());
+            Assert.StartsWith("Credential URI is not valid.", ex1.Message);
             provider = new URLCredentialProvider("http://test");
+            provider = new URLCredentialProvider.Builder().CredentialsURI("http://test").Build();
+            provider = new URLCredentialProvider.Builder().CredentialsURI(new Uri("http://test")).Build();
         }
 
         [Fact]
@@ -38,6 +44,15 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             URLCredentialProvider provider = new URLCredentialProvider(config);
             var ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.StartsWith("Failed to connect Server: http://10.10.10.10", ex.Message);
+
+            provider = new URLCredentialProvider.Builder()
+                .CredentialsURI("http://10.10.10.10")
+                .ConnectionTimeout(2000)
+                .ReadTimeout(2000)
+                .Build();
+
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             Assert.StartsWith("Failed to connect Server: http://10.10.10.10", ex.Message);
 
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
@@ -68,12 +83,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(URLCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
             RefreshResult<CredentialModel> mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(URLCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
             Assert.Equal(AuthConstant.URLSts, mockRefreshResult.Value.Type);
+            Assert.Equal(AuthConstant.CredentialsURI, mockRefreshResult.Value.Type);
             Assert.Equal("credentials_uri", mockRefreshResult.Value.ProviderName);
 
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethodAsync(typeof(URLCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object }));
             RefreshResult<CredentialModel> mockRefreshResultAsync = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(typeof(URLCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object });
             Assert.Equal(AuthConstant.URLSts, mockRefreshResultAsync.Value.Type);
+            Assert.Equal(AuthConstant.CredentialsURI, mockRefreshResult.Value.Type);
 
             response.Status = 400;
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
