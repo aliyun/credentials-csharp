@@ -67,5 +67,20 @@ namespace aliyun_net_credentials_unit_tests.Utils
             AuthUtils.EnvironmentOIDCProviderArn = cacheEnvironmentOIDCProviderArn;
             AuthUtils.EnvironmentOIDCTokenFilePath = cacheEnvironmentOIDCTokenFilePath;
         }
+
+        [Fact]
+        public void TestGetStsRegionWithVpc()
+        {
+            var res = AuthUtils.GetStsRegionWithVpc(null, null);
+            Assert.Equal("", res);
+            res = AuthUtils.GetStsRegionWithVpc(null, true);
+            Assert.Equal("", res);
+            res = AuthUtils.GetStsRegionWithVpc(null, false);
+            Assert.Equal("", res);
+            res = AuthUtils.GetStsRegionWithVpc("cn-hangzhou", true);
+            Assert.Equal("-vpc.cn-hangzhou", res);
+            res = AuthUtils.GetStsRegionWithVpc("cn-hangzhou", false);
+            Assert.Equal(".cn-hangzhou", res);
+        }
     }
 }

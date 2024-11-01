@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +20,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public async void DisableIMDSv1Test()
         {
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(new Config() { RoleName = "roleName", DisableIMDSv1 = true });
+            Assert.True(providerConfig.DisableIMDSv1);
+
+            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").DisableIMDSv1(true).Build();
             Assert.True(providerConfig.DisableIMDSv1);
 
             var ex = Assert.Throws<CredentialException>(() => { providerConfig.GetCredentials(); });
@@ -88,6 +90,12 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetMetadata", providerConfig, new object[] { mock.Object });
             });
             Assert.Equal("The role name was not found in the instance", ex.Message);
+            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
+            ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "GetMetadata", providerConfig, new object[] { mock.Object });
+            });
+            Assert.Equal("The role name was not found in the instance", ex.Message);
         }
 
         [Fact]
@@ -124,7 +132,16 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.NotNull(providerRoleName.CredentialUrl);
             Assert.False(providerRoleName.DisableIMDSv1);
 
+            providerRoleName = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
+            Assert.NotNull(providerRoleName);
+            Assert.Equal("roleName", providerRoleName.RoleName);
+            Assert.NotNull(providerRoleName.CredentialUrl);
+            Assert.False(providerRoleName.DisableIMDSv1);
+
             EcsRamRoleCredentialProvider providerConfig = new EcsRamRoleCredentialProvider(new Config() { RoleName = "roleName" });
+            await Assert.ThrowsAsync<CredentialException>(async () => { await providerConfig.RefreshCredentialsAsync(); });
+
+            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
             await Assert.ThrowsAsync<CredentialException>(async () => { await providerConfig.RefreshCredentialsAsync(); });
         }
 
@@ -135,6 +152,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 new Config() { RoleName = "roleName" });
             Assert.Equal("roleName", providerConfig.RoleName);
             Assert.False(providerConfig.DisableIMDSv1);
+
+            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").ConnectionTimeout(1100).ReadTimeout(1200).Build();
+            Assert.Equal(1100, providerConfig.ConnectionTimeout);
+            Assert.Equal(1200, providerConfig.ReadTimeout);
 
             providerConfig = new EcsRamRoleCredentialProvider(
                 new Config() { RoleName = "roleName", ConnectTimeout = 1100, Timeout = 1200 });

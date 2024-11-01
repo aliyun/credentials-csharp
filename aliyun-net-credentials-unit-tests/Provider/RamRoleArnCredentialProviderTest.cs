@@ -23,6 +23,29 @@ namespace aliyun_net_credentials_unit_tests.Provider
             RamRoleArnCredentialProvider provider;
             var ex = Assert.Throws<ArgumentNullException>(() => provider = new RamRoleArnCredentialProvider(nullProvider, "roleArn"));
             Assert.StartsWith("Must specify a previous credentials provider to asssume role.", ex.Message);
+            ex = Assert.Throws<ArgumentNullException>(() => provider = new RamRoleArnCredentialProvider.Builder().CredentialsProvider(nullProvider).RoleArn("roleArn").Build());
+            Assert.StartsWith("AccessKeyId must not be null or empty.", ex.Message);
+            provider = new RamRoleArnCredentialProvider.Builder()
+                .CredentialsProvider(nullProvider)
+                .RoleArn("roleArn")
+                .AccessKeyId("test")
+                .AccessKeySecret("test")
+                .STSEndpoint("sts.cn-hangzhou.aliyuncs.com")
+                .Build();
+            Assert.Equal("sts.cn-hangzhou.aliyuncs.com", provider.GetSTSEndpoint());
+            Assert.Equal("StaticAKCredentialsProvider", provider.CredentialsProvider.GetType().Name);
+
+            provider = new RamRoleArnCredentialProvider.Builder()
+                .CredentialsProvider(nullProvider)
+                .RoleArn("roleArn")
+                .AccessKeyId("test")
+                .AccessKeySecret("test")
+                .SecurityToken("test")
+                .ExternalId("test")
+                .Build();
+            Assert.Equal("sts.aliyuncs.com", provider.GetSTSEndpoint());
+            Assert.Equal("test", provider.GetExternalId());
+            Assert.Equal("StaticSTSCredentialsProvider", provider.CredentialsProvider.GetType().Name);
         }
 
         [Fact]
@@ -44,6 +67,29 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
+
+            IAlibabaCloudCredentialsProvider innerProvider = new StaticAKCredentialsProvider.Builder()
+                    .AccessKeyId(config.AccessKeyId)
+                    .AccessKeySecret(config.AccessKeySecret)
+                    .Build();
+            provider = new RamRoleArnCredentialProvider.Builder()
+                        .CredentialsProvider(innerProvider)
+                        .DurationSeconds(config.RoleSessionExpiration)
+                        .RoleArn(config.RoleArn)
+                        .RoleSessionName(config.RoleSessionName)
+                        .Policy(config.Policy)
+                        .STSEndpoint(config.STSEndpoint)
+                        .ExternalId(config.ExternalId)
+                        .ConnectTimeout(config.ConnectTimeout)
+                        .ReadTimeout(config.Timeout)
+                        .Build();
+            supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
+            ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
+            msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
+            Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
+            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
         }
 
         [Fact]
@@ -53,6 +99,15 @@ namespace aliyun_net_credentials_unit_tests.Provider
             RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(config);
             Assert.NotNull(provider);
             provider = new RamRoleArnCredentialProvider("accessKeyID", "accessKeySecret", "roleSessionName", "roleArn", "regionId", "policy");
+            Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            provider = new RamRoleArnCredentialProvider.Builder()
+                .AccessKeyId("accessKeyID")
+                .AccessKeySecret("accessKeySecret")
+                .RoleSessionName("roleSessionName")
+                .RoleArn("roleArn")
+                .RegionId("regionId")
+                .Policy("policy")
+                .Build();
             Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -67,7 +122,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
 
             RefreshResult<CredentialModel> mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
-            
+
             var mockRefreshFunc = new Mock<Func<RefreshResult<CredentialModel>>>();
             mockRefreshFunc.Setup(f => f()).Returns(() => mockRefreshResult);
 

@@ -109,7 +109,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Contains("InvalidAccessKeyId.NotFound", ex.Message);
 
             var ex1 = Assert.Throws<ArgumentNullException>(() => { provider.ReloadCredentialsProvider(config, "Invalid_RamRoleArn"); });
-            Assert.Contains("AccessKeyId must not be null.", ex1.Message);
+            Assert.Contains("AccessKeyId must not be null or empty.", ex1.Message);
 
             credentialsProvider = provider.ReloadCredentialsProvider(config, "EcsRamRole");
             Assert.True(credentialsProvider is EcsRamRoleCredentialProvider);

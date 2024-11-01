@@ -119,8 +119,8 @@ namespace Aliyun.Credentials.Provider
                             case "AK":
                                 CredentialModel credentialModel = new CredentialModel
                                 {
-                                    AccessKeyId = ParameterHelper.ValidateNotNull(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null."),
-                                    AccessKeySecret = ParameterHelper.ValidateNotNull(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null."),
+                                    AccessKeyId = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null or emptry."),
+                                    AccessKeySecret = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null or empty."),
                                     Type = AuthConstant.AccessKey
                                 };
                                 Models.Config credentialsConfig = new Models.Config
@@ -132,27 +132,35 @@ namespace Aliyun.Credentials.Provider
                             case "RamRoleArn":
                                 credentialModel = new CredentialModel
                                 {
-                                    AccessKeyId = ParameterHelper.ValidateNotNull(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null."),
-                                    AccessKeySecret = ParameterHelper.ValidateNotNull(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null."),
+                                    AccessKeyId = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null or empty."),
+                                    AccessKeySecret = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null or empty."),
                                     Type = AuthConstant.AccessKey
                                 };
                                 IAlibabaCloudCredentialsProvider innerProvider = new StaticCredentialsProvider(credentialModel);
-                                return new RamRoleArnCredentialProvider(innerProvider, profile.GetRoleArn(), profile.GetDurationSeconds() ?? 3600, profile.GetRoleSessionName());
+                                return new RamRoleArnCredentialProvider.Builder()
+                                    .CredentialsProvider(innerProvider)
+                                    .RoleArn(profile.GetRoleArn())
+                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .RoleSessionName(profile.GetRoleSessionName())
+                                    .Build();
                             case "EcsRamRole":
-                                return new EcsRamRoleCredentialProvider(profile.GetRamRoleName());
+                                return new EcsRamRoleCredentialProvider.Builder().RoleName(profile.GetRamRoleName()).Build(); 
                             case "OIDC":
-                                Models.Config modelsConfig = new Models.Config
-                                {
-                                    RoleArn = profile.GetRoleArn(),
-                                    RoleSessionName = profile.GetRoleSessionName(),
-                                    OIDCProviderArn = profile.GetOidcProviderArn(),
-                                    OIDCTokenFilePath = profile.GetOidcTokenFile(),
-                                    RoleSessionExpiration = profile.GetDurationSeconds() ?? -1
-                                };
-                                return new OIDCRoleArnCredentialProvider(modelsConfig);
+                                return new OIDCRoleArnCredentialProvider.Builder()
+                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .RoleArn(profile.GetRoleArn())
+                                    .RoleSessionName(profile.GetRoleSessionName())
+                                    .OIDCProviderArn(profile.GetOidcProviderArn())
+                                    .OIDCTokenFilePath(profile.GetOidcTokenFile())
+                                    .Build();
                             case "ChainableRamRoleArn":
                                 IAlibabaCloudCredentialsProvider previousProvider = ReloadCredentialsProvider(config, profile.GetSourceProfile());
-                                return new RamRoleArnCredentialProvider(previousProvider, profile.GetRoleArn(), profile.GetDurationSeconds() ?? 3600, profile.GetRoleSessionName());
+                                return new RamRoleArnCredentialProvider.Builder()
+                                    .CredentialsProvider(previousProvider)
+                                    .RoleArn(profile.GetRoleArn())
+                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .RoleSessionName(profile.GetRoleSessionName())
+                                    .Build();
                             default:
                                 throw new CredentialException(string.Format("Unsupported profile mode '{0}' form CLI credentials file.", profile.GetMode()));
                         }

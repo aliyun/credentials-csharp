@@ -164,11 +164,37 @@ namespace Aliyun.Credentials.Utils
             return obj;
         }
 
+        public static string ValidateNotEmpty(string str, string paramName, string message)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException(paramName, message);
+            }
+            return str;
+        }
+
+
         public static string ValidateEnvNotNull(string obj, string envVariableName, string paramName, string message)
         {
             if (obj == null)
             {
                 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVariableName)))
+                {
+                    throw new ArgumentNullException(paramName, message);
+                }
+                else
+                {
+                    return Environment.GetEnvironmentVariable(envVariableName);
+                }
+            }
+            return obj;
+        }
+
+        public static string ValidateEnvNotEmpty(string obj, string envVariableName, string paramName, string message)
+        {
+            if (string.IsNullOrWhiteSpace(obj))
+            {
+                if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(envVariableName)))
                 {
                     throw new ArgumentNullException(paramName, message);
                 }

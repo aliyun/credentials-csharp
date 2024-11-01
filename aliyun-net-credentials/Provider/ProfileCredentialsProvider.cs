@@ -158,8 +158,14 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured role_session_name or role_arn is empty");
             }
 
-            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(accessKeyId,
-                accessKeySecret, roleSessionName, roleArn, regionId, policy);
+            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider.Builder()
+                .AccessKeyId(accessKeyId)
+                .AccessKeySecret(accessKeySecret)
+                .RoleSessionName(roleSessionName)
+                .RoleArn(roleArn)
+                .RegionId(regionId)
+                .Policy(policy)
+                .Build();
             return provider.GetCredentials();
         }
 
@@ -181,8 +187,14 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured role_session_name or role_arn is empty");
             }
 
-            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider(accessKeyId,
-                accessKeySecret, roleSessionName, roleArn, regionId, policy);
+            RamRoleArnCredentialProvider provider = new RamRoleArnCredentialProvider.Builder()
+                .AccessKeyId(accessKeyId)
+                .AccessKeySecret(accessKeySecret)
+                .RoleSessionName(roleSessionName)
+                .RoleArn(roleArn)
+                .RegionId(regionId)
+                .Policy(policy)
+                .Build();
             return await provider.GetCredentialsAsync();
         }
 
@@ -232,7 +244,7 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured role_name is empty");
             }
 
-            EcsRamRoleCredentialProvider provider = new EcsRamRoleCredentialProvider(roleName);
+            EcsRamRoleCredentialProvider provider = new EcsRamRoleCredentialProvider.Builder().RoleName(roleName).Build();
             return provider.GetCredentials();
         }
 
@@ -244,7 +256,7 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured role_name is empty");
             }
 
-            EcsRamRoleCredentialProvider provider = new EcsRamRoleCredentialProvider(roleName);
+            EcsRamRoleCredentialProvider provider = new EcsRamRoleCredentialProvider.Builder().RoleName(roleName).Build();
             return await provider.GetCredentialsAsync();
         }
 
@@ -267,8 +279,14 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured oidc_provider_arn is empty");
             }
 
-            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider(roleArn,
-                OIDCProviderArn, OIDCTokenFilePath, roleSessionName, regionId, policy);
+            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider.Builder()
+                .RoleArn(roleArn)
+                .OIDCProviderArn(OIDCProviderArn)
+                .OIDCTokenFilePath(OIDCTokenFilePath)
+                .RoleSessionName(roleSessionName)
+                .RegionId(regionId)
+                .Policy(policy)
+                .Build();
             return provider.GetCredentials();
         }
 
@@ -291,8 +309,14 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("The configured oidc_provider_arn is empty");
             }
 
-            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider(roleArn,
-                OIDCProviderArn, OIDCTokenFilePath, roleSessionName, regionId, policy);
+            OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider.Builder()
+                .RoleArn(roleArn)
+                .OIDCProviderArn(OIDCProviderArn)
+                .OIDCTokenFilePath(OIDCTokenFilePath)
+                .RoleSessionName(roleSessionName)
+                .RegionId(regionId)
+                .Policy(policy)
+                .Build();
             return await provider.GetCredentialsAsync();
         }
 

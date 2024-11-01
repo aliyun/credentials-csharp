@@ -67,5 +67,8 @@ namespace Aliyun.Credentials.Models
 
         [NameInMap("stsEndpoint")]
         public string STSEndpoint { get; set; }
+
+        [NameInMap("externalId")]
+        public string ExternalId { get; set; }
     }
 }

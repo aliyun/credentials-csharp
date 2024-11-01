@@ -30,20 +30,22 @@ namespace Aliyun.Credentials.Provider
         /// <summary>
         /// An identifier for the assumed role session.
         /// </summary>
-        private string roleSessionName = "defaultSessionName";
+        private string roleSessionName = "credentials-csharp-" + (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
         private string regionId;
         private string policy;
 
         /// <summary>
         /// Unit of millisecond
         /// </summary>
-        private int connectTimeout = 1000;
-        private int readTimeout = 1000;
+        private int connectTimeout = 5000;
+        private int readTimeout = 10000;
 
         /// <summary>
         /// Endpoint of RAM OpenAPI
         /// </summary>
         private string STSEndpoint = "sts.aliyuncs.com";
+
+        [Obsolete("Use builder instead.")]
         public OIDCRoleArnCredentialProvider(Config config) : this(config.RoleArn, config.OIDCProviderArn, config.OIDCTokenFilePath)
         {
             roleSessionName = config.RoleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? roleSessionName;
@@ -57,19 +59,141 @@ namespace Aliyun.Credentials.Provider
             STSEndpoint = config.STSEndpoint ?? STSEndpoint;
         }
 
+        [Obsolete("Use builder instead.")]
         public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath)
         {
-            this.roleArn = ParameterHelper.ValidateEnvNotNull(roleArn, "ALIBABA_CLOUD_ROLE_ARN", "roleArn", "RoleArn must not be null.");
-            this.oidcProviderArn = ParameterHelper.ValidateEnvNotNull(oidcProviderArn, "ALIBABA_CLOUD_OIDC_PROVIDER_ARN", "oidcProviderArn", "OIDCProviderArn must not be null.");
-            this.oidcTokenFilePath = ParameterHelper.ValidateEnvNotNull(oidcTokenFilePath, "ALIBABA_CLOUD_OIDC_TOKEN_FILE", "oidcTokenFilePath", "OIDCTokenFilePath must not be null.");
+            this.roleArn = ParameterHelper.ValidateEnvNotEmpty(roleArn, "ALIBABA_CLOUD_ROLE_ARN", "roleArn", "RoleArn must not be null or empty.");
+            this.oidcProviderArn = ParameterHelper.ValidateEnvNotEmpty(oidcProviderArn, "ALIBABA_CLOUD_OIDC_PROVIDER_ARN", "oidcProviderArn", "OIDCProviderArn must not be null or empty.");
+            this.oidcTokenFilePath = ParameterHelper.ValidateEnvNotEmpty(oidcTokenFilePath, "ALIBABA_CLOUD_OIDC_TOKEN_FILE", "oidcTokenFilePath", "OIDCTokenFilePath must not be null or empty.");
         }
 
-        public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath, 
+        [Obsolete("Use builder instead.")]
+        public OIDCRoleArnCredentialProvider(string roleArn, string oidcProviderArn, string oidcTokenFilePath,
             string roleSessionName, string regionId, string policy) : this(roleArn, oidcProviderArn, oidcTokenFilePath)
         {
             this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.regionId = regionId ?? this.regionId;
             this.policy = policy;
+        }
+
+        private OIDCRoleArnCredentialProvider(Builder builder)
+        {
+            this.durationSeconds = builder.durationSeconds > 0 ? builder.durationSeconds : 3600;
+            this.roleSessionName = string.IsNullOrEmpty(builder.roleSessionName)
+                ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME")
+                    ?? "credentials-csharp-" + (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds
+                : builder.roleSessionName;
+            this.regionId = string.IsNullOrEmpty(builder.regionId) ? "cn-hangzhou" : builder.regionId;
+            this.roleArn = string.IsNullOrEmpty(builder.roleArn) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") : builder.roleArn;
+            this.connectTimeout = builder.connectTimeout > 0 ? builder.connectTimeout : 5000;
+            this.readTimeout = builder.readTimeout > 0 ? builder.readTimeout : 10000;
+            this.oidcProviderArn = string.IsNullOrEmpty(builder.oidcProviderArn)
+                ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN")
+                : builder.oidcProviderArn;
+            this.oidcTokenFilePath = string.IsNullOrEmpty(builder.oidcTokenFilePath)
+                ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE")
+                : builder.oidcTokenFilePath;
+            this.policy = builder.policy;
+            if (string.IsNullOrEmpty(builder.stsEndpoint))
+            {
+                this.STSEndpoint = string.Format("sts{0}.aliyuncs.com", AuthUtils.GetStsRegionWithVpc(builder.stsRegionId, builder.enableVpc));
+            }
+            else
+            {
+                this.STSEndpoint = string.IsNullOrEmpty(builder.stsEndpoint) ? "sts.aliyuncs.com" : builder.stsEndpoint;
+            }
+        }
+
+        public class Builder
+        {
+            internal int durationSeconds;
+            internal string roleSessionName;
+            internal string regionId;
+            internal string roleArn;
+            internal string oidcProviderArn;
+            internal string oidcTokenFilePath;
+            internal string policy;
+            internal int connectTimeout;
+            internal int readTimeout;
+            internal string stsEndpoint;
+            internal string stsRegionId;
+            internal bool? enableVpc;
+            public Builder DurationSeconds(int durationSeconds)
+            {
+                this.durationSeconds = durationSeconds;
+                return this;
+            }
+
+            public Builder RoleSessionName(string roleSessionName)
+            {
+                this.roleSessionName = roleSessionName;
+                return this;
+            }
+
+            public Builder RegionId(string regionId)
+            {
+                this.regionId = regionId;
+                return this;
+            }
+
+            public Builder RoleArn(string roleArn)
+            {
+                this.roleArn = roleArn;
+                return this;
+            }
+
+            public Builder OIDCProviderArn(string oidcProviderArn)
+            {
+                this.oidcProviderArn = oidcProviderArn;
+                return this;
+            }
+
+            public Builder OIDCTokenFilePath(string oidcTokenFilePath)
+            {
+                this.oidcTokenFilePath = oidcTokenFilePath;
+                return this;
+            }
+
+            public Builder Policy(string policy)
+            {
+                this.policy = policy;
+                return this;
+            }
+
+            public Builder ConnectTimeout(int connectTimeout)
+            {
+                this.connectTimeout = connectTimeout;
+                return this;
+            }
+
+            public Builder ReadTimeout(int readTimeout)
+            {
+                this.readTimeout = readTimeout;
+                return this;
+            }
+
+            public Builder STSEndpoint(string stsEndpoint)
+            {
+                this.stsEndpoint = stsEndpoint;
+                return this;
+            }
+
+            public Builder StsRegionId(string stsRegionId)
+            {
+                this.stsRegionId = stsRegionId;
+                return this;
+            }
+
+            public Builder EnableVpc(bool enableVpc)
+            {
+                this.enableVpc = enableVpc;
+                return this;
+            }
+
+            public OIDCRoleArnCredentialProvider Build()
+            {
+                return new OIDCRoleArnCredentialProvider(this);
+            }
         }
 
         public override RefreshResult<CredentialModel> RefreshCredentials()

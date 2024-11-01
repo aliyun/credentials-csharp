@@ -48,36 +48,81 @@ namespace Aliyun.Credentials
                 case AuthConstant.AccessKey:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateEnvNotNull(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID",  "AccessKeyId", "AccessKeyId must not be null."),
-                        AccessKeySecret = ParameterHelper.ValidateEnvNotNull(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
                         Type = AuthConstant.AccessKey,
                     });
                 case AuthConstant.Sts:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateEnvNotNull(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID",  "AccessKeyId", "AccessKeyId must not be null."),
-                        AccessKeySecret = ParameterHelper.ValidateEnvNotNull(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null."),
-                        SecurityToken = ParameterHelper.ValidateEnvNotNull(config.SecurityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
+                        SecurityToken = ParameterHelper.ValidateEnvNotEmpty(config.SecurityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty."),
                         Type = AuthConstant.Sts,
                     });
                 case AuthConstant.BeareaToken:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        BearerToken = ParameterHelper.ValidateNotNull(config.BearerToken, "BearerToken", "BearerToken must not be null."),
+                        BearerToken = ParameterHelper.ValidateNotEmpty(config.BearerToken, "BearerToken", "BearerToken must not be null or empty."),
                         Type = AuthConstant.BeareaToken,
                     });
                 case AuthConstant.EcsRamRole:
-                    return new EcsRamRoleCredentialProvider(config);
+                    return new EcsRamRoleCredentialProvider.Builder()
+                        .RoleName(config.RoleName)
+                        .DisableIMDSv1(config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1)
+                        .ConnectionTimeout(config.ConnectTimeout)
+                        .ReadTimeout(config.Timeout)
+                        .Build();
                 case AuthConstant.RamRoleArn:
-                    return new RamRoleArnCredentialProvider(config);
+                    IAlibabaCloudCredentialsProvider innerProvider;
+                    if (string.IsNullOrEmpty(config.SecurityToken))
+                    {
+                        innerProvider = new StaticAKCredentialsProvider.Builder()
+                            .AccessKeyId(config.AccessKeyId)
+                            .AccessKeySecret(config.AccessKeySecret)
+                            .Build();
+                    }
+                    else
+                    {
+                        innerProvider = new StaticSTSCredentialsProvider.Builder()
+                            .AccessKeyId(config.AccessKeyId)
+                            .AccessKeySecret(config.AccessKeySecret)
+                            .SecurityToken(config.SecurityToken)
+                            .Build();
+                    }
+                    return new RamRoleArnCredentialProvider.Builder()
+                        .CredentialsProvider(innerProvider)
+                        .DurationSeconds(config.RoleSessionExpiration)
+                        .RoleArn(config.RoleArn)
+                        .RoleSessionName(config.RoleSessionName)
+                        .Policy(config.Policy)
+                        .STSEndpoint(config.STSEndpoint)
+                        .ExternalId(config.ExternalId)
+                        .ConnectTimeout(config.ConnectTimeout)
+                        .ReadTimeout(config.Timeout)
+                        .Build();
                 case AuthConstant.RsaKeyPair:
                     return new RsaKeyPairCredentialProvider(config);
                 case AuthConstant.OIDCRoleArn:
-                    return new OIDCRoleArnCredentialProvider(config);
-                case AuthConstant.URLSts:
-                    return new URLCredentialProvider(config);
+                    return new OIDCRoleArnCredentialProvider.Builder()
+                        .DurationSeconds(config.RoleSessionExpiration)
+                        .RoleArn(config.RoleArn)
+                        .RoleSessionName(config.RoleSessionName)
+                        .OIDCProviderArn(config.OIDCProviderArn)
+                        .OIDCTokenFilePath(config.OIDCTokenFilePath)
+                        .Policy(config.Policy)
+                        .STSEndpoint(config.STSEndpoint)
+                        .ConnectTimeout(config.ConnectTimeout)
+                        .ReadTimeout(config.Timeout)
+                        .Build();
+                case AuthConstant.CredentialsURI:
+                    return new URLCredentialProvider.Builder()
+                        .CredentialsURI(config.CredentialsURI)
+                        .ConnectionTimeout(config.ConnectTimeout)
+                        .ReadTimeout(config.Timeout)
+                        .Build();
                 default:
-                    return new DefaultCredentialsProvider();
+                    throw new CredentialException(string.Format("Unsupported credential type option: {0}, support: access_key, sts, bearer, ecs_ram_role, ram_role_arn, rsa_key_pair, oidc_role_arn, credentials_uri", config.Type));
             }
         }
 
