@@ -1,9 +1,7 @@
 using System;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
-using Aliyun.Credentials;
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
@@ -58,6 +56,16 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.False(provider.ContainsCredentialsProvider(testProvider));
             provider.ClearCredentialsProvider();
 
+            testProvider = new RamRoleArnCredentialProvider.Builder()
+               .AccessKeyId("accessKeyId2")
+               .AccessKeySecret("accessKeySecret")
+               .RoleArn("roleArn")
+               .Build();
+            provider.AddCredentialsProvider(testProvider);
+            provider.RemoveCredentialsProvider(testProvider);
+            Assert.False(provider.ContainsCredentialsProvider(testProvider));
+            provider.ClearCredentialsProvider();
+
             Mock<IAlibabaCloudCredentialsProvider> mockProvider = new Mock<IAlibabaCloudCredentialsProvider>();
             mockProvider.Setup(p => p.GetCredentials()).Returns((CredentialModel)null);
             provider.AddCredentialsProvider(mockProvider.Object);
@@ -93,6 +101,16 @@ namespace aliyun_net_credentials_unit_tests.Provider
             await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
 
             RamRoleArnCredentialProvider testProvider = new RamRoleArnCredentialProvider("accessKeyId2", "accessKeySecret", "roleArn");
+            provider.AddCredentialsProvider(testProvider);
+            provider.RemoveCredentialsProvider(testProvider);
+            Assert.False(provider.ContainsCredentialsProvider(testProvider));
+            provider.ClearCredentialsProvider();
+
+            testProvider = new RamRoleArnCredentialProvider.Builder()
+               .AccessKeyId("accessKeyId2")
+               .AccessKeySecret("accessKeySecret")
+               .RoleArn("roleArn")
+               .Build();
             provider.AddCredentialsProvider(testProvider);
             provider.RemoveCredentialsProvider(testProvider);
             Assert.False(provider.ContainsCredentialsProvider(testProvider));

@@ -55,13 +55,24 @@ namespace aliyun_net_credentials_unit_tests
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
             Assert.IsType<URLCredentialProvider>(result);
 
-            config.Type = null;
+            config.Type = AuthConstant.CredentialsURI;
+            config.CredentialsURI = "http://test";
             result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
-            Assert.IsType<DefaultCredentialsProvider>(result);
+            Assert.IsType<URLCredentialProvider>(result);
+
+            config.Type = null;
+            var ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            });
+            Assert.Equal("invalid type option, support: access_key, sts, ecs_ram_role, ram_role_arn, rsa_key_pair", ex.Message);
 
             config.Type = "default";
-            result = TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
-            Assert.IsType<DefaultCredentialsProvider>(result);
+            ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(Client), "GetProvider", client, new object[] { config });
+            });
+            Assert.Equal("invalid type option, support: access_key, sts, ecs_ram_role, ram_role_arn, rsa_key_pair", ex.Message);
 
             config.Type = AuthConstant.Sts;
             config.SecurityToken = "test";

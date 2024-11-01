@@ -13,7 +13,6 @@ using Newtonsoft.Json;
 
 using Moq;
 using Xunit;
-using Aliyun.Credentials;
 
 
 namespace aliyun_net_credentials_unit_tests.Provider
@@ -27,6 +26,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.StartsWith("RoleArn must not be null.", nullEx.Message);
             OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider("", "", "");
             var notExistEx = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Equal("OIDCTokenFilePath  does not exist.", notExistEx.Message);
+
+            provider = new OIDCRoleArnCredentialProvider.Builder()
+                .RoleArn("")
+                .OIDCProviderArn("")
+                .OIDCTokenFilePath("")
+                .Build();
+            notExistEx = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             Assert.Equal("OIDCTokenFilePath  does not exist.", notExistEx.Message);
         }
 
@@ -50,6 +57,21 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
 
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
+            msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+            Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
+            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+
+            provider = new OIDCRoleArnCredentialProvider.Builder()
+                        .RoleArn(config.RoleArn)
+                        .RoleSessionName(config.RoleSessionName)
+                        .OIDCProviderArn(config.OIDCProviderArn)
+                        .OIDCTokenFilePath(config.OIDCTokenFilePath)
+                        .Policy(config.Policy)
+                        .Build();
+
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));

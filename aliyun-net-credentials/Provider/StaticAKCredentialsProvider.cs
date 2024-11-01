@@ -22,6 +22,37 @@ namespace Aliyun.Credentials.Provider
             this.accessKeySecret = ParameterHelper.ValidateEnvNotNull(accessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null.");
         }
 
+        public StaticAKCredentialsProvider(Builder builder)
+        {
+            this.accessKeyId = ParameterHelper.ValidateEnvNotNull(builder.accessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null.");
+            this.accessKeySecret = ParameterHelper.ValidateEnvNotNull(builder.accessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null.");
+        }
+
+        public class Builder
+        {
+            internal string securityToken;
+            internal string accessKeyId;
+            internal string accessKeySecret;
+
+            public Builder AccessKeyId(string accessKeyId)
+            {
+                this.accessKeyId = accessKeyId;
+                return this;
+            }
+
+            public Builder AccessKeySecret(string accessKeySecret)
+            {
+                this.accessKeySecret = accessKeySecret;
+                return this;
+            }
+
+            public StaticAKCredentialsProvider Build()
+            {
+                return new StaticAKCredentialsProvider(this);
+            } 
+
+        }
+
         public CredentialModel GetCredentials()
         {
             return new CredentialModel

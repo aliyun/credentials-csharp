@@ -23,12 +23,14 @@ namespace Aliyun.Credentials.Provider
         private int connectTimeout = 1000;
         private int readTimeout = 1000;
 
+        [Obsolete("Use builder instead.")]
         public URLCredentialProvider(Config config) : this(config.CredentialsURI)
         {
             connectTimeout = config.ConnectTimeout;
             readTimeout = config.Timeout;
         }
 
+        [Obsolete("Use builder instead.")]
         public URLCredentialProvider(string credentialsURI)
         {
             try
@@ -40,6 +42,58 @@ namespace Aliyun.Credentials.Provider
             catch (UriFormatException)
             {
                 throw new CredentialException("Credential URI is not valid.");
+            }
+        }
+
+        private URLCredentialProvider(Builder builder)
+        {
+            this.connectTimeout = builder.connectionTimeout;
+            this.readTimeout = builder.readTimeout;
+            try
+            {
+                string uriStr = builder.credentialsURI ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI");
+                this.credentialsURI = new Uri(ParameterHelper.ValidateNotNull(builder.credentialsURI, "credentialsURI", "Credentials URI is not valid."));
+
+            }
+            catch (UriFormatException)
+            {
+                throw new CredentialException("Credential URI is not valid.");
+            }
+        }
+
+        public class Builder
+        {
+            internal string credentialsURI = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI");
+            internal int connectionTimeout = 1000;
+            internal int readTimeout = 1000;
+
+            public Builder CredentialsURI(string credentialsURI)
+            {
+                this.credentialsURI = credentialsURI;
+                return this;
+            }
+
+            public Builder CredentialsURI(Uri credentialsURI)
+            {
+                this.credentialsURI = credentialsURI.ToString();
+                return this;
+            }
+
+            public Builder ConnectionTimeout(int connectionTimeout)
+            {
+                this.connectionTimeout = connectionTimeout > 0 ? connectionTimeout : 1000;
+                return this;
+            }
+
+            public Builder ReadTimeout(int readTimeout)
+            {
+                this.readTimeout = readTimeout > 0 ? readTimeout : 1000;
+                return this;
+            }
+
+            public URLCredentialProvider Build()
+            {
+                return new URLCredentialProvider(this);
             }
         }
 
@@ -105,7 +159,7 @@ namespace Aliyun.Credentials.Provider
                 CredentialModel credentialModel = new CredentialModel
                 {
                     Expiration = expiration,
-                    Type = AuthConstant.URLSts,
+                    Type = AuthConstant.CredentialsURI,
                     ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
@@ -149,7 +203,7 @@ namespace Aliyun.Credentials.Provider
                 CredentialModel credentialModel = new CredentialModel
                 {
                     Expiration = expiration,
-                    Type = AuthConstant.URLSts,
+                    Type = AuthConstant.CredentialsURI,
                     ProviderName = GetProviderName()
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
