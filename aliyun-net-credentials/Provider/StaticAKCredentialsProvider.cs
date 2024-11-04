@@ -5,6 +5,10 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// <para>Setup access_key credential through <see href="https://usercenter.console.aliyun.com/#/manage/ak">User Information Management</see>, it have full authority over the account, please keep it safe.</para>
+    /// <para>Sometimes for security reasons, you cannot hand over a primary account AccessKey with full access to the developer of a project. You may create a sub-account <see href="https://ram.console.aliyun.com/users">RAM Sub-account</see>, grant its <see href="https://ram.console.aliyun.com/permissions">authorization</see>，and use the AccessKey of RAM Sub-account.</para>
+    /// </summary>
     internal class StaticAKCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly string accessKeyId;

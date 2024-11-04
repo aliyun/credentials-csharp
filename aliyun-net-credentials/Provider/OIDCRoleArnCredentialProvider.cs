@@ -12,6 +12,11 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// <para>The ACK cluster creates a service account OpenID Connect (OIDC) token file, associates the token file with a pod, and then injects relevant environment variables into the pod.</para>
+    /// <para>Then, the Credentials tool uses the environment variables to call the AssumeRoleWithOIDC operation of STS and obtains an STS token of the RAM role.</para>
+    /// <para>For more information about the RRSA feature, see <see href="https://www.alibabacloud.com/help/en/ack/ack-managed-and-ack-dedicated/user-guide/use-rrsa-to-authorize-pods-to-access-different-cloud-services#task-2142941">Use RRSA to authorize different pods to access different cloud services.</see></para>
+    /// </summary>
     public class OIDCRoleArnCredentialProvider : SessionCredentialsProvider
     {
         /// <summary>
@@ -23,8 +28,16 @@ namespace Aliyun.Credentials.Provider
         /// The arn of the role to be assumed.
         /// </summary>
         private string roleArn;
+
+        /// <summary>
+        /// The ARN of the OIDC IdP.
+        /// </summary>
         private string oidcProviderArn;
         private string oidcToken;
+
+        /// <summary>
+        /// The path of the OIDC token file.
+        /// </summary>
         private string oidcTokenFilePath;
 
         /// <summary>

@@ -11,6 +11,10 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// <para>By specifying <see href="https://ram.console.aliyun.com/#/role/list">RAM Role</see>, the credential will be able to automatically request maintenance of STS Token.</para> 
+    /// <para>If you want to limit the permissions of STS Token, you can assign value for Policy.</para>
+    /// </summary>
     public class RamRoleArnCredentialProvider : SessionCredentialsProvider
     {
         /// <summary>

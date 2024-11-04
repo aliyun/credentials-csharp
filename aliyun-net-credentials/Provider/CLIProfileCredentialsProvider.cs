@@ -12,7 +12,13 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
-
+    /// <summary>
+    /// Obtain the credential information from a configuration file. The path of the configuration file varies based on the operating system:
+    /// <list type="bullet">
+    /// <item><description>Linux: ~/.aliyun/config.json</description></item>
+    /// <item><description>Windows: C:\Users\USER_NAME\.aliyun\config.json</description></item>
+    /// </list>
+    /// </summary>
     internal class CLIProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly string CLI_CREDENTIALS_CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aliyun", "config.json");
@@ -269,6 +275,14 @@ namespace Aliyun.Credentials.Provider
             private readonly string oidcProviderArn;
             [JsonProperty("source_profile")]
             private readonly string sourceProfile;
+            [JsonProperty("policy")]
+            private readonly string policy;
+            [JsonProperty("region_id")]
+            private readonly string regionId;
+            [JsonProperty("enable_vpc")]
+            private readonly string enableVpc;
+            [JsonProperty("external_id")]
+            private readonly string externalId;
 
             public string GetName()
             {

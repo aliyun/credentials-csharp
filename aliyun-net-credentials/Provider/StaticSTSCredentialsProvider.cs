@@ -4,6 +4,9 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// Create a temporary security credential by applying Temporary Security Credentials (TSC) through the Security Token Service (STS).
+    /// </summary>
     internal class StaticSTSCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly string accessKeyId;
