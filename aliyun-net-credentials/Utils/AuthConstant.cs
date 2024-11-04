@@ -24,6 +24,9 @@ namespace Aliyun.Credentials.Utils
         public const string IniOIDCProviderArn = "oidc_provider_arn";
         public const string IniOIDCTokenFilePath = "oidc_token_file_path";
         public const string DefaultRegion = "region_id";
+        public const string iniStsRegionId = "sts_region";
+        public const string iniExternalId = "external_id";
+        public const string iniEnableVpc = "enable_vpc";
         public const string IniEnable = "enable";
 
         public const string AccessKey = "access_key";

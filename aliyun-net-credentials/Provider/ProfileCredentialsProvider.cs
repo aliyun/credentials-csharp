@@ -154,6 +154,13 @@ namespace Aliyun.Credentials.Provider
             string roleArn = DictionaryUtil.Get(clientConfig, AuthConstant.IniRoleArn);
             string regionId = DictionaryUtil.Get(clientConfig, AuthConstant.DefaultRegion);
             string policy = DictionaryUtil.Get(clientConfig, AuthConstant.IniPolicy);
+            string stsRegionId = DictionaryUtil.Get(clientConfig, AuthConstant.iniStsRegionId);
+            string externalId = DictionaryUtil.Get(clientConfig, AuthConstant.iniExternalId);
+            string enable = DictionaryUtil.Get(clientConfig, AuthConstant.IniEnable);
+            bool? enableVpc = enable == null ? (bool?)null
+                : enable.ToLower() == "true" ? true
+                : enable.ToLower() == "false" ? false
+                : (bool?)null;
 
             if (string.IsNullOrWhiteSpace(accessKeyId) || string.IsNullOrWhiteSpace(accessKeySecret))
             {
@@ -172,6 +179,9 @@ namespace Aliyun.Credentials.Provider
                 .RoleArn(roleArn)
                 .RegionId(regionId)
                 .Policy(policy)
+                .StsRegionId(stsRegionId)
+                .EnableVpc(enableVpc)
+                .ExternalId(externalId)
                 .Build();
             return provider.GetCredentials();
         }
@@ -305,6 +315,12 @@ namespace Aliyun.Credentials.Provider
             string OIDCTokenFilePath = DictionaryUtil.Get(clientConfig, AuthConstant.IniOIDCTokenFilePath);
             string regionId = DictionaryUtil.Get(clientConfig, AuthConstant.DefaultRegion);
             string policy = DictionaryUtil.Get(clientConfig, AuthConstant.IniPolicy);
+            string stsRegionId = DictionaryUtil.Get(clientConfig, AuthConstant.iniStsRegionId);
+            string enable = DictionaryUtil.Get(clientConfig, AuthConstant.IniEnable);
+            bool? enableVpc = enable == null ? (bool?)null
+                : enable.ToLower() == "true" ? true
+                : enable.ToLower() == "false" ? false
+                : (bool?)null;
 
             if (string.IsNullOrWhiteSpace(roleArn))
             {
@@ -323,6 +339,8 @@ namespace Aliyun.Credentials.Provider
                 .RoleSessionName(roleSessionName)
                 .RegionId(regionId)
                 .Policy(policy)
+                .StsRegionId(stsRegionId)
+                .EnableVpc(enableVpc)
                 .Build();
             return await provider.GetCredentialsAsync();
         }

@@ -91,15 +91,19 @@ namespace Aliyun.Credentials.Provider
 
         private OIDCRoleArnCredentialProvider(Builder builder)
         {
-            this.durationSeconds = builder.durationSeconds > 0 ? builder.durationSeconds : 3600;
+            this.durationSeconds = (builder.durationSeconds == null || builder.durationSeconds == 0) ? 3600 : builder.durationSeconds.Value;
+            if (this.durationSeconds < 900)
+            {
+                throw new CredentialException("Session duration should be in the range of 900s - max session duration");
+            }
             this.roleSessionName = string.IsNullOrEmpty(builder.roleSessionName)
                 ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME")
                     ?? "credentials-csharp-" + (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds
                 : builder.roleSessionName;
             this.regionId = string.IsNullOrEmpty(builder.regionId) ? "cn-hangzhou" : builder.regionId;
             this.roleArn = string.IsNullOrEmpty(builder.roleArn) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") : builder.roleArn;
-            this.connectTimeout = builder.connectTimeout > 0 ? builder.connectTimeout : 5000;
-            this.readTimeout = builder.readTimeout > 0 ? builder.readTimeout : 10000;
+            this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0) ? 5000 : builder.connectTimeout.Value;
+            this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             this.oidcProviderArn = string.IsNullOrEmpty(builder.oidcProviderArn)
                 ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN")
                 : builder.oidcProviderArn;
@@ -107,31 +111,28 @@ namespace Aliyun.Credentials.Provider
                 ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE")
                 : builder.oidcTokenFilePath;
             this.policy = builder.policy;
+            this.STSEndpoint = builder.stsEndpoint;
             if (string.IsNullOrEmpty(builder.stsEndpoint))
             {
                 this.STSEndpoint = string.Format("sts{0}.aliyuncs.com", AuthUtils.GetStsRegionWithVpc(builder.stsRegionId, builder.enableVpc));
-            }
-            else
-            {
-                this.STSEndpoint = string.IsNullOrEmpty(builder.stsEndpoint) ? "sts.aliyuncs.com" : builder.stsEndpoint;
             }
         }
 
         public class Builder
         {
-            internal int durationSeconds;
+            internal int? durationSeconds;
             internal string roleSessionName;
             internal string regionId;
             internal string roleArn;
             internal string oidcProviderArn;
             internal string oidcTokenFilePath;
             internal string policy;
-            internal int connectTimeout;
-            internal int readTimeout;
+            internal int? connectTimeout;
+            internal int? readTimeout;
             internal string stsEndpoint;
             internal string stsRegionId;
             internal bool? enableVpc;
-            public Builder DurationSeconds(int durationSeconds)
+            public Builder DurationSeconds(int? durationSeconds)
             {
                 this.durationSeconds = durationSeconds;
                 return this;
@@ -173,13 +174,13 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder ConnectTimeout(int connectTimeout)
+            public Builder ConnectTimeout(int? connectTimeout)
             {
                 this.connectTimeout = connectTimeout;
                 return this;
             }
 
-            public Builder ReadTimeout(int readTimeout)
+            public Builder ReadTimeout(int? readTimeout)
             {
                 this.readTimeout = readTimeout;
                 return this;
@@ -197,7 +198,7 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder EnableVpc(bool enableVpc)
+            public Builder EnableVpc(bool? enableVpc)
             {
                 this.enableVpc = enableVpc;
                 return this;

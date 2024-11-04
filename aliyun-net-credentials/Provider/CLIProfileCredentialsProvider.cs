@@ -19,7 +19,7 @@ namespace Aliyun.Credentials.Provider
     /// <item><description>Windows: C:\Users\USER_NAME\.aliyun\config.json</description></item>
     /// </list>
     /// </summary>
-    internal class CLIProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
+    public class CLIProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly string CLI_CREDENTIALS_CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aliyun", "config.json");
         private volatile IAlibabaCloudCredentialsProvider credentialsProvider;
@@ -146,26 +146,41 @@ namespace Aliyun.Credentials.Provider
                                 return new RamRoleArnCredentialProvider.Builder()
                                     .CredentialsProvider(innerProvider)
                                     .RoleArn(profile.GetRoleArn())
-                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .DurationSeconds(profile.GetDurationSeconds())
                                     .RoleSessionName(profile.GetRoleSessionName())
+                                    .StsRegionId(profile.GetStsRegionId())
+                                    .EnableVpc(profile.GetEnableVpc())
+                                    .Policy(profile.GetPolicy())
+                                    .ExternalId(profile.GetExternalId())
                                     .Build();
                             case "EcsRamRole":
-                                return new EcsRamRoleCredentialProvider.Builder().RoleName(profile.GetRamRoleName()).Build(); 
+                                return new EcsRamRoleCredentialProvider.Builder().RoleName(profile.GetRamRoleName()).Build();
                             case "OIDC":
                                 return new OIDCRoleArnCredentialProvider.Builder()
-                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .DurationSeconds(profile.GetDurationSeconds())
                                     .RoleArn(profile.GetRoleArn())
                                     .RoleSessionName(profile.GetRoleSessionName())
                                     .OIDCProviderArn(profile.GetOidcProviderArn())
                                     .OIDCTokenFilePath(profile.GetOidcTokenFile())
+                                    .StsRegionId(profile.GetStsRegionId())
+                                    .Policy(profile.GetPolicy())
+                                    .EnableVpc(profile.GetEnableVpc())
                                     .Build();
                             case "ChainableRamRoleArn":
+                                if (profile.GetSourceProfile() == profile.GetName())
+                                {
+                                    throw new CredentialException("Source profile name can not be the same as profile name.");
+                                }
                                 IAlibabaCloudCredentialsProvider previousProvider = ReloadCredentialsProvider(config, profile.GetSourceProfile());
                                 return new RamRoleArnCredentialProvider.Builder()
                                     .CredentialsProvider(previousProvider)
                                     .RoleArn(profile.GetRoleArn())
-                                    .DurationSeconds(profile.GetDurationSeconds() ?? 3600)
+                                    .DurationSeconds(profile.GetDurationSeconds())
                                     .RoleSessionName(profile.GetRoleSessionName())
+                                    .StsRegionId(profile.GetStsRegionId())
+                                    .EnableVpc(profile.GetEnableVpc())
+                                    .Policy(profile.GetPolicy())
+                                    .ExternalId(profile.GetExternalId())
                                     .Build();
                             default:
                                 throw new CredentialException(string.Format("Unsupported profile mode '{0}' form CLI credentials file.", profile.GetMode()));
@@ -280,7 +295,7 @@ namespace Aliyun.Credentials.Provider
             [JsonProperty("region_id")]
             private readonly string regionId;
             [JsonProperty("enable_vpc")]
-            private readonly string enableVpc;
+            private readonly bool? enableVpc;
             [JsonProperty("external_id")]
             private readonly string externalId;
 
@@ -341,6 +356,26 @@ namespace Aliyun.Credentials.Provider
             public string GetSourceProfile()
             {
                 return sourceProfile;
+            }
+
+            public string GetPolicy()
+            {
+                return policy;
+            }
+
+            public string GetRegionId()
+            {
+                return regionId;
+            }
+
+            public bool? GetEnableVpc()
+            {
+                return enableVpc;
+            }
+
+            public string GetExternalId()
+            {
+                return externalId;
             }
         }
     }

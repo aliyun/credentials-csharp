@@ -56,18 +56,18 @@ namespace Aliyun.Credentials.Provider
         private EcsRamRoleCredentialProvider(Builder builder)
         {
             this.roleName = builder.roleName;
-            this.disableIMDSv1 = builder.disableIMDSv1;
-            this.connectionTimeout = builder.connectionTimeout > 0 ? builder.connectionTimeout : 1000;
-            this.readTimeout = builder.readTimeout > 0 ? builder.readTimeout : 1000;
+            this.disableIMDSv1 = builder.disableIMDSv1 ?? AuthUtils.DisableIMDSv1;
+            this.connectionTimeout = (builder.connectionTimeout == null || builder.connectionTimeout <= 0) ? 5000 : builder.connectionTimeout.Value;
+            this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             SetCredentialUrl();
         }
 
         public class Builder
         {
             internal string roleName;
-            internal bool disableIMDSv1 = AuthUtils.DisableIMDSv1;
-            internal int connectionTimeout;
-            internal int readTimeout;
+            internal bool? disableIMDSv1;
+            internal int? connectionTimeout;
+            internal int? readTimeout;
 
             public Builder RoleName(string roleName)
             {
@@ -75,19 +75,19 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder DisableIMDSv1(bool disableIMDSv1)
+            public Builder DisableIMDSv1(bool? disableIMDSv1)
             {
                 this.disableIMDSv1 = disableIMDSv1;
                 return this;
             }
 
-            public Builder ConnectionTimeout(int connectionTimeout)
+            public Builder ConnectionTimeout(int? connectionTimeout)
             {
                 this.connectionTimeout = connectionTimeout;
                 return this;
             }
 
-            public Builder ReadTimeout(int readTimeout)
+            public Builder ReadTimeout(int? readTimeout)
             {
                 this.readTimeout = readTimeout;
                 return this;

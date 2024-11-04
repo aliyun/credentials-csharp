@@ -32,7 +32,12 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("profile", provider.GetProviderName());
 
             AuthUtils.ClientType = "client2";
-            Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Contains("InvalidAccessKeyId.NotFound", ex.Message);
+
+            AuthUtils.ClientType = "client2-1";
+            ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
+            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
 
             AuthUtils.ClientType = "client4";
             AuthUtils.SetPrivateKey("test");
