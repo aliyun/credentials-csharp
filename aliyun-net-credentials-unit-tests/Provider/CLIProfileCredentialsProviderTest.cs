@@ -74,7 +74,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             {
                 NullValueHandling = NullValueHandling.Ignore
             };
-            Assert.Equal("[{\"name\":\"AK\",\"mode\":\"AK\",\"access_key_id\":\"access_key_id\",\"access_key_secret\":\"access_key_secret\"},{\"name\":\"RamRoleArn\",\"mode\":\"RamRoleArn\",\"access_key_id\":\"access_key_id\",\"access_key_secret\":\"access_key_secret\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\"},{\"name\":\"EcsRamRole\",\"mode\":\"EcsRamRole\",\"ram_role_name\":\"ram_role_name\"},{\"name\":\"OIDC\",\"mode\":\"OIDC\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\",\"oidc_token_file\":\"path/to/oidc/file\",\"oidc_provider_arn\":\"oidc_provider_arn\"},{\"name\":\"ChainableRamRoleArn\",\"mode\":\"ChainableRamRoleArn\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\",\"source_profile\":\"AK\"}]", JsonConvert.SerializeObject(config.GetProfiles(), settings));
+            Assert.Equal("[{\"name\":\"AK\",\"mode\":\"AK\",\"access_key_id\":\"access_key_id\",\"access_key_secret\":\"access_key_secret\"},{\"name\":\"RamRoleArn\",\"mode\":\"RamRoleArn\",\"access_key_id\":\"access_key_id\",\"access_key_secret\":\"access_key_secret\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\",\"enable_vpc\":true},{\"name\":\"EcsRamRole\",\"mode\":\"EcsRamRole\",\"ram_role_name\":\"ram_role_name\"},{\"name\":\"OIDC\",\"mode\":\"OIDC\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\",\"oidc_token_file\":\"path/to/oidc/file\",\"oidc_provider_arn\":\"oidc_provider_arn\"},{\"name\":\"ChainableRamRoleArn\",\"mode\":\"ChainableRamRoleArn\",\"ram_role_arn\":\"ram_role_arn\",\"ram_session_name\":\"ram_session_name\",\"expired_seconds\":3600,\"sts_region\":\"cn-hangzhou\",\"source_profile\":\"AK\"}]", JsonConvert.SerializeObject(config.GetProfiles(), settings));
         }
 
         [Fact]
@@ -108,6 +108,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             var exAsync = await Assert.ThrowsAsync<CredentialException>(async() => {await credentialsProvider.GetCredentialsAsync(); });
             Assert.Contains("InvalidAccessKeyId.NotFound", ex.Message);
 
+            credentialsProvider = provider.ReloadCredentialsProvider(config, "RamRoleArnEnableVpc");
+            Assert.True(credentialsProvider is RamRoleArnCredentialProvider);
+            ex = Assert.Throws<CredentialException>(() => { credentialsProvider.GetCredentials(); });
+            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
+
+            exAsync = await Assert.ThrowsAsync<CredentialException>(async() => {await credentialsProvider.GetCredentialsAsync(); });
+            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
+
             var ex1 = Assert.Throws<ArgumentNullException>(() => { provider.ReloadCredentialsProvider(config, "Invalid_RamRoleArn"); });
             Assert.Contains("AccessKeyId must not be null or empty.", ex1.Message);
 
@@ -117,10 +125,16 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credentialsProvider  = provider.ReloadCredentialsProvider(config, "OIDC");
             Assert.True(credentialsProvider is OIDCRoleArnCredentialProvider);
 
+            credentialsProvider  = provider.ReloadCredentialsProvider(config, "OIDCEnableVpc");
+            Assert.True(credentialsProvider is OIDCRoleArnCredentialProvider);
+
             credentialsProvider = provider.ReloadCredentialsProvider(config, "ChainableRamRoleArn");
             Assert.True(credentialsProvider is RamRoleArnCredentialProvider);
             Assert.Equal("akid", ((RamRoleArnCredentialProvider) credentialsProvider).CredentialsProvider.GetCredentials().AccessKeyId);
             Assert.Equal("secret", ((RamRoleArnCredentialProvider) credentialsProvider).CredentialsProvider.GetCredentials().AccessKeySecret);
+
+            ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "ChainableRamRoleArn1"); });
+            Assert.Equal("Source profile name can not be the same as profile name.", ex.Message);
 
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "ChainableRamRoleArn2"); });
             Assert.Contains("Unable to get profile with 'InvalidSource' form CLI credentials file.", ex.Message);

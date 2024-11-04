@@ -50,8 +50,8 @@ namespace Aliyun.Credentials.Provider
 
         private URLCredentialProvider(Builder builder)
         {
-            this.connectTimeout = builder.connectionTimeout > 0 ? builder.connectionTimeout : 5000;
-            this.readTimeout = builder.readTimeout > 0 ? builder.readTimeout : 10000;;
+            this.connectTimeout = (builder.connectionTimeout == null || builder.connectionTimeout <= 0) ? 5000 : builder.connectionTimeout.Value;
+            this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             try
             {
                 string uriStr = string.IsNullOrEmpty(builder.credentialsURI) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") : builder.credentialsURI;
@@ -67,8 +67,8 @@ namespace Aliyun.Credentials.Provider
         public class Builder
         {
             internal string credentialsURI;
-            internal int connectionTimeout;
-            internal int readTimeout;
+            internal int? connectionTimeout;
+            internal int? readTimeout;
 
             public Builder CredentialsURI(string credentialsURI)
             {
@@ -82,13 +82,13 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder ConnectionTimeout(int connectionTimeout)
+            public Builder ConnectionTimeout(int? connectionTimeout)
             {
                 this.connectionTimeout = connectionTimeout;
                 return this;
             }
 
-            public Builder ReadTimeout(int readTimeout)
+            public Builder ReadTimeout(int? readTimeout)
             {
                 this.readTimeout = readTimeout;
                 return this;

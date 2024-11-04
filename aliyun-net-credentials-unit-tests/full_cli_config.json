@@ -14,6 +14,7 @@
             "access_key_secret": "access_key_secret",
             "ram_role_arn": "ram_role_arn",
             "ram_session_name": "ram_session_name",
+            "enable_vpc": true,
             "expired_seconds": 3600,
             "sts_region": "cn-hangzhou"
         },

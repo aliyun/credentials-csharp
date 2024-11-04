@@ -14,6 +14,7 @@ namespace Aliyun.Credentials.Utils
         private string environmentAccesskeySecret;
         private string environmentSecurityToken;
         private string environmentEcsMetaData;
+        private string environmentEcsMetaDataDisabled;
         private string environmentCredentialsFile;
         private string environmentRoleArn;
         private string environmentOIDCProviderArn;
@@ -33,6 +34,7 @@ namespace Aliyun.Credentials.Utils
             environmentAccesskeySecret = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_SECRET") ?? environmentAccesskeySecret;
             environmentSecurityToken = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_SECURITY_TOKEN") ?? environmentSecurityToken;
             environmentEcsMetaData = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA") ?? environmentEcsMetaData;
+            environmentEcsMetaDataDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA_DISABLED") ?? environmentEcsMetaDataDisabled;
             environmentCredentialsFile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_FILE") ?? environmentCredentialsFile;
             environmentRoleArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") ?? environmentRoleArn;
             environmentOIDCProviderArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN") ?? environmentOIDCProviderArn;
@@ -123,7 +125,8 @@ namespace Aliyun.Credentials.Utils
         public static string GetStsRegionWithVpc(string stsRegionId, bool? enableVpc)
         {
             string regionId = string.IsNullOrEmpty(stsRegionId) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_STS_REGION") : stsRegionId;
-            bool enableVpcEnv = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED") == "true";
+            var enable = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED") ?? "";
+            bool enableVpcEnv = enable.ToLower() == "true";
             string isVpc = (enableVpc == null ? enableVpcEnv : (bool)enableVpc) ? "-vpc" : "";
             if (!string.IsNullOrEmpty(regionId))
             {
@@ -174,6 +177,13 @@ namespace Aliyun.Credentials.Utils
             get { return authUtils.environmentEcsMetaData; }
 
             set { authUtils.environmentEcsMetaData = value; }
+        }
+
+        public static string EnvironmentEcsMetaDataDisabled
+        {
+            get { return authUtils.environmentEcsMetaDataDisabled; }
+
+            set { authUtils.environmentEcsMetaDataDisabled = value; }
         }
 
         public static string EnvironmentCredentialsFile
