@@ -8,6 +8,18 @@ using Aliyun.Credentials.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// The default credential provider chain of the Credentials tool allows you to use the same code to obtain credentials for different environments based on configurations independent of the application. 
+    /// </summary>
+    /// <remarks> If you use <c>Client client = new Client()</c> to initialize a Credentials client without specifying an initialization method, the Credentials tool obtains the credential information in the following order:
+    /// <list type="number">
+    /// <item><description>Obtain the credential information from environment variables</description></item>
+    /// <item><description>Obtain the credential information by using the RAM role of an OIDC IdP</description></item>
+    /// <item><description>Obtain the credential information from config.json</description></item>
+    /// <item><description>Obtain the credential information by using the RAM role of an ECS instance</description></item>
+    /// <item><description>Obtain the credential information by URI</description></item>
+    /// </list>
+    /// </remarks>
     public class DefaultCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
         private readonly List<IAlibabaCloudCredentialsProvider> UserConfigurationProviders =

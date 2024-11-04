@@ -13,15 +13,18 @@ using Tea.Utils;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// By specifying the url, the credential will be able to automatically request maintenance of STS Token.
+    /// </summary>
     public class URLCredentialProvider : SessionCredentialsProvider
     {
         private readonly Uri credentialsURI;
 
         /// <summary>
-        /// Unit of millsecond
+        /// Unit of millsecond.
         /// </summary>
-        private int connectTimeout = 1000;
-        private int readTimeout = 1000;
+        private int connectTimeout = 5000;
+        private int readTimeout = 10000;
 
         [Obsolete("Use builder instead.")]
         public URLCredentialProvider(Config config) : this(config.CredentialsURI)
@@ -64,8 +67,8 @@ namespace Aliyun.Credentials.Provider
         public class Builder
         {
             internal string credentialsURI;
-            internal int connectionTimeout = 1000;
-            internal int readTimeout = 1000;
+            internal int connectionTimeout;
+            internal int readTimeout;
 
             public Builder CredentialsURI(string credentialsURI)
             {

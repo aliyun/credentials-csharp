@@ -11,6 +11,9 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
+    /// <summary>
+    /// Both ECS and ECI instances support binding instance RAM roles. When you use the Credentials tool in an instance, you will automatically obtain the RAM role bound to the instance, and obtain the STS Token of the RAM role by accessing the metadata service to complete the initialization of the credential client.
+    /// </summary>
     public class EcsRamRoleCredentialProvider : SessionCredentialsProvider
     {
         private const string UrlInEcsMetadata = "/latest/meta-data/ram/security-credentials/";
