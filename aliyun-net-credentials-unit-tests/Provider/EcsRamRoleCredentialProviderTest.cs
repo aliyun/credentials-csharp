@@ -15,6 +15,25 @@ namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class EcsRamRoleCredentialProviderTest
     {
+        [Fact]
+        public void TestDisableIMDS()
+        {
+            var cacheMetadataDisabled = AuthUtils.EnvironmentEcsMetaDataDisabled;
+            AuthUtils.EnvironmentEcsMetaDataDisabled = "true";
+            var ex = Assert.Throws<CredentialException>(() => { new EcsRamRoleCredentialProvider.Builder().Build(); });
+            Assert.Equal("IMDS credentials is disabled", ex.Message);
+
+            AuthUtils.EnvironmentEcsMetaDataDisabled = null;
+            var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
+
+            AuthUtils.EnvironmentEcsMetaDataDisabled = "false";
+            provider = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
+
+            AuthUtils.EnvironmentEcsMetaDataDisabled = "test";
+            provider = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").Build();
+
+            AuthUtils.EnvironmentEcsMetaDataDisabled = cacheMetadataDisabled;
+        }
 
         [Fact]
         public async void DisableIMDSv1Test()
@@ -153,8 +172,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("roleName", providerConfig.RoleName);
             Assert.False(providerConfig.DisableIMDSv1);
 
-            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").ConnectionTimeout(1100).ReadTimeout(1200).Build();
-            Assert.Equal(1100, providerConfig.ConnectionTimeout);
+            providerConfig = new EcsRamRoleCredentialProvider.Builder().RoleName("roleName").ConnectTimeout(1100).ReadTimeout(1200).Build();
+            Assert.Equal(1100, providerConfig.ConnectTimeout);
             Assert.Equal(1200, providerConfig.ReadTimeout);
 
             providerConfig = new EcsRamRoleCredentialProvider(

@@ -101,13 +101,32 @@ namespace aliyun_net_credentials_unit_tests
                 "not found credentials:",
                 "[EnvironmentVariableCredentialsProvider: Environment variable accessKeyId cannot be empty,",
                 "CLIProfileCredentialsProvider: Unable to open credentials file:",
-                "ProfileCredentialsProvider: Unable to open credentials file:"
+                "ProfileCredentialsProvider: Unable to open credentials file:",
+                "EcsRamRoleCredentialProvider: Failed to connect ECS Metadata Service: Aliyun.Credentials.Exceptions.CredentialException: Exception : The request url is 100.100.100.200"
             };
 
             foreach (var subMessage in expectedMessage)
             {
                 Assert.Contains(subMessage, ex.Message);
             }
+
+            var cacheMetadataDisabled = AuthUtils.EnvironmentEcsMetaDataDisabled;
+            AuthUtils.EnvironmentEcsMetaDataDisabled = "true";
+            ex = Assert.Throws<CredentialException>(() => new Client(new DefaultCredentialsProvider()).GetCredential());
+            expectedMessage = new[]
+            {
+                "not found credentials:",
+                "[EnvironmentVariableCredentialsProvider: Environment variable accessKeyId cannot be empty,",
+                "CLIProfileCredentialsProvider: Unable to open credentials file:",
+                "ProfileCredentialsProvider: Unable to open credentials file:",
+            };
+
+            foreach (var subMessage in expectedMessage)
+            {
+                Assert.Contains(subMessage, ex.Message);
+            }
+
+            AuthUtils.EnvironmentEcsMetaDataDisabled = cacheMetadataDisabled;
 
             ex = Assert.Throws<CredentialException>(() => new Client(new ProfileCredentialsProvider()).GetCredential());
             Assert.StartsWith("Unable to open credentials file:", ex.Message);
@@ -130,7 +149,8 @@ namespace aliyun_net_credentials_unit_tests
             Assert.Equal("test", credential.AccessKeyId);
             Assert.Equal("test", credential.AccessKeySecret);
 
-            credential = new Client(new StaticSTSCredentialsProvider(new Config {
+            credential = new Client(new StaticSTSCredentialsProvider(new Config
+            {
                 AccessKeyId = "test",
                 AccessKeySecret = "test",
                 SecurityToken = "test"

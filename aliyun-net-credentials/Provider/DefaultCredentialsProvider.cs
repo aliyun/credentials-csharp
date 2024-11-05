@@ -32,16 +32,16 @@ namespace Aliyun.Credentials.Provider
         public DefaultCredentialsProvider()
         {
             this.reuseLastProviderEnabled = true;
-            createDefaultChain();
+            CreateDefaultChain();
         }
 
         public DefaultCredentialsProvider(bool reuseLastProviderEnabled)
         {
             this.reuseLastProviderEnabled = reuseLastProviderEnabled;
-            createDefaultChain();
+            CreateDefaultChain();
         }
 
-        private void createDefaultChain()
+        private void CreateDefaultChain()
         {
             UserConfigurationProviders.Add(new EnvironmentVariableCredentialsProvider());
             if (AuthUtils.EnvironmentEnableOIDC())
@@ -55,7 +55,8 @@ namespace Aliyun.Credentials.Provider
             UserConfigurationProviders.Add(new CLIProfileCredentialsProvider());
             UserConfigurationProviders.Add(new ProfileCredentialsProvider());
             var roleName = AuthUtils.EnvironmentEcsMetaData;
-            if (null != roleName)
+            var metadataDisabled = AuthUtils.EnvironmentEcsMetaDataDisabled ?? "";
+            if (metadataDisabled.ToLower() != "true")
             {
                 UserConfigurationProviders.Add(new EcsRamRoleCredentialProvider.Builder().RoleName(roleName).Build());
             }

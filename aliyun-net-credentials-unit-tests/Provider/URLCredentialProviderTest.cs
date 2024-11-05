@@ -48,7 +48,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             provider = new URLCredentialProvider.Builder()
                 .CredentialsURI("http://10.10.10.10")
-                .ConnectionTimeout(2000)
+                .ConnectTimeout(2000)
                 .ReadTimeout(2000)
                 .Build();
 

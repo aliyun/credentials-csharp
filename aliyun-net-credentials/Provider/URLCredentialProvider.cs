@@ -50,7 +50,7 @@ namespace Aliyun.Credentials.Provider
 
         private URLCredentialProvider(Builder builder)
         {
-            this.connectTimeout = (builder.connectionTimeout == null || builder.connectionTimeout <= 0) ? 5000 : builder.connectionTimeout.Value;
+            this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0) ? 5000 : builder.connectTimeout.Value;
             this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             try
             {
@@ -67,7 +67,7 @@ namespace Aliyun.Credentials.Provider
         public class Builder
         {
             internal string credentialsURI;
-            internal int? connectionTimeout;
+            internal int? connectTimeout;
             internal int? readTimeout;
 
             public Builder CredentialsURI(string credentialsURI)
@@ -82,9 +82,9 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder ConnectionTimeout(int? connectionTimeout)
+            public Builder ConnectTimeout(int? connectTimeout)
             {
-                this.connectionTimeout = connectionTimeout;
+                this.connectTimeout = connectTimeout;
                 return this;
             }
 
