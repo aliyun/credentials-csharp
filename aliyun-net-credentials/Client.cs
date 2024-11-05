@@ -70,7 +70,7 @@ namespace Aliyun.Credentials
                     return new EcsRamRoleCredentialProvider.Builder()
                         .RoleName(config.RoleName)
                         .DisableIMDSv1(config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1)
-                        .ConnectionTimeout(config.ConnectTimeout)
+                        .ConnectTimeout(config.ConnectTimeout)
                         .ReadTimeout(config.Timeout)
                         .Build();
                 case AuthConstant.RamRoleArn:
@@ -118,7 +118,7 @@ namespace Aliyun.Credentials
                 case AuthConstant.CredentialsURI:
                     return new URLCredentialProvider.Builder()
                         .CredentialsURI(config.CredentialsURI)
-                        .ConnectionTimeout(config.ConnectTimeout)
+                        .ConnectTimeout(config.ConnectTimeout)
                         .ReadTimeout(config.Timeout)
                         .Build();
                 default:

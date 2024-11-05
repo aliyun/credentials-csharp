@@ -24,7 +24,7 @@ namespace Aliyun.Credentials.Provider
         private string roleName;
         private string credentialUrl;
         private const string MetadataServiceHost = "100.100.100.200";
-        private readonly int connectionTimeout = 1000;
+        private readonly int connectTimeout = 1000;
         private readonly int readTimeout = 1000;
         private readonly bool disableIMDSv1;
         private const int metadataTokenDuration = 21600;
@@ -42,7 +42,7 @@ namespace Aliyun.Credentials.Provider
         {
             if (config.ConnectTimeout > 1000)
             {
-                connectionTimeout = config.ConnectTimeout;
+                connectTimeout = config.ConnectTimeout;
             }
             if (config.Timeout > 1000)
             {
@@ -55,9 +55,14 @@ namespace Aliyun.Credentials.Provider
 
         private EcsRamRoleCredentialProvider(Builder builder)
         {
+            var metadataDisabled = AuthUtils.EnvironmentEcsMetaDataDisabled ?? "";
+            if (metadataDisabled.ToLower() == "true")
+            {
+                throw new CredentialException("IMDS credentials is disabled");
+            }
             this.roleName = builder.roleName;
             this.disableIMDSv1 = builder.disableIMDSv1 ?? AuthUtils.DisableIMDSv1;
-            this.connectionTimeout = (builder.connectionTimeout == null || builder.connectionTimeout <= 0) ? 5000 : builder.connectionTimeout.Value;
+            this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0) ? 5000 : builder.connectTimeout.Value;
             this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             SetCredentialUrl();
         }
@@ -66,7 +71,7 @@ namespace Aliyun.Credentials.Provider
         {
             internal string roleName;
             internal bool? disableIMDSv1;
-            internal int? connectionTimeout;
+            internal int? connectTimeout;
             internal int? readTimeout;
 
             public Builder RoleName(string roleName)
@@ -81,9 +86,9 @@ namespace Aliyun.Credentials.Provider
                 return this;
             }
 
-            public Builder ConnectionTimeout(int? connectionTimeout)
+            public Builder ConnectTimeout(int? connectTimeout)
             {
-                this.connectionTimeout = connectionTimeout;
+                this.connectTimeout = connectTimeout;
                 return this;
             }
 
@@ -151,7 +156,7 @@ namespace Aliyun.Credentials.Provider
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
                 httpRequest.Method = MethodType.PUT;
-                httpRequest.ConnectTimeout = this.connectionTimeout;
+                httpRequest.ConnectTimeout = this.connectTimeout;
                 httpRequest.ReadTimeout = this.readTimeout;
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
 
@@ -186,7 +191,7 @@ namespace Aliyun.Credentials.Provider
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
                 httpRequest.Method = MethodType.PUT;
-                httpRequest.ConnectTimeout = this.connectionTimeout;
+                httpRequest.ConnectTimeout = this.connectTimeout;
                 httpRequest.ReadTimeout = this.readTimeout;
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
 
@@ -220,7 +225,7 @@ namespace Aliyun.Credentials.Provider
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
-                ConnectTimeout = connectionTimeout,
+                ConnectTimeout = connectTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
             };
@@ -258,7 +263,7 @@ namespace Aliyun.Credentials.Provider
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
-                ConnectTimeout = connectionTimeout,
+                ConnectTimeout = connectTimeout,
                 ReadTimeout = readTimeout,
                 Url = credentialUrl
             };
@@ -399,9 +404,9 @@ namespace Aliyun.Credentials.Provider
             return "ecs_ram_role";
         }
 
-        public int ConnectionTimeout
+        public int ConnectTimeout
         {
-            get { return connectionTimeout; }
+            get { return connectTimeout; }
         }
 
         public int ReadTimeout
