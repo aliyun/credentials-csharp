@@ -1,3 +1,12 @@
+### 2024-11-11 Version 1.4.3
+* fix: add providerName in provider 
+* fix: support provider in credential client 
+* refactor providers and support stsRegionId and enableVpc 
+* fix: supplement comments 
+* fix: supplement fields in cli and profile credentials 
+* fix: add ecs provider in default chain by default and disable by environment variable && unify name of connectTimeout
+* fix: record the complete chain and fix null return in profile provider
+
 ### 2024-09-14 Version 1.4.2
 * feat: support cli credentials provider 
 * refactor: get metadata token every time refresh credentials
