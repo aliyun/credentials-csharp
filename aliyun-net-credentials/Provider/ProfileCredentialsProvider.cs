@@ -37,7 +37,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (IOException)
             {
-                throw new CredentialException(String.Format("Unable to open credentials file: {0}.", filePath));
+                throw new CredentialException(string.Format("Unable to open credentials file: {0}.", filePath));
             }
 
             if (!iniFile.Ini.ContainsKey(AuthUtils.ClientType))
@@ -66,14 +66,17 @@ namespace Aliyun.Credentials.Provider
             }
             catch (IOException)
             {
-                return null;
+                throw new CredentialException(string.Format("Unable to open credentials file: {0}.", filePath));
             }
 
             if (!iniFile.Ini.ContainsKey(AuthUtils.ClientType))
             {
                 throw new CredentialException("Client is not open in the specified credentials file");
             }
-            return await CreateCredentialAsync(iniFile.Ini[AuthUtils.ClientType]);
+
+            CredentialModel credentialModel = await CreateCredentialAsync(iniFile.Ini[AuthUtils.ClientType]);
+            credentialModel.ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentialModel.ProviderName);
+            return credentialModel;
         }
 
         private CredentialModel CreateCredential(Dictionary<string, string> clientConfig)
@@ -100,14 +103,15 @@ namespace Aliyun.Credentials.Provider
             string accessKeySecret = clientConfig[AuthConstant.IniAccessKeyIdsecret];
             if (string.IsNullOrWhiteSpace(accessKeyId) || string.IsNullOrWhiteSpace(accessKeySecret))
             {
-                return null;
+                throw new CredentialException("The configured access_key_id or access_key_secret is empty");
             }
 
             return new CredentialModel
             {
                 AccessKeyId = accessKeyId,
                 AccessKeySecret = accessKeySecret,
-                Type = AuthConstant.AccessKey
+                Type = AuthConstant.AccessKey,
+                ProviderName = "static_ak"
             };
         }
 
@@ -135,14 +139,15 @@ namespace Aliyun.Credentials.Provider
             string accessKeySecret = clientConfig[AuthConstant.IniAccessKeyIdsecret];
             if (string.IsNullOrWhiteSpace(accessKeyId) || string.IsNullOrWhiteSpace(accessKeySecret))
             {
-                return null;
+                throw new CredentialException("The configured access_key_id or access_key_secret is empty");
             }
 
             return new CredentialModel
             {
                 AccessKeyId = accessKeyId,
                 AccessKeySecret = accessKeySecret,
-                Type = AuthConstant.AccessKey
+                Type = AuthConstant.AccessKey,
+                ProviderName = "static_ak"
             };
         }
 

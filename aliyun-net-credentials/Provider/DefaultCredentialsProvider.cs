@@ -89,7 +89,7 @@ namespace Aliyun.Credentials.Provider
                             AccessKeyId = credential.AccessKeyId,
                             AccessKeySecret = credential.AccessKeySecret,
                             SecurityToken = credential.SecurityToken,
-                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(), provider.GetProviderName())
+                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credential.ProviderName)
                         };
                     }
                 }
@@ -123,7 +123,7 @@ namespace Aliyun.Credentials.Provider
                             AccessKeyId = credential.AccessKeyId,
                             AccessKeySecret = credential.AccessKeySecret,
                             SecurityToken = credential.SecurityToken,
-                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(), provider.GetProviderName())
+                            ProviderName = string.Format("{0}/{1}", this.GetProviderName(),  credential.ProviderName)
                         };
                     }
                 }

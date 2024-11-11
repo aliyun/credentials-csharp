@@ -342,7 +342,10 @@ namespace Aliyun.Credentials.Provider
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
                     Type = AuthConstant.RamRoleArn,
-                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(), CredentialsProvider.GetProviderName())
+                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(),
+                        string.IsNullOrEmpty(previousCredentials.ProviderName)
+                            ? CredentialsProvider.GetProviderName()
+                            : previousCredentials.ProviderName)
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
@@ -401,7 +404,10 @@ namespace Aliyun.Credentials.Provider
                     SecurityToken = DictionaryUtil.Get(credentials, "SecurityToken"),
                     Expiration = expiration,
                     Type = AuthConstant.RamRoleArn,
-                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(), CredentialsProvider.GetProviderName())
+                    ProviderName = string.Format("{0}/{1}", this.GetProviderName(),
+                        string.IsNullOrEmpty(previousCredentials.ProviderName)
+                            ? CredentialsProvider.GetProviderName()
+                            : previousCredentials.ProviderName)
                 };
                 return new RefreshResult<CredentialModel>(credentialModel, GetStaleTime(expiration));
             }
