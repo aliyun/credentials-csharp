@@ -55,10 +55,12 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Assert.Throws<CredentialException>(() => { provider.GetCredentials(); }).Message);
 
             AuthUtils.ClientType = "client6";
-            Assert.Null(provider.GetCredentials());
+            Assert.Equal("The configured access_key_id or access_key_secret is empty",
+                Assert.Throws<CredentialException>(() => { provider.GetCredentials(); }).Message);
 
             AuthUtils.ClientType = "client7";
-            Assert.Null(provider.GetCredentials());
+            Assert.Equal("The configured access_key_id or access_key_secret is empty",
+                Assert.Throws<CredentialException>(() => { provider.GetCredentials(); }).Message);
 
             AuthUtils.ClientType = "client8";
             Assert.Equal("OIDCTokenFilePath path does not exist.",
@@ -72,7 +74,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public async Task ProfileGetCredentialAsyncTest()
         {
             ProfileCredentialsProvider provider = new ProfileCredentialsProvider();
-            Assert.Null(await provider.GetCredentialsAsync());
+            Assert.Contains("Unable to open credentials file: ",
+                (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); })).Message);
 
             string tempEnvironmentCredentialsFile = AuthUtils.EnvironmentCredentialsFile;
             string tempClientType = AuthUtils.ClientType;
@@ -102,10 +105,12 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); })).Message);
 
             AuthUtils.ClientType = "client6";
-            Assert.Null(await provider.GetCredentialsAsync());
+            Assert.Equal("The configured access_key_id or access_key_secret is empty",
+                (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); })).Message);
 
             AuthUtils.ClientType = "client7";
-            Assert.Null(await provider.GetCredentialsAsync());
+            Assert.Equal("The configured access_key_id or access_key_secret is empty",
+                (await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); })).Message);
 
             AuthUtils.ClientType = "client8";
             Assert.Equal("OIDCTokenFilePath path does not exist.",

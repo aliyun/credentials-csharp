@@ -21,7 +21,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             {
                 AccessKeyId = "",
                 AccessKeySecret = "",
-                Type = AuthConstant.AccessKey
+                Type = AuthConstant.AccessKey,
+                ProviderName = this.GetProviderName()
             };
         }
 
@@ -31,7 +32,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             {
                 AccessKeyId = "",
                 AccessKeySecret = "",
-                Type = AuthConstant.AccessKey
+                Type = AuthConstant.AccessKey,
+                ProviderName = this.GetProviderName()
             });
         }
 
@@ -144,7 +146,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         }
 
         [Fact]
-        public void ReuseLastProviderEnabledTest()
+        public async void ReuseLastProviderEnabledTest()
         {
             string cacheEnvironmentAccessKeyId = AuthUtils.EnvironmentAccessKeyId;
             string cacheEnvironmentAccesskeySecret = AuthUtils.EnvironmentAccesskeySecret;
@@ -182,6 +184,13 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             provider.AddCredentialsProvider(new CredentialsProviderForTest());
             credential = provider.GetCredentials();
+            Assert.Equal("", credential.AccessKeyId);
+            Assert.Equal("", credential.AccessKeySecret);
+            Assert.Equal("default/test", credential.ProviderName);
+            Assert.True(providerField.GetValue(provider) is CredentialsProviderForTest);
+            Assert.False((bool)reuseEnableField.GetValue(provider));
+
+            credential = await provider.GetCredentialsAsync();
             Assert.Equal("", credential.AccessKeyId);
             Assert.Equal("", credential.AccessKeySecret);
             Assert.Equal("default/test", credential.ProviderName);

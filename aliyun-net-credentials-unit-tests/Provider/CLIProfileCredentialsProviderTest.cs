@@ -22,9 +22,24 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("AK", provider.GetProfileName());
             Assert.Equal("cli_profile", provider.GetProviderName());
 
+            var cacheProfile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
             Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "TEST");
             provider = new CLIProfileCredentialsProvider();
             Assert.Equal("TEST", provider.GetProfileName());
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", cacheProfile);
+
+            string path = TestHelper.GetCLIConfigFilePath("aliyun");
+            provider = new CLIProfileCredentialsProvider();
+            var credential = provider.GetCredentials(path);
+            Assert.Equal("cli_profile/static_ak", credential.ProviderName);
+
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "AK");
+            credential = provider.GetCredentials(path);
+            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", cacheProfile);
+
+            path = TestHelper.GetCLIConfigFilePath("empty");
+            var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials(path));
+            Assert.Equal("Unable to get profile form empty CLI credentials file.", ex.Message);
         }
 
         [Fact]

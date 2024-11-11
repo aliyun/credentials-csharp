@@ -44,11 +44,11 @@ namespace Aliyun.Credentials.Provider
             }
             string refreshedProfileName = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
 
-            if (credentialsProvider == null)
+            if (ShouldReloadCredentialsProvider(refreshedProfileName))
             {
                 lock (credentialsProviderLock)
                 {
-                    if (credentialsProvider == null)
+                    if (ShouldReloadCredentialsProvider(refreshedProfileName))
                     {
                         if (!string.IsNullOrEmpty(refreshedProfileName))
                         {
@@ -64,7 +64,44 @@ namespace Aliyun.Credentials.Provider
                 AccessKeyId = credentials.AccessKeyId,
                 AccessKeySecret = credentials.AccessKeySecret,
                 SecurityToken = credentials.SecurityToken,
-                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentialsProvider.GetProviderName())
+                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentials.ProviderName)
+            };
+        }
+
+        internal CredentialModel GetCredentials(string path)
+        {
+            if (AuthUtils.EnvironmentDisableCLIProfile)
+            {
+                throw new CredentialException("CLI credentials file is disabled.");
+            }
+            Config config = ParseProfile(path);
+            if (config == null)
+            {
+                throw new CredentialException("Unable to get profile form empty CLI credentials file.");
+            }
+            string refreshedProfileName = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
+
+            if (ShouldReloadCredentialsProvider(refreshedProfileName))
+            {
+                lock (credentialsProviderLock)
+                {
+                    if (ShouldReloadCredentialsProvider(refreshedProfileName))
+                    {
+                        if (!string.IsNullOrEmpty(refreshedProfileName))
+                        {
+                            this.currentProfileName = refreshedProfileName;
+                        }
+                        this.credentialsProvider = ReloadCredentialsProvider(config, this.currentProfileName);
+                    }
+                }
+            }
+            var credentials = this.credentialsProvider.GetCredentials();
+            return new CredentialModel
+            {
+                AccessKeyId = credentials.AccessKeyId,
+                AccessKeySecret = credentials.AccessKeySecret,
+                SecurityToken = credentials.SecurityToken,
+                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentials.ProviderName)
             };
         }
 
@@ -101,7 +138,7 @@ namespace Aliyun.Credentials.Provider
                 AccessKeyId = credentials.AccessKeyId,
                 AccessKeySecret = credentials.AccessKeySecret,
                 SecurityToken = credentials.SecurityToken,
-                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentialsProvider.GetProviderName())
+                ProviderName = string.Format("{0}/{1}", this.GetProviderName(), credentials.ProviderName)
             };
         }
 
