@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -24,6 +25,14 @@ namespace aliyun_net_credentials_unit_tests
             RunMethod(t, strMethod, null, aobjParams, eFlags);
         }
 
+        internal static object RunStaticMethodWithReturn(Type t, string strMethod, object[] aobjParams)
+        {
+            BindingFlags eFlags =
+                BindingFlags.Static | BindingFlags.Public |
+                BindingFlags.NonPublic;
+            return RunMethod(t, strMethod, null, aobjParams, eFlags);
+        }
+
         /// <summary>
         /// 调用实例方法
         /// </summary>
@@ -35,9 +44,77 @@ namespace aliyun_net_credentials_unit_tests
         public static object RunInstanceMethod(Type t, string strMethod, object objInstance, object[] aobjParams)
         {
             BindingFlags eFlags = BindingFlags.Instance | BindingFlags.Public |
-                BindingFlags.NonPublic;
+                                  BindingFlags.NonPublic;
             return RunMethod(t, strMethod,
                 objInstance, aobjParams, eFlags);
+        }
+
+        public static object RunInstanceMethodNew(Type t, string strMethod, object objInstance, object[] aobjParams)
+        {
+            BindingFlags eFlags = BindingFlags.Instance | BindingFlags.Public |
+                                  BindingFlags.NonPublic;
+            return RunMethodNew(t, strMethod,
+                objInstance, aobjParams, eFlags);
+        }
+
+        private static object RunMethodNew(Type t, string strMethod, object objInstance, object[] aobjParams,
+            BindingFlags eFlags)
+        {
+            var methods = t.GetMethods(eFlags)
+                .Where(m => m.Name == strMethod)
+                .ToList();
+
+            // not found
+            if (!methods.Any())
+            {
+                throw new ArgumentException(string.Format("There is no method \"{0}\" for type \"{1}\".", strMethod,
+                    t));
+            }
+
+            MethodInfo methodToInvoke = null;
+            foreach (var method in methods)
+            {
+                var parameters = method.GetParameters();
+
+                // 检查参数个数和类型是否匹配
+                if (parameters.Length != aobjParams.Length) continue;
+                var matched = true;
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    // 处理参数类型兼容性，如果参数可以为null，可以放宽这里的检查
+                    if (aobjParams[i] == null || parameters[i].ParameterType.IsInstanceOfType(aobjParams[i])) continue;
+                    matched = false;
+                    break;
+                }
+
+                if (matched)
+                {
+                    methodToInvoke = method;
+                    break;
+                }
+            }
+
+            // 找到匹配的方法
+            if (methodToInvoke != null)
+            {
+                try
+                {
+                    var objRet = methodToInvoke.Invoke(objInstance, aobjParams);
+                    return objRet;
+                }
+                catch (TargetInvocationException ex)
+                {
+                    if (null != ex.InnerException)
+                    {
+                        throw ex.InnerException;
+                    }
+
+                    throw;
+                }
+            }
+
+            throw new ArgumentException(string.Format(
+                "No suitable overload found for method \"{0}\" with the specified parameter types.", strMethod));
         }
 
         private static object RunMethod(Type t, string strMethod, object objInstance, object[] aobjParams,
@@ -92,7 +169,7 @@ namespace aliyun_net_credentials_unit_tests
         public static object RunInstanceMethodAsync(Type t, string strMethod, object objInstance, object[] aobjParams)
         {
             BindingFlags eFlags = BindingFlags.Instance | BindingFlags.Public |
-                BindingFlags.NonPublic;
+                                  BindingFlags.NonPublic;
             return RunMethodAsync(t, strMethod,
                 objInstance, aobjParams, eFlags);
         }
@@ -114,10 +191,12 @@ namespace aliyun_net_credentials_unit_tests
                 {
                     task.Wait();
                 }
+
                 if (task.Status == TaskStatus.Faulted)
                 {
                     throw task.Exception;
                 }
+
                 return task.GetType().GetProperty("Result").GetValue(task, null);
             }
             catch (TargetInvocationException ex)
@@ -135,6 +214,7 @@ namespace aliyun_net_credentials_unit_tests
                 {
                     throw ex.InnerException;
                 }
+
                 throw;
             }
         }
@@ -166,6 +246,12 @@ namespace aliyun_net_credentials_unit_tests
                 default:
                     return "";
             }
+        }
+
+        public static void SetPrivateField(Type t, string fieldName, object obj, object value)
+        {
+            t.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(obj, value);
         }
     }
 }

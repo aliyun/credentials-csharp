@@ -48,7 +48,7 @@ namespace Aliyun.Credentials.Provider
             }
         }
 
-        private URLCredentialProvider(Builder builder)
+        private URLCredentialProvider(Builder builder): base(builder)
         {
             this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0) ? 5000 : builder.connectTimeout.Value;
             this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
@@ -64,7 +64,7 @@ namespace Aliyun.Credentials.Provider
             }
         }
 
-        public class Builder
+        public class Builder: SessionCredentialsProvider.Builder
         {
             internal string credentialsURI;
             internal int? connectTimeout;

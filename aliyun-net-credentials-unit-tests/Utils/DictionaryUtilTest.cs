@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-
 using Aliyun.Credentials.Utils;
-
 using Xunit;
 
 namespace aliyun_net_credentials_unit_tests.Utils
@@ -108,6 +106,53 @@ namespace aliyun_net_credentials_unit_tests.Utils
             DictionaryUtil.Pop(dic, "a");
             DictionaryUtil.Pop(dic, "c");
             Assert.Null(DictionaryUtil.Get(dic, "a"));
+        }
+
+        [Fact]
+        public void TransformDicToString_ValidDictionary_ReturnsCorrectString()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" },
+                { "key3", "value3" }
+            };
+
+            var result = DictionaryUtil.TransformDicToString(dic);
+
+            Assert.Equal("key1=value1;key2=value2;key3=value3", result);
+        }
+
+        [Fact]
+        public void TransformDicToString_EmptyDictionary_ReturnsEmptyString()
+        {
+            var dic = new Dictionary<string, string>();
+            var result = DictionaryUtil.TransformDicToString(dic);
+            Assert.Equal(string.Empty, result);
+        }
+
+        [Fact]
+        public void TransformDicToString_NullValuesInDictionary_ReturnsCorrectString()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "key1", null },
+                { "key2", "value2" },
+                { "key3", "value3" }
+            };
+
+            var result = DictionaryUtil.TransformDicToString(dic);
+            Assert.Equal("key1=;key2=value2;key3=value3", result);
+        }
+
+        [Fact]
+        public void TransformDicToString_NullDictionary_ThrowsArgumentNullException()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(
+                () => DictionaryUtil.TransformDicToString((Dictionary<string, string>)null)
+            );
+
+            Assert.Contains("Value cannot be null", exception.Message);
         }
     }
 }

@@ -112,7 +112,7 @@ namespace Aliyun.Credentials.Provider
             this.policy = policy;
         }
 
-        private RamRoleArnCredentialProvider(Builder builder)
+        private RamRoleArnCredentialProvider(Builder builder): base(builder)
         {
             this.durationSeconds = (builder.durationSeconds == null || builder.durationSeconds == 0) ? 3600 : builder.durationSeconds.Value;
             if (this.durationSeconds < 900)
@@ -155,7 +155,7 @@ namespace Aliyun.Credentials.Provider
             }
         }
 
-        public class Builder
+        public class Builder : SessionCredentialsProvider.Builder
         {
             internal int? durationSeconds;
             internal string roleSessionName;
