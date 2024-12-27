@@ -33,7 +33,6 @@ namespace Aliyun.Credentials.Provider
         /// The ARN of the OIDC IdP.
         /// </summary>
         private string oidcProviderArn;
-        private string oidcToken;
 
         /// <summary>
         /// The path of the OIDC token file.
@@ -89,7 +88,7 @@ namespace Aliyun.Credentials.Provider
             this.policy = policy;
         }
 
-        private OIDCRoleArnCredentialProvider(Builder builder)
+        private OIDCRoleArnCredentialProvider(Builder builder): base(builder)
         {
             this.durationSeconds = (builder.durationSeconds == null || builder.durationSeconds == 0) ? 3600 : builder.durationSeconds.Value;
             if (this.durationSeconds < 900)
@@ -118,7 +117,7 @@ namespace Aliyun.Credentials.Provider
             }
         }
 
-        public class Builder
+        public class Builder: SessionCredentialsProvider.Builder
         {
             internal int? durationSeconds;
             internal string roleSessionName;
@@ -234,7 +233,7 @@ namespace Aliyun.Credentials.Provider
 
         private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
-            oidcToken = AuthUtils.GetOIDCToken(oidcTokenFilePath);
+            var oidcToken = AuthUtils.GetOIDCToken(oidcTokenFilePath);
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
             httpRequest.AddUrlParameter("Action", "AssumeRoleWithOIDC");
@@ -302,7 +301,7 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
-            oidcToken = await AuthUtils.GetOIDCTokenAsync(oidcTokenFilePath);
+            var oidcToken = await AuthUtils.GetOIDCTokenAsync(oidcTokenFilePath);
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.SetCommonUrlParameters();
             httpRequest.AddUrlParameter("Action", "AssumeRoleWithOIDC");

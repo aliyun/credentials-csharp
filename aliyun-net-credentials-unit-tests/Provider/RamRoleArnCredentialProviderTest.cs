@@ -115,7 +115,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             {
                 Status = 200,
                 Encoding = "UTF-8",
-                Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
+                Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2039-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
                 "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
@@ -139,15 +139,43 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("test", resultAsync.AccessKeySecret);
             Assert.Equal("test", resultAsync.SecurityToken);
             Assert.Equal("ram_role_arn/static_ak", resultAsync.ProviderName);
-            Assert.Equal(1546304461000, resultAsync.Expiration);
+            Assert.Equal(2177456461000, resultAsync.Expiration);
             mockAsyncRefreshFunc.Verify(f => f(), Times.Once);
-
+            
+            // 返回未过期的cachedValue
             var result = supplier.Get();
-
             Assert.Equal("test", result.AccessKeyId);
             Assert.Equal("test", result.AccessKeySecret);
             Assert.Equal("test", result.SecurityToken);
-            Assert.Equal(1546304461000, result.Expiration);
+            Assert.Equal(2177456461000, result.Expiration);
+            
+            response = new HttpResponse("http://www.aliyun.com")
+            {
+                Status = 200,
+                Encoding = "UTF-8",
+                Content = Encoding.UTF8.GetBytes("{\"Credentials\":{\"Expiration\":\"2019-01-01T1:1:1Z\",\"AccessKeyId\":\"test\"," +
+                                                 "\"AccessKeySecret\":\"test\",\"SecurityToken\":\"test\"}}")
+            };
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
+            Assert.IsType<RefreshResult<CredentialModel>>(TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object }));
+            
+            mockRefreshResult = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(typeof(RamRoleArnCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
+            
+            mockRefreshFunc = new Mock<Func<RefreshResult<CredentialModel>>>();
+            mockRefreshFunc.Setup(f => f()).Returns(() => mockRefreshResult);
+            
+            mockAsyncRefreshFunc = new Mock<Func<Task<RefreshResult<CredentialModel>>>>();
+            mockAsyncRefreshFunc.Setup(f => f()).ReturnsAsync(mockRefreshResult);
+            
+            supplier = new RefreshCachedSupplier<CredentialModel>(
+                mockRefreshFunc.Object,
+                mockAsyncRefreshFunc.Object);
+            
+            var ex = await Assert.ThrowsAsync<CredentialException>(async () => { await supplier.GetAsync(); });
+            Assert.Equal("No cached value was found.", ex.Message);
+            
+            ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
+            Assert.Equal("No cached value was found.", ex.Message);
             mockRefreshFunc.Verify(f => f(), Times.Once);
         }
 
@@ -241,9 +269,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 mockSyncRefreshFunc.Object,
                 mockAsyncRefreshFunc.Object);
 
-            typeof(RefreshCachedSupplier<CredentialModel>)
-                .GetField("cachedValue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(supplier, new RefreshResult<CredentialModel>(new CredentialModel
+            TestHelper.SetPrivateField(typeof(RefreshCachedSupplier<CredentialModel>), "cachedValue", supplier,
+                new RefreshResult<CredentialModel>(new CredentialModel
                 {
                     AccessKeyId = "accessKeyId",
                     AccessKeySecret = "accessKeySecret",
@@ -260,9 +287,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
             mockAsyncRefreshFunc.Verify(f => f(), Times.Once);
 
             // 重置cachedValue
-            typeof(RefreshCachedSupplier<CredentialModel>)
-                .GetField("cachedValue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(supplier, new RefreshResult<CredentialModel>(new CredentialModel
+            TestHelper.SetPrivateField(typeof(RefreshCachedSupplier<CredentialModel>), "cachedValue", supplier,
+                new RefreshResult<CredentialModel>(new CredentialModel
                 {
                     AccessKeyId = "accessKeyId",
                     AccessKeySecret = "accessKeySecret",

@@ -18,6 +18,13 @@ namespace Aliyun.Credentials.Utils
             return date.ToUniversalTime()
                 .ToString(Iso8601DateFormat, CultureInfo.CreateSpecificCulture("en-US"));
         }
+        
+        public static string FormatIso8601Date(long date)
+        {
+            var unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var dateTime = unixEpoch.AddMilliseconds(date);
+            return dateTime.ToString(Iso8601DateFormat, CultureInfo.CreateSpecificCulture("en-US"));
+        }
 
         public static string GetRfc2616Date(DateTime datetime)
         {

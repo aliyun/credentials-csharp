@@ -86,7 +86,7 @@ namespace Aliyun.Credentials.Utils
             }
             catch (IOException e)
             {
-                Console.WriteLine(e.StackTrace);
+                throw new CredentialException(e.Message);
             }
             return oidcToken;
         }
@@ -117,7 +117,7 @@ namespace Aliyun.Credentials.Utils
             }
             catch (IOException e)
             {
-                Console.WriteLine(e.StackTrace);
+                throw new CredentialException(e.Message);
             }
             return oidcToken;
         }
