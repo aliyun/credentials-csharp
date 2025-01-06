@@ -1,3 +1,7 @@
+### 2025-01-06 Version 1.5.0
+* fix: record the complete chain and fix null return in profile provider
+* feat: upgrade the credential refresh mechanism and add fallbacks for error scenarios
+
 ### 2024-11-11 Version 1.4.3
 * fix: add providerName in provider 
 * fix: support provider in credential client 
