@@ -48,16 +48,16 @@ namespace Aliyun.Credentials
                 case AuthConstant.AccessKey:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
-                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
                         Type = AuthConstant.AccessKey,
                     });
                 case AuthConstant.Sts:
                     return new StaticCredentialsProvider(new CredentialModel
                     {
-                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
-                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
-                        SecurityToken = ParameterHelper.ValidateEnvNotEmpty(config.SecurityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty."),
+                        AccessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, Configure.Constants.EnvPrefix+ "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty."),
+                        AccessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, Configure.Constants.EnvPrefix+ "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty."),
+                        SecurityToken = ParameterHelper.ValidateEnvNotEmpty(config.SecurityToken, Configure.Constants.EnvPrefix + "SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty."),
                         Type = AuthConstant.Sts,
                     });
                 case AuthConstant.BeareaToken:

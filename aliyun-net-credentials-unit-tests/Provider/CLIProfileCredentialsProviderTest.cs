@@ -22,20 +22,20 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("AK", provider.GetProfileName());
             Assert.Equal("cli_profile", provider.GetProviderName());
 
-            var cacheProfile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
-            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "TEST");
+            var cacheProfile = Environment.GetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "PROFILE");
+            Environment.SetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "PROFILE", "TEST");
             provider = new CLIProfileCredentialsProvider();
             Assert.Equal("TEST", provider.GetProfileName());
-            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", cacheProfile);
+            Environment.SetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "PROFILE", cacheProfile);
 
             string path = TestHelper.GetCLIConfigFilePath("aliyun");
             provider = new CLIProfileCredentialsProvider();
             var credential = provider.GetCredentials(path);
             Assert.Equal("cli_profile/static_ak", credential.ProviderName);
 
-            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", "AK");
+            Environment.SetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "PROFILE", "AK");
             credential = provider.GetCredentials(path);
-            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_PROFILE", cacheProfile);
+            Environment.SetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "PROFILE", cacheProfile);
 
             path = TestHelper.GetCLIConfigFilePath("empty");
             var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials(path));
@@ -126,10 +126,10 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credentialsProvider = provider.ReloadCredentialsProvider(config, "RamRoleArnEnableVpc");
             Assert.True(credentialsProvider is RamRoleArnCredentialProvider);
             ex = Assert.Throws<CredentialException>(() => { credentialsProvider.GetCredentials(); });
-            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
+            Assert.Contains(string.Format("The request url is sts-vpc.{0}.{1}", Aliyun.Credentials.Configure.Constants.DefaultRegion, Aliyun.Credentials.Configure.Constants.DomainSuffix), ex.Message);
 
             exAsync = await Assert.ThrowsAsync<CredentialException>(async() => {await credentialsProvider.GetCredentialsAsync(); });
-            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
+            Assert.Contains(string.Format("The request url is sts-vpc.{0}.{1}", Aliyun.Credentials.Configure.Constants.DefaultRegion, Aliyun.Credentials.Configure.Constants.DomainSuffix), ex.Message);
 
             var ex1 = Assert.Throws<ArgumentNullException>(() => { provider.ReloadCredentialsProvider(config, "Invalid_RamRoleArn"); });
             Assert.Contains("AccessKeyId must not be null or empty.", ex1.Message);

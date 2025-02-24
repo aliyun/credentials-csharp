@@ -187,7 +187,7 @@ namespace aliyun_net_credentials_unit_tests
             var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message.Substring(startIndex, endIndex - startIndex + 1).Trim());
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
             AuthUtils.EnvironmentRoleArn = null;
             AuthUtils.EnvironmentOIDCProviderArn = null;

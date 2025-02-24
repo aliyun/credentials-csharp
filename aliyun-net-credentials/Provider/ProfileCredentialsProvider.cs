@@ -12,8 +12,8 @@ namespace Aliyun.Credentials.Provider
     /// <summary>
     /// Obtain the credential information from a configuration file.
     /// <list type="bullet">
-    /// <item><description>Linux: ~/.alibabacloud/credentials</description></item>
-    /// <item><description>Windows: C:\Users\USER_NAME\.alibabacloud\credentials</description></item>
+    /// <item><description>Linux: ~/xx/credentials</description></item>
+    /// <item><description>Windows: C:\Users\USER_NAME\xx\credentials</description></item>
     /// </list>
     /// </summary>
     public class ProfileCredentialsProvider : IAlibabaCloudCredentialsProvider

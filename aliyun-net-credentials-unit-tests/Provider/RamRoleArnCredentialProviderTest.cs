@@ -30,9 +30,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .RoleArn("roleArn")
                 .AccessKeyId("test")
                 .AccessKeySecret("test")
-                .STSEndpoint("sts.cn-hangzhou.aliyuncs.com")
+                .STSEndpoint(string.Format("sts.{0}.{1}", Aliyun.Credentials.Configure.Constants.DefaultRegion, Aliyun.Credentials.Configure.Constants.DomainSuffix))
                 .Build();
-            Assert.Equal("sts.cn-hangzhou.aliyuncs.com", provider.GetSTSEndpoint());
+            Assert.Equal(string.Format("sts.{0}.{1}", Aliyun.Credentials.Configure.Constants.DefaultRegion, Aliyun.Credentials.Configure.Constants.DomainSuffix), provider.GetSTSEndpoint());
             Assert.Equal("StaticAKCredentialsProvider", provider.CredentialsProvider.GetType().Name);
 
             provider = new RamRoleArnCredentialProvider.Builder()
@@ -43,7 +43,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .SecurityToken("test")
                 .ExternalId("test")
                 .Build();
-            Assert.Equal("sts.aliyuncs.com", provider.GetSTSEndpoint());
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, provider.GetSTSEndpoint());
             Assert.Equal("test", provider.GetExternalId());
             Assert.Equal("StaticSTSCredentialsProvider", provider.CredentialsProvider.GetType().Name);
         }
@@ -58,14 +58,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Dictionary<string, object> msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
 
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await supplier.GetAsync(); });
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
 
             IAlibabaCloudCredentialsProvider innerProvider = new StaticAKCredentialsProvider.Builder()
@@ -88,7 +88,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Specified access key is not found.", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("InvalidAccessKeyId.NotFound", msgMap.GetValueOrDefault("Code"));
         }
 

@@ -15,16 +15,16 @@ namespace Aliyun.Credentials.Provider
 
         public StaticSTSCredentialsProvider(Config config)
         {
-            securityToken = ParameterHelper.ValidateEnvNotEmpty(config.SecurityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty.");
-            accessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
-            accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
+            securityToken = ParameterHelper.ValidateEnvNotEmpty(config.SecurityToken, Configure.Constants.EnvPrefix + "SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty.");
+            accessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
+            accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
         }
 
         public StaticSTSCredentialsProvider(Builder builder)
         {
-            this.securityToken = ParameterHelper.ValidateEnvNotEmpty(builder.securityToken, "ALIBABA_CLOUD_SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty.");
-            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
-            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
+            this.securityToken = ParameterHelper.ValidateEnvNotEmpty(builder.securityToken, Configure.Constants.EnvPrefix + "SECURITY_TOKEN", "SecurityToken", "SecurityToken must not be null or empty.");
+            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
+            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeySecret, Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
         }
 
         public class Builder

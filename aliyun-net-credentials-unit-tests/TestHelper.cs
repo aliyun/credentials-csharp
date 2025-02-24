@@ -242,7 +242,7 @@ namespace aliyun_net_credentials_unit_tests
                 case "full":
                     return HomePath + Slash + "full_cli_config.json";
                 case "aliyun":
-                    return HomePath + Slash + ".aliyun/config.json";
+                    return HomePath + Slash + Aliyun.Credentials.Configure.Constants.ConfigStorePath + Slash + "config.json";
                 default:
                     return "";
             }

@@ -32,7 +32,7 @@ namespace Aliyun.Credentials.Provider
         /// </summary>
         private string roleSessionName = "credentials-csharp-" + (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
 
-        private string regionId = "cn-hangzhou";
+        private string regionId = Configure.Constants.DefaultRegion;
         private string policy;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Aliyun.Credentials.Provider
         /// <summary>
         /// Endpoint of RAM OpenAPI
         /// </summary>
-        private string STSEndpoint = "sts.aliyuncs.com";
+        private string STSEndpoint = Configure.Constants.StsDefaultEndpoint;
 
         private string externalId;
 
@@ -62,12 +62,12 @@ namespace Aliyun.Credentials.Provider
             {
                 CredentialsProvider = new StaticAKCredentialsProvider(config);
             }
-            roleArn = config.RoleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
+            roleArn = config.RoleArn ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN");
             connectTimeout = config.ConnectTimeout > 0 ? config.ConnectTimeout : connectTimeout;
             readTimeout = config.Timeout > 0 ? config.Timeout : readTimeout;
             durationSeconds = config.RoleSessionExpiration > 0 ? config.RoleSessionExpiration : durationSeconds;
             policy = config.Policy;
-            roleSessionName = config.RoleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? roleSessionName;
+            roleSessionName = config.RoleSessionName ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_SESSION_NAME") ?? roleSessionName;
             STSEndpoint = config.STSEndpoint ?? STSEndpoint;
             externalId = config.ExternalId;
         }
@@ -76,21 +76,21 @@ namespace Aliyun.Credentials.Provider
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleArn)
         {
             CredentialsProvider = new StaticAKCredentialsProvider(accessKeyId, accessKeySecret);
-            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
+            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN");
         }
 
         [Obsolete("Use builder instead.")]
         public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleArn)
         {
             CredentialsProvider = ParameterHelper.ValidateNotNull(provider, "Provider", "Must specify a previous credentials provider to asssume role.");
-            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
+            this.roleArn = roleArn ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN");
         }
 
         [Obsolete("Use builder instead.")]
         public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleArn, int durationSeconds,
             string roleSessionName) : this(provider, roleArn)
         {
-            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.durationSeconds = durationSeconds;
         }
 
@@ -98,7 +98,7 @@ namespace Aliyun.Credentials.Provider
         public RamRoleArnCredentialProvider(string accessKeyId, string accessKeySecret, string roleSessionName,
             string roleArn, string regionId, string policy) : this(accessKeyId, accessKeySecret, roleArn)
         {
-            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.regionId = regionId;
             this.policy = policy;
         }
@@ -107,7 +107,7 @@ namespace Aliyun.Credentials.Provider
         public RamRoleArnCredentialProvider(IAlibabaCloudCredentialsProvider provider, string roleSessionName,
                     string roleArn, string regionId, string policy) : this(provider, roleArn)
         {
-            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME") ?? this.roleSessionName;
+            this.roleSessionName = roleSessionName ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_SESSION_NAME") ?? this.roleSessionName;
             this.regionId = regionId;
             this.policy = policy;
         }
@@ -120,11 +120,11 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Session duration should be in the range of 900s - max session duration");
             }
             this.roleSessionName = string.IsNullOrEmpty(builder.roleSessionName)
-                ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_SESSION_NAME")
+                ? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_SESSION_NAME")
                     ?? "credentials-csharp-" + (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds
                 : builder.roleSessionName;
-            this.regionId = string.IsNullOrEmpty(builder.regionId) ? "cn-hangzhou" : builder.regionId;
-            this.roleArn = string.IsNullOrEmpty(builder.roleArn) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") : builder.roleArn;
+            this.regionId = string.IsNullOrEmpty(builder.regionId) ? Configure.Constants.DefaultRegion : builder.regionId;
+            this.roleArn = string.IsNullOrEmpty(builder.roleArn) ? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN") : builder.roleArn;
             this.policy = builder.policy;
             this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0) ? 5000 : builder.connectTimeout.Value;
             this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
@@ -132,7 +132,7 @@ namespace Aliyun.Credentials.Provider
             this.STSEndpoint = builder.stsEndpoint;
             if (string.IsNullOrEmpty(builder.stsEndpoint))
             {
-                this.STSEndpoint = string.Format("sts{0}.aliyuncs.com", AuthUtils.GetStsRegionWithVpc(builder.stsRegionId, builder.enableVpc));
+                this.STSEndpoint = string.Format("sts{0}.{1}", AuthUtils.GetStsRegionWithVpc(builder.stsRegionId, builder.enableVpc), Configure.Constants.DomainSuffix);
             }
             if (builder.credentialsProvider != null)
             {

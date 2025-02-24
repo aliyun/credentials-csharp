@@ -38,7 +38,7 @@ namespace Aliyun.Credentials.Provider
         {
             try
             {
-                string uriStr = credentialsURI ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI");
+                string uriStr = credentialsURI ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "CREDENTIALS_URI");
                 this.credentialsURI = new Uri(ParameterHelper.ValidateNotEmpty(uriStr, "credentialsURI", "Credentials URI must not be null or empty."));
 
             }
@@ -54,7 +54,7 @@ namespace Aliyun.Credentials.Provider
             this.readTimeout = (builder.readTimeout == null || builder.readTimeout <= 0) ? 10000 : builder.readTimeout.Value;
             try
             {
-                string uriStr = string.IsNullOrEmpty(builder.credentialsURI) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") : builder.credentialsURI;
+                string uriStr = string.IsNullOrEmpty(builder.credentialsURI) ? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "CREDENTIALS_URI") : builder.credentialsURI;
                 this.credentialsURI = new Uri(ParameterHelper.ValidateNotEmpty(uriStr, "credentialsURI", "Credentials URI must not be null or empty."));
 
             }

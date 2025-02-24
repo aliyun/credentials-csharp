@@ -16,7 +16,7 @@ namespace Aliyun.Credentials.Provider
     public class RsaKeyPairCredentialProvider : SessionCredentialsProvider
     {
         private int durationSeconds = 3600;
-        private string regionId = "cn-hangzhou";
+        private string regionId = Configure.Constants.DefaultRegion;
         private int connectTimeout = 1000;
         private int readTimeout = 1000;
 
@@ -70,7 +70,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");
+            httpRequest.Url = ParameterHelper.ComposeUrl(Configure.Constants.StsDefaultEndpoint, httpRequest.UrlParameters, "https");
             HttpResponse httpResponse = client.DoAction(httpRequest);
             if (httpResponse != null && httpResponse.Status != 200)
             {
@@ -121,7 +121,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.Method = MethodType.GET;
             httpRequest.ConnectTimeout = connectTimeout;
             httpRequest.ReadTimeout = readTimeout;
-            httpRequest.Url = ParameterHelper.ComposeUrl("sts.aliyuncs.com", httpRequest.UrlParameters, "https");
+            httpRequest.Url = ParameterHelper.ComposeUrl(Configure.Constants.StsDefaultEndpoint, httpRequest.UrlParameters, "https");
             HttpResponse httpResponse = await client.DoActionAsync(httpRequest);
             if (httpResponse != null && httpResponse.Status != 200)
             {

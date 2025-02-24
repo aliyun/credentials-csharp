@@ -15,20 +15,20 @@ namespace Aliyun.Credentials.Provider
     /// <summary>
     /// Obtain the credential information from a configuration file. The path of the configuration file varies based on the operating system:
     /// <list type="bullet">
-    /// <item><description>Linux: ~/.aliyun/config.json</description></item>
+    /// <item><description>Linux: ~/xx/config.json</description></item>
     /// <item><description>Windows: C:\Users\USER_NAME\.aliyun\config.json</description></item>
     /// </list>
     /// </summary>
     public class CLIProfileCredentialsProvider : IAlibabaCloudCredentialsProvider
     {
-        private readonly string CLI_CREDENTIALS_CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aliyun", "config.json");
+        private readonly string CLI_CREDENTIALS_CONFIG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), Aliyun.Credentials.Configure.Constants.ConfigStorePath, "config.json");
         private volatile IAlibabaCloudCredentialsProvider credentialsProvider;
         private volatile string currentProfileName;
         private readonly object credentialsProviderLock = new object();
 
         public CLIProfileCredentialsProvider(string profileName = null)
         {
-            currentProfileName = profileName ?? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
+            currentProfileName = profileName ?? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "PROFILE");
         }
 
         public CredentialModel GetCredentials()
@@ -42,7 +42,7 @@ namespace Aliyun.Credentials.Provider
             {
                 throw new CredentialException("Unable to get profile form empty CLI credentials file.");
             }
-            string refreshedProfileName = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
+            string refreshedProfileName = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "PROFILE");
 
             if (ShouldReloadCredentialsProvider(refreshedProfileName))
             {
@@ -79,7 +79,7 @@ namespace Aliyun.Credentials.Provider
             {
                 throw new CredentialException("Unable to get profile form empty CLI credentials file.");
             }
-            string refreshedProfileName = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
+            string refreshedProfileName = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "PROFILE");
 
             if (ShouldReloadCredentialsProvider(refreshedProfileName))
             {
@@ -116,7 +116,7 @@ namespace Aliyun.Credentials.Provider
             {
                 throw new CredentialException("Unable to get profile form empty CLI credentials file.");
             }
-            string refreshedProfileName = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE");
+            string refreshedProfileName = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "PROFILE");
 
             if (ShouldReloadCredentialsProvider(refreshedProfileName))
             {

@@ -34,7 +34,7 @@ namespace aliyun_net_credentials_unit_tests.Utils
 
             AuthUtils.EnvironmentAccessKeyId = "test";
             Assert.Equal("test", AuthUtils.EnvironmentAccessKeyId);
-            Environment.SetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID", null);
+            Environment.SetEnvironmentVariable(Aliyun.Credentials.Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", null);
             AuthUtils.EnvironmentAccessKeyId = cacheEnvironmentAccessKeyId;
 
             AuthUtils.EnvironmentAccesskeySecret = "test";
@@ -77,10 +77,10 @@ namespace aliyun_net_credentials_unit_tests.Utils
             Assert.Equal("", res);
             res = AuthUtils.GetStsRegionWithVpc(null, false);
             Assert.Equal("", res);
-            res = AuthUtils.GetStsRegionWithVpc("cn-hangzhou", true);
-            Assert.Equal("-vpc.cn-hangzhou", res);
-            res = AuthUtils.GetStsRegionWithVpc("cn-hangzhou", false);
-            Assert.Equal(".cn-hangzhou", res);
+            res = AuthUtils.GetStsRegionWithVpc(Aliyun.Credentials.Configure.Constants.DefaultRegion, true);
+            Assert.Equal(string.Format("-vpc.{0}", Aliyun.Credentials.Configure.Constants.DefaultRegion), res);
+            res = AuthUtils.GetStsRegionWithVpc(Aliyun.Credentials.Configure.Constants.DefaultRegion, false);
+            Assert.Equal(string.Format(".{0}", Aliyun.Credentials.Configure.Constants.DefaultRegion), res);
         }
     }
 }

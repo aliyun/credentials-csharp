@@ -16,20 +16,20 @@ namespace Aliyun.Credentials.Provider
 
         public StaticAKCredentialsProvider(Config config)
         {
-            accessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
-            accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
+            accessKeyId = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
+            accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(config.AccessKeySecret, Configure.Constants.EnvPrefix+ "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
         }
 
         public StaticAKCredentialsProvider(string accessKeyId, string accessKeySecret)
         {
-            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(accessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
-            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(accessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
+            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(accessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
+            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(accessKeySecret, Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
         }
 
         public StaticAKCredentialsProvider(Builder builder)
         {
-            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeyId, "ALIBABA_CLOUD_ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
-            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeySecret, "ALIBABA_CLOUD_ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
+            this.accessKeyId = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeyId, Configure.Constants.EnvPrefix + "ACCESS_KEY_ID", "AccessKeyId", "AccessKeyId must not be null or empty.");
+            this.accessKeySecret = ParameterHelper.ValidateEnvNotEmpty(builder.accessKeySecret, Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET", "AccessKeySecret", "AccessKeySecret must not be null or empty.");
         }
 
         public class Builder

@@ -26,6 +26,12 @@ jobs:
       run: cd aliyun-net-credentials-unit-tests/ && dotnet add package AltCover && cd ../ && dotnet restore && dotnet build
     - name: Setup OIDC
       run: npm install @actions/core@1.6.0 @actions/http-client
+    - name: Test
+      run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
+    - name: Upload code coverage report
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
     - name: Get Id Token
       uses: actions/github-script@v6
       id: idtoken
@@ -41,9 +47,3 @@ jobs:
         ALIBABA_CLOUD_OIDC_PROVIDER_ARN: ${{ secrets.ALIBABA_CLOUD_OIDC_PROVIDER_ARN }}
         ALIBABA_CLOUD_OIDC_TOKEN_FILE: "/tmp/oidc_token"
         ALIBABA_CLOUD_ROLE_ARN: ${{ secrets.ALIBABA_CLOUD_ROLE_ARN }}
-    - name: Test
-      run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
-    - name: Upload code coverage report
-      uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
