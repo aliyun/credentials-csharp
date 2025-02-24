@@ -182,7 +182,7 @@ namespace Aliyun.Credentials.Provider
 
         private void SetCredentialUrl()
         {
-            credentialUrl = "http://" + MetadataServiceHost + UrlInEcsMetadata + roleName;
+            credentialUrl = Configure.Constants.ECSIMDSSecurityCredURL + roleName;
         }
 
         public override RefreshResult<CredentialModel> RefreshCredentials()
@@ -232,7 +232,7 @@ namespace Aliyun.Credentials.Provider
             var metadataToken = GetMetadataToken(client);
             if (metadataToken != null)
             {
-                httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
+                httpRequest.Headers.Add(Configure.Constants.ECSIMDSHeaderPrefix + "ecs-metadata-token", metadataToken);
             }
 
             HttpResponse httpResponse;
@@ -268,11 +268,11 @@ namespace Aliyun.Credentials.Provider
         {
             try
             {
-                HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
+                HttpRequest httpRequest = new HttpRequest(Configure.Constants.ECSIMDSSecurityCredTokenURL);
                 httpRequest.Method = MethodType.PUT;
                 httpRequest.ConnectTimeout = this.connectTimeout;
                 httpRequest.ReadTimeout = this.readTimeout;
-                httpRequest.Headers.Add("X-aliyun-ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
+                httpRequest.Headers.Add(Configure.Constants.ECSIMDSHeaderPrefix + "ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
 
                 HttpResponse httpResponse;
                 try
@@ -310,11 +310,11 @@ namespace Aliyun.Credentials.Provider
         {
             try
             {
-                HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
+                HttpRequest httpRequest = new HttpRequest(Configure.Constants.ECSIMDSSecurityCredTokenURL);
                 httpRequest.Method = MethodType.PUT;
                 httpRequest.ConnectTimeout = this.connectTimeout;
                 httpRequest.ReadTimeout = this.readTimeout;
-                httpRequest.Headers.Add("X-aliyun-ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
+                httpRequest.Headers.Add(Configure.Constants.ECSIMDSHeaderPrefix + "ecs-metadata-token-ttl-seconds", metadataTokenDuration.ToString());
 
                 HttpResponse httpResponse;
                 try
@@ -368,7 +368,7 @@ namespace Aliyun.Credentials.Provider
             var metadataToken = await GetMetadataTokenAsync(client);
             if (metadataToken != null)
             {
-                httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
+                httpRequest.Headers.Add(Configure.Constants.ECSIMDSHeaderPrefix + "ecs-metadata-token", metadataToken);
             }
 
             HttpResponse httpResponse;
@@ -407,10 +407,10 @@ namespace Aliyun.Credentials.Provider
             var currentRoleName = this.roleName;
             if (string.IsNullOrWhiteSpace(this.roleName))
             {
-                currentRoleName = GetMetadata(client, "http://" + MetadataServiceHost + UrlInEcsMetadata);
+                currentRoleName = GetMetadata(client, Configure.Constants.ECSIMDSSecurityCredURL);
             }
 
-            var jsonContent = GetMetadata(client, "http://" + MetadataServiceHost + UrlInEcsMetadata + currentRoleName);
+            var jsonContent = GetMetadata(client, Configure.Constants.ECSIMDSSecurityCredURL + currentRoleName);
             var contentObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
 
             if (!"Success".Equals(contentObj.Get("Code")))
@@ -465,11 +465,11 @@ namespace Aliyun.Credentials.Provider
             var currentRoleName = this.roleName;
             if (string.IsNullOrWhiteSpace(this.roleName))
             {
-                currentRoleName = await GetMetadataAsync(client, "http://" + MetadataServiceHost + UrlInEcsMetadata);
+                currentRoleName = await GetMetadataAsync(client, Configure.Constants.ECSIMDSSecurityCredURL);
             }
 
             var jsonContent = await GetMetadataAsync(client,
-                "http://" + MetadataServiceHost + UrlInEcsMetadata + currentRoleName);
+                Configure.Constants.ECSIMDSSecurityCredURL + currentRoleName);
 
             var contentObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
 

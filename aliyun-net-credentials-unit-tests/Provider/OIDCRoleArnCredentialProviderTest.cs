@@ -55,14 +55,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
 
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
 
             provider = new OIDCRoleArnCredentialProvider.Builder()
@@ -77,14 +77,14 @@ namespace aliyun_net_credentials_unit_tests.Provider
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
 
             var supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
             ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
-            Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
+            Assert.Equal(Aliyun.Credentials.Configure.Constants.StsDefaultEndpoint, msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
         }
 

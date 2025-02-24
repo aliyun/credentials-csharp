@@ -37,7 +37,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             AuthUtils.ClientType = "client2-1";
             ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
-            Assert.Contains("The request url is sts-vpc.cn-hangzhou.aliyuncs.com", ex.Message);
+            Assert.Contains(string.Format("The request url is sts-vpc.{0}.{1}", Aliyun.Credentials.Configure.Constants.DefaultRegion, Aliyun.Credentials.Configure.Constants.DomainSuffix), ex.Message);
 
             AuthUtils.ClientType = "client4";
             AuthUtils.SetPrivateKey("test");

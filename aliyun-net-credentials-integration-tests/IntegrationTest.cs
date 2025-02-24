@@ -23,9 +23,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void ItegrationOIDCProviderTest()
         {
-            string roleArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN");
-            string providerArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN");
-            string tokenFilePath = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE");
+            string roleArn = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN");
+            string providerArn = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "OIDC_PROVIDER_ARN");
+            string tokenFilePath = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "OIDC_TOKEN_FILE");
 
             Config config = new Config
             {

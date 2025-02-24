@@ -4,9 +4,9 @@ namespace Aliyun.Credentials.Utils
 {
     public class AuthConstant
     {
-        public const string EnvAccessKeyId = "ALIBABA_CLOUD_ACCESS_KEY_ID";
-        public const string EnvAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET";
-        public const string EnvSecurityToken = "ALIBABA_CLOUD_SECURITY_TOKEN";
+        public const string EnvAccessKeyId = Configure.Constants.EnvPrefix + "ACCESS_KEY_ID";
+        public const string EnvAccessKeySecret = Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET";
+        public const string EnvSecurityToken = Configure.Constants.EnvPrefix + "SECURITY_TOKEN";
         public const string IniAccessKeyId = "access_key_id";
         public const string IniAccessKeyIdsecret = "access_key_secret";
         public const string IniType = "type";
@@ -58,7 +58,7 @@ namespace Aliyun.Credentials.Utils
         {
             string homePath = GetHomePath();
             string slash = GetOsSlash();
-            return homePath + slash + ".alibabacloud" + slash + "credentials.ini";
+            return homePath + slash + Configure.Constants.PATHCredentialFile + slash + "credentials.ini";
         }
     }
 }

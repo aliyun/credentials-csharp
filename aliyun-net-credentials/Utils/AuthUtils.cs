@@ -29,19 +29,19 @@ namespace Aliyun.Credentials.Utils
 
         AuthUtils()
         {
-            clientType = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_PROFILE") ?? clientType;
-            environmentAccessKeyId = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_ID") ?? environmentAccessKeyId;
-            environmentAccesskeySecret = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ACCESS_KEY_SECRET") ?? environmentAccesskeySecret;
-            environmentSecurityToken = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_SECURITY_TOKEN") ?? environmentSecurityToken;
-            environmentEcsMetaData = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA") ?? environmentEcsMetaData;
-            environmentEcsMetaDataDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_METADATA_DISABLED") ?? environmentEcsMetaDataDisabled;
-            environmentCredentialsFile = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_FILE") ?? environmentCredentialsFile;
-            environmentRoleArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ROLE_ARN") ?? environmentRoleArn;
-            environmentOIDCProviderArn = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_PROVIDER_ARN") ?? environmentOIDCProviderArn;
-            environmentOIDCTokenFilePath = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_OIDC_TOKEN_FILE") ?? environmentOIDCTokenFilePath;
-            environmentCLIProfileDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CLI_PROFILE_DISABLED") ?? environmentCLIProfileDisabled;
-            environmentCredentialsURI = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") ?? environmentCredentialsURI;
-            disableECSIMDSv1 = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_IMDSV1_DISABLED") ?? disableECSIMDSv1;
+            clientType = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "PROFILE") ?? clientType;
+            environmentAccessKeyId = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ACCESS_KEY_ID") ?? environmentAccessKeyId;
+            environmentAccesskeySecret = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ACCESS_KEY_SECRET") ?? environmentAccesskeySecret;
+            environmentSecurityToken = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "SECURITY_TOKEN") ?? environmentSecurityToken;
+            environmentEcsMetaData = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ECS_METADATA") ?? environmentEcsMetaData;
+            environmentEcsMetaDataDisabled = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ECS_METADATA_DISABLED") ?? environmentEcsMetaDataDisabled;
+            environmentCredentialsFile = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "CREDENTIALS_FILE") ?? environmentCredentialsFile;
+            environmentRoleArn = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "ROLE_ARN") ?? environmentRoleArn;
+            environmentOIDCProviderArn = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "OIDC_PROVIDER_ARN") ?? environmentOIDCProviderArn;
+            environmentOIDCTokenFilePath = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "OIDC_TOKEN_FILE") ?? environmentOIDCTokenFilePath;
+            environmentCLIProfileDisabled = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "CLI_PROFILE_DISABLED") ?? environmentCLIProfileDisabled;
+            environmentCredentialsURI = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "CREDENTIALS_URI") ?? environmentCredentialsURI;
+            disableECSIMDSv1 = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "IMDSV1_DISABLED") ?? disableECSIMDSv1;
         }
 
         public static string GetPrivateKey(string filePath)
@@ -124,8 +124,8 @@ namespace Aliyun.Credentials.Utils
 
         public static string GetStsRegionWithVpc(string stsRegionId, bool? enableVpc)
         {
-            string regionId = string.IsNullOrEmpty(stsRegionId) ? Environment.GetEnvironmentVariable("ALIBABA_CLOUD_STS_REGION") : stsRegionId;
-            var enable = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_VPC_ENDPOINT_ENABLED") ?? "";
+            string regionId = string.IsNullOrEmpty(stsRegionId) ? Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "STS_REGION") : stsRegionId;
+            var enable = Environment.GetEnvironmentVariable(Configure.Constants.EnvPrefix + "VPC_ENDPOINT_ENABLED") ?? "";
             bool enableVpcEnv = enable.ToLower() == "true";
             string isVpc = (enableVpc == null ? enableVpcEnv : (bool)enableVpc) ? "-vpc" : "";
             if (!string.IsNullOrEmpty(regionId))
