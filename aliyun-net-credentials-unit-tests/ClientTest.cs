@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using aliyun_net_credentials_unit_tests.Provider;
 using Aliyun.Credentials;
 using Aliyun.Credentials.Utils;
 using Aliyun.Credentials.Models;
@@ -185,10 +186,17 @@ namespace aliyun_net_credentials_unit_tests
             int endIndex = ex.Message.IndexOf("}", startIndex);
             startIndex += keyword.Length;
             var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message.Substring(startIndex, endIndex - startIndex + 1).Trim());
+#if NET45
+            Assert.NotNull(RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Message"));
+            Assert.Equal("sts.aliyuncs.com", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Code"));
+#else
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+#endif
             AuthUtils.EnvironmentRoleArn = null;
             AuthUtils.EnvironmentOIDCProviderArn = null;
             AuthUtils.EnvironmentOIDCTokenFilePath = null;

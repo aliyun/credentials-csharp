@@ -53,17 +53,30 @@ namespace aliyun_net_credentials_unit_tests.Provider
             OIDCRoleArnCredentialProvider provider = new OIDCRoleArnCredentialProvider(config);
             var ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             var msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+#if NET45
+            Assert.NotNull(RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Message"));
+            Assert.Equal("sts.aliyuncs.com", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Code"));
+#else
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
-
+#endif
             ex = await Assert.ThrowsAsync<CredentialException>(async () => { await provider.GetCredentialsAsync(); });
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+#if NET45
+            Assert.NotNull(RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Message"));
+            Assert.Equal("sts.aliyuncs.com", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Code"));
+#else
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+#endif
 
             provider = new OIDCRoleArnCredentialProvider.Builder()
                         .RoleArn(config.RoleArn)
@@ -75,17 +88,31 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             ex = Assert.Throws<CredentialException>(() => { provider.GetCredentials(); });
             msgMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(ex.Message);
+#if NET45
+            Assert.NotNull(RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Message"));
+            Assert.Equal("sts.aliyuncs.com", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Code"));
+#else
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+#endif
 
             var supplier = new RefreshCachedSupplier<CredentialModel>(new Func<RefreshResult<CredentialModel>>(provider.RefreshCredentials), new Func<Task<RefreshResult<CredentialModel>>>(provider.RefreshCredentialsAsync));
             ex = Assert.Throws<CredentialException>(() => { supplier.Get(); });
+#if NET45
+            Assert.NotNull(RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "RequestId"));
+            Assert.Equal("Parameter OIDCProviderArn is not valid", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Message"));
+            Assert.Equal("sts.aliyuncs.com", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "HostId"));
+            Assert.Equal("AuthenticationFail.NoPermission", RamRoleArnCredentialProviderTest.GetValueOrDefault(msgMap, "Code"));
+#else
             Assert.NotNull(msgMap.GetValueOrDefault("RequestId"));
             Assert.Equal("Parameter OIDCProviderArn is not valid", msgMap.GetValueOrDefault("Message"));
             Assert.Equal("sts.aliyuncs.com", msgMap.GetValueOrDefault("HostId"));
             Assert.Equal("AuthenticationFail.NoPermission", msgMap.GetValueOrDefault("Code"));
+#endif
         }
 
         [Fact]

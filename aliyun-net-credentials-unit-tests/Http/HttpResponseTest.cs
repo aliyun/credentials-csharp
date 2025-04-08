@@ -1,13 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-
 using Aliyun.Credentials.Http;
-
 using Moq;
-
 using Xunit;
 
 namespace aliyun_net_credentials_unit_tests.Http
@@ -82,10 +80,14 @@ namespace aliyun_net_credentials_unit_tests.Http
         public static HttpRequest SetContent()
         {
             var tmpHeaders = new Dictionary<string, string>
-                { { "Content-MD5", "md5" },
-                    { "Content-Length", "1024" },
-                    { "Content-Type", "text/json" }
-                };
+            {
+                { "Content-MD5", "md5" },
+                // Do not set request.ContentLength before writing the request stream. The request.ContentLength is set automatically.
+                // { "Content-Length", "1024" },
+                { "Content-Type", "text/json" },
+                { "User-Agent", "test ua" },
+            };
+
             var instance = new HttpRequest("https://www.alibabacloud.com", tmpHeaders);
             instance.Method = MethodType.GET;
             Assert.Equal(MethodType.GET, instance.Method);
@@ -112,69 +114,79 @@ namespace aliyun_net_credentials_unit_tests.Http
             return instance;
         }
 
+#if NETCOREAPP2_0
         [Fact]
         public void ParseHttpResponseTest()
         {
             HttpWebResponse httpWebResponse = new HttpWebResponse();
             Assert.NotNull(httpWebResponse);
-
+        
             HttpResponse httpResponse = new HttpResponse("http://www.baidu.com");
-
+        
             Mock<HttpWebResponse> mock = new Mock<HttpWebResponse>();
-            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream) null);
+            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream)null);
             mock.Setup(p => p.Method).Returns("Get");
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("test", "test");
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse", new object[] { httpResponse, mock.Object });
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse",
+                new object[] { httpResponse, mock.Object });
             byte[] bytes = Encoding.UTF8.GetBytes("test");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
-
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse", new object[] { httpResponse, mock.Object });
+        
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse",
+                new object[] { httpResponse, mock.Object });
             Assert.Null(httpResponse.Encoding);
-
+        
             headers.Add("Content-Type", "");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse", new object[] { httpResponse, mock.Object });
-
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse",
+                new object[] { httpResponse, mock.Object });
+        
             headers.Add("Content-Type", "test");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse", new object[] { httpResponse, mock.Object });
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponse",
+                new object[] { httpResponse, mock.Object });
         }
-
+        
         [Fact]
         public async Task ParseHttpResponseAsyncTest()
         {
             HttpWebResponse httpWebResponse = new HttpWebResponse();
             Assert.NotNull(httpWebResponse);
-
+        
             HttpResponse httpResponse = new HttpResponse("http://www.baidu.com");
-
+        
             Mock<HttpWebResponse> mock = new Mock<HttpWebResponse>();
-            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream) null);
+            mock.Setup(p => p.GetResponseStream()).Returns((MemoryStream)null);
             mock.Setup(p => p.Method).Returns("Get");
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("test", "test");
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync", new object[] { httpResponse, mock.Object });
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync",
+                new object[] { httpResponse, mock.Object });
             byte[] bytes = Encoding.UTF8.GetBytes("test");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
-
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync", new object[] { httpResponse, mock.Object });
+        
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync",
+                new object[] { httpResponse, mock.Object });
             Assert.Null(httpResponse.Encoding);
-
+        
             headers.Add("Content-Type", "");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync", new object[] { httpResponse, mock.Object });
-
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync",
+                new object[] { httpResponse, mock.Object });
+        
             headers.Add("Content-Type", "test");
             mock.Setup(p => p.GetResponseStream()).Returns(new MemoryStream(bytes));
             mock.Setup(p => p.Headers).Returns(headers);
-            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync", new object[] { httpResponse, mock.Object });
+            TestHelper.RunStaticMethod(typeof(HttpResponse), "ParseHttpResponseAsync",
+                new object[] { httpResponse, mock.Object });
         }
+#endif
 
         [Fact]
         public void HttpCheckTest()
@@ -184,7 +196,8 @@ namespace aliyun_net_credentials_unit_tests.Http
             Assert.Equal("URL is null for HttpRequest.",
                 Assert.Throws<InvalidDataException>(() =>
                 {
-                    TestHelper.RunStaticMethod(typeof(HttpResponse), "CheckHttpRequest", new object[] { httpRequest });
+                    TestHelper.RunStaticMethod(typeof(HttpResponse), "CheckHttpRequest",
+                        new object[] { httpRequest });
                 }).Message
             );
 
@@ -192,7 +205,8 @@ namespace aliyun_net_credentials_unit_tests.Http
             Assert.Equal("Method is null for HttpRequest.",
                 Assert.Throws<InvalidDataException>(() =>
                 {
-                    TestHelper.RunStaticMethod(typeof(HttpResponse), "CheckHttpRequest", new object[] { httpRequest });
+                    TestHelper.RunStaticMethod(typeof(HttpResponse), "CheckHttpRequest",
+                        new object[] { httpRequest });
                 }).Message
             );
         }

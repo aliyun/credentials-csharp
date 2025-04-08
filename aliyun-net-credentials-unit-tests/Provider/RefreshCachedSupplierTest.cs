@@ -7,22 +7,13 @@ using Aliyun.Credentials.Policy;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class RefreshCachedSupplierTest : IDisposable
     {
-        private readonly ITestOutputHelper output;
-
-        public RefreshCachedSupplierTest(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
-
         private RefreshResult<CredentialModel> RefreshFunc()
         {
-            Console.WriteLine("Refreshing credentials synchronously");
             return new RefreshResult<CredentialModel>.Builder(new CredentialModel { AccessKeyId = "newAccessKey" })
                 .StaleTime(DateTime.UtcNow.AddMinutes(10).GetTimeMillis())
                 .PrefetchTime(DateTime.UtcNow.AddMinutes(-10).GetTimeMillis())
@@ -32,7 +23,6 @@ namespace aliyun_net_credentials_unit_tests.Provider
         private async Task<RefreshResult<CredentialModel>> RefreshFuncAsync()
         {
             await Task.Delay(100);
-            Console.WriteLine("Refreshing credentials asynchronously");
             return new RefreshResult<CredentialModel>.Builder(new CredentialModel
                     { AccessKeyId = "newAccessKeyForAsync" })
                 .StaleTime(DateTime.UtcNow.AddMinutes(10).GetTimeMillis())

@@ -231,7 +231,7 @@ namespace Aliyun.Credentials.Provider
         internal Config ParseProfile(string configFilePath)
         {
             FileInfo configFile = new FileInfo(configFilePath);
-            if (!configFile.Exists || !configFile.Attributes.HasFlag(FileAttributes.Normal) || !IsFileReadable(configFile))
+            if (!configFile.Exists)
             {
                 throw new CredentialException(string.Format("Unable to open credentials file: {0}.", configFile.FullName));
             }
@@ -255,21 +255,6 @@ namespace Aliyun.Credentials.Provider
             catch (Exception)
             {
                 throw new CredentialException(string.Format("Failed to parse credential from CLI credentials file: {0}.", configFile.FullName));
-            }
-        }
-
-        private static bool IsFileReadable(FileInfo fileInfo)
-        {
-            try
-            {
-                using (FileStream stream = fileInfo.OpenRead())
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
             }
         }
 
