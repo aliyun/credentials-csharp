@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Utils;
 
@@ -18,7 +17,9 @@ namespace Aliyun.Credentials.Http
         private const int DefaultConnectTimeoutInMilliSeconds = 5000;
         private const int BufferLength = 1024;
 
-        public HttpResponse(string strUrl) : base(strUrl) { }
+        public HttpResponse(string strUrl) : base(strUrl)
+        {
+        }
 
         public int Status { get; set; }
 
@@ -91,7 +92,6 @@ namespace Aliyun.Credentials.Http
                         }
 
                         ms.Write(buffer, 0, length);
-
                     }
 
                     ms.Seek(0, SeekOrigin.Begin);
@@ -118,7 +118,6 @@ namespace Aliyun.Credentials.Http
                         }
 
                         await ms.WriteAsync(buffer, 0, length);
-
                     }
 
                     ms.Seek(0, SeekOrigin.Begin);
@@ -164,7 +163,6 @@ namespace Aliyun.Credentials.Http
                         string.Format("The request url is {0} {1}",
                             httpWebRequest.RequestUri == null ? "empty" : httpWebRequest.RequestUri.Host, ex));
                 }
-
             }
             catch (Exception ex)
             {
@@ -182,7 +180,6 @@ namespace Aliyun.Credentials.Http
             {
                 httpWebRequest.Timeout = (int)timeout;
             }
-
             HttpWebResponse httpWebResponse;
             var httpResponse = new HttpResponse(httpWebRequest.RequestUri.AbsoluteUri);
             try
@@ -207,7 +204,6 @@ namespace Aliyun.Credentials.Http
                         string.Format("The request url is {0} {1}",
                             httpWebRequest.RequestUri == null ? "empty" : httpWebRequest.RequestUri.Host, ex));
                 }
-
             }
             catch (Exception ex)
             {
@@ -244,6 +240,7 @@ namespace Aliyun.Credentials.Http
 
             foreach (var header in request.Headers)
             {
+                // deal with restricted headers on .NET Framework
                 if (header.Key.Equals("Content-Length"))
                 {
                     httpWebRequest.ContentLength = long.Parse(header.Value);
@@ -255,10 +252,16 @@ namespace Aliyun.Credentials.Http
                     httpWebRequest.ContentType = header.Value;
                     continue;
                 }
+                
+                if (header.Key.Equals("User-Agent"))
+                {
+                    httpWebRequest.UserAgent = header.Value;
+                    continue;
+                }
 
                 httpWebRequest.Headers.Add(header.Key, header.Value);
             }
-
+            
             if ((request.Method != MethodType.POST && request.Method != MethodType.PUT) || request.Content == null)
                 return httpWebRequest;
             using (var stream = httpWebRequest.GetRequestStream())
@@ -282,6 +285,7 @@ namespace Aliyun.Credentials.Http
 
             httpWebRequest.ReadWriteTimeout =
                 request.ReadTimeout > 0 ? request.ReadTimeout : DefaultReadTimeoutInMilliSeconds;
+            
 
             if (DictionaryUtil.Get(request.Headers, "Accept") != null)
             {
@@ -296,6 +300,7 @@ namespace Aliyun.Credentials.Http
 
             foreach (var header in request.Headers)
             {
+                // deal with restricted headers on .NET Framework
                 if (header.Key.Equals("Content-Length"))
                 {
                     httpWebRequest.ContentLength = long.Parse(header.Value);
@@ -305,6 +310,12 @@ namespace Aliyun.Credentials.Http
                 if (header.Key.Equals("Content-Type"))
                 {
                     httpWebRequest.ContentType = header.Value;
+                    continue;
+                }
+                
+                if (header.Key.Equals("User-Agent"))
+                {
+                    httpWebRequest.UserAgent = header.Value;
                     continue;
                 }
 

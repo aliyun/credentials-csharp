@@ -10,16 +10,14 @@ permissions:
   id-token: write
 
 jobs:
-  build:
-
+  build-ubuntu:
     runs-on: ubuntu-20.04
-
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '2.x'
+        dotnet-version: '3.x'
     - name: install altcover
       run: dotnet tool install --global altcover.visualizer --version  8.6.14
     - name: Install dependencies
@@ -42,8 +40,29 @@ jobs:
         ALIBABA_CLOUD_OIDC_TOKEN_FILE: "/tmp/oidc_token"
         ALIBABA_CLOUD_ROLE_ARN: ${{ secrets.ALIBABA_CLOUD_ROLE_ARN }}
     - name: Test
-      run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true
+      run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true --framework netcoreapp3.1
     - name: Upload code coverage report
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        
+  build-windows:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        framework: [net45, netcoreapp3.1]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '3.x'
+
+      - name: Restore dependencies
+        run: dotnet restore aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj
+        
+      - name: Ensure Tests Compile
+        run: dotnet build aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --configuration Debug --framework ${{ matrix.framework }}
+
+      - name: Run Unit Tests
+        run: dotnet test aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --no-build --logger "trx;LogFileName=TestResults_${{ matrix.framework }}.trx" --framework ${{ matrix.framework }}

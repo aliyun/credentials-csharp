@@ -23,13 +23,15 @@ namespace aliyun_net_credentials_unit_tests
             {
                 AccessKeyId = "newPublicKeyId",
                 AccessKeySecret = "newPrivateKeySecret",
-                Expiration = DateTimeOffset.UtcNow.AddMinutes(5).ToUnixTimeMilliseconds()
+                // Expiration = DateTimeOffset.UtcNow.AddMinutes(5).ToUnixTimeMilliseconds()
+                Expiration = (long)(DateTimeOffset.UtcNow.AddMinutes(5) - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalMilliseconds
             };
             mockProvider.Setup(p => p.GetCredentials()).Returns(credentialModel);
             mockProvider.Setup(p => p.GetCredentialsAsync()).ReturnsAsync(credentialModel);
 
             // 凭证过期
-            var staleExpiration = DateTimeOffset.UtcNow.AddMinutes(-5).ToUnixTimeMilliseconds();
+            // var staleExpiration = DateTimeOffset.UtcNow.AddMinutes(-5).ToUnixTimeMilliseconds();
+            var staleExpiration = (long)(DateTimeOffset.UtcNow.AddMinutes(-5) - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalMilliseconds;
             var rsaKeyPairCredential = new RsaKeyPairCredential("publicKeyId", "privateKeySecret", staleExpiration, mockProvider.Object);
 
             rsaKeyPairCredential.RefreshCredential();
