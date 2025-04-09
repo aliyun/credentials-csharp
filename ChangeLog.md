@@ -1,3 +1,6 @@
+### 2025-04-09 Version 1.5.1
+* fix: handling restricted request headers
+
 ### 2025-01-06 Version 1.5.0
 * fix: record the complete chain and fix null return in profile provider
 * feat: upgrade the credential refresh mechanism and add fallbacks for error scenarios
