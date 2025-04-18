@@ -115,6 +115,20 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("static_ak", credential.ProviderName);
             Assert.Null(credential.SecurityToken);
 
+            credentialsProvider = provider.ReloadCredentialsProvider(config, "StsToken");
+            Assert.True(credentialsProvider is StaticSTSCredentialsProvider);
+            credential = credentialsProvider.GetCredentials();
+            Assert.Equal("accessKeyId", credential.AccessKeyId);
+            Assert.Equal("accessKeySecret", credential.AccessKeySecret);
+            Assert.Equal("stsToken", credential.SecurityToken);
+            Assert.Equal("static_sts", credential.ProviderName);
+
+            credential = await credentialsProvider.GetCredentialsAsync();
+            Assert.Equal("accessKeyId", credential.AccessKeyId);
+            Assert.Equal("accessKeySecret", credential.AccessKeySecret);
+            Assert.Equal("static_sts", credential.ProviderName);
+            Assert.Equal("stsToken", credential.SecurityToken);
+
             credentialsProvider = provider.ReloadCredentialsProvider(config, "RamRoleArn");
             Assert.True(credentialsProvider is RamRoleArnCredentialProvider);
             ex = Assert.Throws<CredentialException>(() => { credentialsProvider.GetCredentials(); });
