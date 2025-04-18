@@ -160,20 +160,18 @@ namespace Aliyun.Credentials.Provider
                         switch (profile.GetMode())
                         {
                             case "AK":
-                                CredentialModel credentialModel = new CredentialModel
-                                {
-                                    AccessKeyId = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null or emptry."),
-                                    AccessKeySecret = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null or empty."),
-                                    Type = AuthConstant.AccessKey
-                                };
-                                Models.Config credentialsConfig = new Models.Config
-                                {
-                                    AccessKeyId = profile.GetAccessKeyId(),
-                                    AccessKeySecret = profile.GetAccessKeySecret()
-                                };
-                                return new StaticAKCredentialsProvider(credentialsConfig);
+                                return new StaticAKCredentialsProvider.Builder()
+                                    .AccessKeyId(profile.GetAccessKeyId())
+                                    .AccessKeySecret(profile.GetAccessKeySecret())
+                                    .Build();
+                            case "StsToken":
+                                return new StaticSTSCredentialsProvider.Builder()
+                                    .AccessKeyId(profile.GetAccessKeyId())
+                                    .AccessKeySecret(profile.GetAccessKeySecret())
+                                    .SecurityToken(profile.GetSecurityToken())
+                                    .Build();
                             case "RamRoleArn":
-                                credentialModel = new CredentialModel
+                                CredentialModel credentialModel = new CredentialModel
                                 {
                                     AccessKeyId = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeyId(), "AccessKeyId", "AccessKeyId must not be null or empty."),
                                     AccessKeySecret = ParameterHelper.ValidateNotEmpty(profile.GetAccessKeySecret(), "AccessKeySecret", "AccessKeySecret must not be null or empty."),
@@ -296,6 +294,8 @@ namespace Aliyun.Credentials.Provider
             private readonly string accessKeyId;
             [JsonProperty("access_key_secret")]
             private readonly string accessKeySecret;
+            [JsonProperty("sts_token")]
+            private readonly string securityToken;
             [JsonProperty("ram_role_arn")]
             private readonly string roleArn;
             [JsonProperty("ram_session_name")]
@@ -338,6 +338,11 @@ namespace Aliyun.Credentials.Provider
             public string GetAccessKeySecret()
             {
                 return accessKeySecret;
+            }
+
+            public string GetSecurityToken()
+            {
+                return securityToken;
             }
 
             public string GetRoleArn()
