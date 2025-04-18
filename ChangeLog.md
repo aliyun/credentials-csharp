@@ -1,3 +1,6 @@
+### 2025-04-18 Version 1.5.2
+* feat: support StsToken mode in cli profile
+
 ### 2025-04-09 Version 1.5.1
 * fix: handling restricted request headers
 
