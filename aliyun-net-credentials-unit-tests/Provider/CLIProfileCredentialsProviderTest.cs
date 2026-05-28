@@ -168,6 +168,17 @@ namespace aliyun_net_credentials_unit_tests.Provider
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "ChainableRamRoleArn2"); });
             Assert.Contains("Unable to get profile with 'InvalidSource' form CLI credentials file.", ex.Message);
 
+            credentialsProvider = provider.ReloadCredentialsProvider(config, "CloudSSO");
+            Assert.True(credentialsProvider is CloudSSOCredentialProvider);
+            Assert.Equal("cloud_sso", ((CloudSSOCredentialProvider)credentialsProvider).GetProviderName());
+
+            credentialsProvider = provider.ReloadCredentialsProvider(config, "OAuth");
+            Assert.True(credentialsProvider is OAuthCredentialProvider);
+            Assert.Equal("oauth", ((OAuthCredentialProvider)credentialsProvider).GetProviderName());
+
+            ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "OAuth_InvalidSite"); });
+            Assert.Contains("Invalid OAuth site type, support CN or INTL.", ex.Message);
+
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "Unsupported"); });
             Assert.Contains("Unsupported profile mode 'Unsupported' form CLI credentials file.", ex.Message);
         }
