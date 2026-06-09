@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Http;
@@ -133,9 +132,9 @@ namespace Aliyun.Credentials.Provider
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
             string body = string.Format("grant_type=refresh_token&refresh_token={0}&client_id={1}&Timestamp={2}",
-                HttpUtility.UrlEncode(this.refreshToken),
-                HttpUtility.UrlEncode(this.clientId),
-                HttpUtility.UrlEncode(timestamp));
+                Uri.EscapeDataString(this.refreshToken),
+                Uri.EscapeDataString(this.clientId),
+                Uri.EscapeDataString(timestamp));
 
             HttpRequest httpRequest = new HttpRequest(requestUrl);
             httpRequest.Method = MethodType.POST;
@@ -160,8 +159,8 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Failed to refresh OAuth token: empty response.");
             }
 
-            string newAccessToken = tokenResp.ContainsKey("access_token") ? tokenResp["access_token"]?.ToString() : null;
-            string newRefreshToken = tokenResp.ContainsKey("refresh_token") ? tokenResp["refresh_token"]?.ToString() : null;
+            string newAccessToken = GetString(tokenResp, "access_token");
+            string newRefreshToken = GetString(tokenResp, "refresh_token");
             long expiresIn = tokenResp.ContainsKey("expires_in") ? Convert.ToInt64(tokenResp["expires_in"]) : 3600;
 
             if (string.IsNullOrEmpty(newAccessToken) || string.IsNullOrEmpty(newRefreshToken))
@@ -172,7 +171,7 @@ namespace Aliyun.Credentials.Provider
 
             this.accessToken = newAccessToken;
             this.refreshToken = newRefreshToken;
-            this.accessTokenExpire = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + expiresIn;
+            this.accessTokenExpire = GetUnixTimeSeconds() + expiresIn;
         }
 
         private async Task TryRefreshOAuthTokenAsync(IConnClient client)
@@ -182,9 +181,9 @@ namespace Aliyun.Credentials.Provider
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
             string body = string.Format("grant_type=refresh_token&refresh_token={0}&client_id={1}&Timestamp={2}",
-                HttpUtility.UrlEncode(this.refreshToken),
-                HttpUtility.UrlEncode(this.clientId),
-                HttpUtility.UrlEncode(timestamp));
+                Uri.EscapeDataString(this.refreshToken),
+                Uri.EscapeDataString(this.clientId),
+                Uri.EscapeDataString(timestamp));
 
             HttpRequest httpRequest = new HttpRequest(requestUrl);
             httpRequest.Method = MethodType.POST;
@@ -209,8 +208,8 @@ namespace Aliyun.Credentials.Provider
                 throw new CredentialException("Failed to refresh OAuth token: empty response.");
             }
 
-            string newAccessToken = tokenResp.ContainsKey("access_token") ? tokenResp["access_token"]?.ToString() : null;
-            string newRefreshToken = tokenResp.ContainsKey("refresh_token") ? tokenResp["refresh_token"]?.ToString() : null;
+            string newAccessToken = GetString(tokenResp, "access_token");
+            string newRefreshToken = GetString(tokenResp, "refresh_token");
             long expiresIn = tokenResp.ContainsKey("expires_in") ? Convert.ToInt64(tokenResp["expires_in"]) : 3600;
 
             if (string.IsNullOrEmpty(newAccessToken) || string.IsNullOrEmpty(newRefreshToken))
@@ -221,12 +220,12 @@ namespace Aliyun.Credentials.Provider
 
             this.accessToken = newAccessToken;
             this.refreshToken = newRefreshToken;
-            this.accessTokenExpire = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + expiresIn;
+            this.accessTokenExpire = GetUnixTimeSeconds() + expiresIn;
         }
 
         private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long now = GetUnixTimeSeconds();
             if (!string.IsNullOrEmpty(this.refreshToken)
                 && (string.IsNullOrEmpty(this.accessToken) || this.accessTokenExpire == 0
                     || this.accessTokenExpire - now <= 1200))
@@ -261,10 +260,10 @@ namespace Aliyun.Credentials.Provider
                     "Get session token from OAuth failed, result: {0}.", httpResponse.GetHttpContentString()));
             }
 
-            string accessKeyId = map.ContainsKey("accessKeyId") ? map["accessKeyId"]?.ToString() : null;
-            string accessKeySecret = map.ContainsKey("accessKeySecret") ? map["accessKeySecret"]?.ToString() : null;
-            string securityToken = map.ContainsKey("securityToken") ? map["securityToken"]?.ToString() : null;
-            string expirationStr = map.ContainsKey("expiration") ? map["expiration"]?.ToString() : null;
+            string accessKeyId = GetString(map, "accessKeyId");
+            string accessKeySecret = GetString(map, "accessKeySecret");
+            string securityToken = GetString(map, "securityToken");
+            string expirationStr = GetString(map, "expiration");
 
             if (string.IsNullOrEmpty(accessKeyId) || string.IsNullOrEmpty(accessKeySecret)
                 || string.IsNullOrEmpty(securityToken))
@@ -306,7 +305,7 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long now = GetUnixTimeSeconds();
             if (!string.IsNullOrEmpty(this.refreshToken)
                 && (string.IsNullOrEmpty(this.accessToken) || this.accessTokenExpire == 0
                     || this.accessTokenExpire - now <= 1200))
@@ -341,10 +340,10 @@ namespace Aliyun.Credentials.Provider
                     "Get session token from OAuth failed, result: {0}.", httpResponse.GetHttpContentString()));
             }
 
-            string accessKeyId = map.ContainsKey("accessKeyId") ? map["accessKeyId"]?.ToString() : null;
-            string accessKeySecret = map.ContainsKey("accessKeySecret") ? map["accessKeySecret"]?.ToString() : null;
-            string securityToken = map.ContainsKey("securityToken") ? map["securityToken"]?.ToString() : null;
-            string expirationStr = map.ContainsKey("expiration") ? map["expiration"]?.ToString() : null;
+            string accessKeyId = GetString(map, "accessKeyId");
+            string accessKeySecret = GetString(map, "accessKeySecret");
+            string securityToken = GetString(map, "securityToken");
+            string expirationStr = GetString(map, "expiration");
 
             if (string.IsNullOrEmpty(accessKeyId) || string.IsNullOrEmpty(accessKeySecret)
                 || string.IsNullOrEmpty(securityToken))
@@ -387,6 +386,20 @@ namespace Aliyun.Credentials.Provider
         public override string GetProviderName()
         {
             return "oauth";
+        }
+
+        private static string GetString(Dictionary<string, object> values, string key)
+        {
+            if (values == null || !values.ContainsKey(key) || values[key] == null)
+            {
+                return null;
+            }
+            return values[key].ToString();
+        }
+
+        private static long GetUnixTimeSeconds()
+        {
+            return DateTime.UtcNow.GetTimeMillis() / 1000;
         }
     }
 }

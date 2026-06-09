@@ -24,7 +24,7 @@ namespace Aliyun.Credentials.Provider
 
         private CloudSSOCredentialProvider(Builder builder) : base(builder)
         {
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long now = DateTime.UtcNow.GetTimeMillis() / 1000;
             if (string.IsNullOrEmpty(builder.accessToken) || builder.accessTokenExpire == 0
                 || builder.accessTokenExpire - now <= 0)
             {

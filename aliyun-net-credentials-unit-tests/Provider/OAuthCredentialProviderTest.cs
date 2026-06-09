@@ -14,6 +14,11 @@ namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class OAuthCredentialProviderTest
     {
+        private static long UnixTimeSeconds()
+        {
+            return DateTime.UtcNow.GetTimeMillis() / 1000;
+        }
+
         [Fact]
         public void TestBuilderValidation()
         {
@@ -47,7 +52,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
             Assert.NotNull(provider);
         }
@@ -59,7 +64,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -92,7 +97,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -125,7 +130,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -229,7 +234,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .TokenUpdateCallback((refreshToken, accessToken, accessKeyId, accessKeySecret,
                     securityToken, accessTokenExpire, stsExpire) =>
                 {
@@ -265,7 +270,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .TokenUpdateCallback((refreshToken, accessToken, accessKeyId, accessKeySecret,
                     securityToken, accessTokenExpire, stsExpire) =>
                 {
@@ -299,7 +304,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 10000)
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -324,7 +329,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .ClientId("client123")
                 .SignInUrl("https://oauth.aliyun.com")
                 .AccessToken("access_token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Assert.Equal("oauth", provider.GetProviderName());

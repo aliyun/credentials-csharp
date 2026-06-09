@@ -148,7 +148,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (Exception ex)
             {
-                throw new CredentialException("failed to execute external command: " + ex.Message, ex);
+                throw new CredentialException("failed to execute external command: " + ex.Message);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Aliyun.Credentials.Provider
             }
             catch (Exception ex)
             {
-                throw new CredentialException("failed to parse external command output: " + ex.Message, ex);
+                throw new CredentialException("failed to parse external command output: " + ex.Message);
             }
 
             string accessKeyId = GetString(response, "access_key_id");
@@ -226,7 +226,7 @@ namespace Aliyun.Credentials.Provider
             {
                 return true;
             }
-            return this.expirationTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds() <= ExpirationSlotSeconds;
+            return this.expirationTimestamp - DateTime.UtcNow.GetTimeMillis() / 1000 <= ExpirationSlotSeconds;
         }
 
         private void InvokeCredentialUpdateCallback(CredentialModel refreshed)

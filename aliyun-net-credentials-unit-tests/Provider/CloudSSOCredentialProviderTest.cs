@@ -14,6 +14,11 @@ namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class CloudSSOCredentialProviderTest
     {
+        private static long UnixTimeSeconds()
+        {
+            return DateTime.UtcNow.GetTimeMillis() / 1000;
+        }
+
         [Fact]
         public void TestBuilderValidation()
         {
@@ -31,7 +36,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                     .AccountId("account123")
                     .AccessConfig("config123")
                     .AccessToken("")
-                    .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                    .AccessTokenExpire(UnixTimeSeconds() + 1000)
                     .Build());
             Assert.Contains("CloudSSO access token is empty or expired", ex.Message);
 
@@ -48,7 +53,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             ex = Assert.Throws<CredentialException>(() =>
                 new CloudSSOCredentialProvider.Builder()
                     .AccessToken("token")
-                    .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                    .AccessTokenExpire(UnixTimeSeconds() + 1000)
                     .Build());
             Assert.Contains("CloudSSO sign in url, account id, and access config cannot be empty", ex.Message);
 
@@ -56,7 +61,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 new CloudSSOCredentialProvider.Builder()
                     .SignInUrl("https://signin.aliyuncs.com")
                     .AccessToken("token")
-                    .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                    .AccessTokenExpire(UnixTimeSeconds() + 1000)
                     .Build());
             Assert.Contains("CloudSSO sign in url, account id, and access config cannot be empty", ex.Message);
 
@@ -65,7 +70,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                     .SignInUrl("https://signin.aliyuncs.com")
                     .AccountId("account123")
                     .AccessToken("token")
-                    .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                    .AccessTokenExpire(UnixTimeSeconds() + 1000)
                     .Build());
             Assert.Contains("CloudSSO sign in url, account id, and access config cannot be empty", ex.Message);
         }
@@ -78,7 +83,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -112,7 +117,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -146,7 +151,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -172,7 +177,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -198,7 +203,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Mock<IConnClient> mock = new Mock<IConnClient>();
@@ -224,7 +229,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 .AccountId("account123")
                 .AccessConfig("config123")
                 .AccessToken("token")
-                .AccessTokenExpire(DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1000)
+                .AccessTokenExpire(UnixTimeSeconds() + 1000)
                 .Build();
 
             Assert.Equal("cloud_sso", provider.GetProviderName());
