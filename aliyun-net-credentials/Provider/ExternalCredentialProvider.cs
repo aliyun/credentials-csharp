@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -206,14 +205,16 @@ namespace Aliyun.Credentials.Provider
             {
                 return 0;
             }
-            DateTime dateTime;
-            if (!DateTime.TryParseExact(expiration, "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                out dateTime))
+            try
+            {
+                string cleanExpiration = expiration.Replace('T', ' ').Replace('Z', ' ');
+                DateTime dateTime = Convert.ToDateTime(cleanExpiration);
+                return dateTime.GetTimeMillis();
+            }
+            catch (Exception)
             {
                 return 0;
             }
-            return dateTime.GetTimeMillis();
         }
 
         private bool NeedUpdateCredential()
