@@ -23,7 +23,7 @@ namespace Aliyun.Credentials.Provider
         private readonly string signInUrl;
         private volatile string refreshToken;
         private volatile string accessToken;
-        private volatile long accessTokenExpire;
+        private long accessTokenExpire;
         private readonly int connectTimeout;
         private readonly int readTimeout;
         private readonly OAuthTokenUpdateCallback tokenUpdateCallback;

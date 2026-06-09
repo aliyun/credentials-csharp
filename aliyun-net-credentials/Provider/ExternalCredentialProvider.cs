@@ -24,7 +24,7 @@ namespace Aliyun.Credentials.Provider
         private readonly ExternalCredentialUpdateCallback credentialUpdateCallback;
         private readonly object refreshLock = new object();
         private volatile CredentialModel credential;
-        private volatile long expirationTimestamp;
+        private long expirationTimestamp;
 
         private ExternalCredentialProvider(Builder builder)
         {
