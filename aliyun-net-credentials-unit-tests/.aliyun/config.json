@@ -100,7 +100,7 @@
       {
         "name": "External",
         "mode": "External",
-        "process_command": "/bin/echo {\"mode\":\"AK\",\"access_key_id\":\"externalAk\",\"access_key_secret\":\"externalSk\"}"
+        "process_command": "/usr/bin/printf \\173\\042mode\\042:\\042AK\\042,\\042access_key_id\\042:\\042externalAk\\042,\\042access_key_secret\\042:\\042externalSk\\042\\175"
       },
       {
         "name": "Unsupported",

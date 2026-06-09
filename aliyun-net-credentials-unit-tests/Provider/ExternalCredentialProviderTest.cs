@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Provider;
@@ -9,6 +10,26 @@ namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class ExternalCredentialProviderTest
     {
+        private static string CreateScript(string json)
+        {
+            string scriptPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".sh");
+            File.WriteAllText(scriptPath, "#!/bin/sh\nprintf '%s\\n' '" + json.Replace("'", "'\\''") + "'\n");
+            using (var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "/bin/chmod",
+                    Arguments = "+x " + scriptPath,
+                    UseShellExecute = false
+                }
+            })
+            {
+                process.Start();
+                process.WaitForExit();
+            }
+            return scriptPath;
+        }
+
         [Fact]
         public void TestBuilderValidation()
         {
@@ -20,8 +41,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void TestGetCredentialsAK()
         {
+            string scriptPath = CreateScript("{\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}");
             var provider = new ExternalCredentialProvider.Builder()
-                .ProcessCommand("/bin/echo {\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}")
+                .ProcessCommand(scriptPath)
                 .Build();
 
             var credential = provider.GetCredentials();
@@ -36,8 +58,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         {
             string capturedToken = null;
             long capturedExpiration = 0;
+            string scriptPath = CreateScript("{\"mode\":\"StsToken\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\",\"sts_token\":\"token\",\"expiration\":\"2049-10-20T04:27:09Z\"}");
             var provider = new ExternalCredentialProvider.Builder()
-                .ProcessCommand("/bin/echo {\"mode\":\"StsToken\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\",\"sts_token\":\"token\",\"expiration\":\"2049-10-20T04:27:09Z\"}")
+                .ProcessCommand(scriptPath)
                 .CredentialUpdateCallback((accessKeyId, accessKeySecret, securityToken, expiration) =>
                 {
                     capturedToken = securityToken;
@@ -57,8 +80,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         public void TestRefreshEveryCallWithoutExpiration()
         {
             int callbackCount = 0;
+            string scriptPath = CreateScript("{\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}");
             var provider = new ExternalCredentialProvider.Builder()
-                .ProcessCommand("/bin/echo {\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}")
+                .ProcessCommand(scriptPath)
                 .CredentialUpdateCallback((accessKeyId, accessKeySecret, securityToken, expiration) =>
                 {
                     callbackCount++;
@@ -73,8 +97,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void TestMissingStsToken()
         {
+            string scriptPath = CreateScript("{\"mode\":\"StsToken\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}");
             var provider = new ExternalCredentialProvider.Builder()
-                .ProcessCommand("/bin/echo {\"mode\":\"StsToken\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}")
+                .ProcessCommand(scriptPath)
                 .Build();
 
             var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials());
@@ -84,8 +109,9 @@ namespace aliyun_net_credentials_unit_tests.Provider
         [Fact]
         public void TestCallbackExceptionIgnored()
         {
+            string scriptPath = CreateScript("{\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}");
             var provider = new ExternalCredentialProvider.Builder()
-                .ProcessCommand("/bin/echo {\"mode\":\"AK\",\"access_key_id\":\"ak\",\"access_key_secret\":\"sk\"}")
+                .ProcessCommand(scriptPath)
                 .CredentialUpdateCallback((accessKeyId, accessKeySecret, securityToken, expiration) =>
                 {
                     throw new Exception("callback error");

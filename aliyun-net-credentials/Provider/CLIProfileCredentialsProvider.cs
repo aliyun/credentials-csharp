@@ -482,7 +482,7 @@ namespace Aliyun.Credentials.Provider
             [JsonProperty("access_token")]
             private readonly string accessToken;
             [JsonProperty("cloud_sso_access_token_expire")]
-            private readonly long accessTokenExpire;
+            private readonly long? accessTokenExpire;
             [JsonProperty("oauth_site_type")]
             private readonly string oauthSiteType;
             [JsonProperty("oauth_refresh_token")]
@@ -490,11 +490,11 @@ namespace Aliyun.Credentials.Provider
             [JsonProperty("oauth_access_token")]
             private string oauthAccessToken;
             [JsonProperty("oauth_access_token_expire")]
-            private long oauthAccessTokenExpire;
+            private long? oauthAccessTokenExpire;
             [JsonProperty("process_command")]
             private readonly string processCommand;
             [JsonProperty("sts_expiration")]
-            private long stsExpire;
+            private long? stsExpire;
 
             public string GetName()
             {
@@ -602,7 +602,7 @@ namespace Aliyun.Credentials.Provider
 
             public long GetAccessTokenExpire()
             {
-                return accessTokenExpire;
+                return accessTokenExpire.HasValue ? accessTokenExpire.Value : 0L;
             }
 
             public string GetOauthSiteType()
@@ -622,7 +622,7 @@ namespace Aliyun.Credentials.Provider
 
             public long GetOauthAccessTokenExpire()
             {
-                return oauthAccessTokenExpire;
+                return oauthAccessTokenExpire.HasValue ? oauthAccessTokenExpire.Value : 0L;
             }
 
             public string GetProcessCommand()
