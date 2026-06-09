@@ -253,6 +253,11 @@ namespace Aliyun.Credentials.Provider
                                     .AccessTokenExpire(profile.GetOauthAccessTokenExpire())
                                     .TokenUpdateCallback(CreateOAuthTokenUpdateCallback(currentProfileName))
                                     .Build();
+                            case "External":
+                                return new ExternalCredentialProvider.Builder()
+                                    .ProcessCommand(profile.GetProcessCommand())
+                                    .CredentialUpdateCallback(CreateExternalCredentialUpdateCallback(currentProfileName))
+                                    .Build();
                             default:
                                 throw new CredentialException(string.Format("Unsupported profile mode '{0}' form CLI credentials file.", profile.GetMode()));
                         }
@@ -312,6 +317,21 @@ namespace Aliyun.Credentials.Provider
             };
         }
 
+        private ExternalCredentialUpdateCallback CreateExternalCredentialUpdateCallback(string profileName)
+        {
+            return (accessKeyId, accessKeySecret, securityToken, expiration) =>
+            {
+                try
+                {
+                    UpdateExternalCredentials(profileName, accessKeyId, accessKeySecret, securityToken, expiration);
+                }
+                catch (Exception)
+                {
+                    // Warning only
+                }
+            };
+        }
+
         private void UpdateOAuthTokens(string profileName, string refreshToken, string accessToken,
             string accessKeyId, string accessKeySecret, string securityToken,
             long accessTokenExpire, long stsExpire)
@@ -339,6 +359,29 @@ namespace Aliyun.Credentials.Provider
             File.WriteAllText(configPath, updatedJson);
         }
 
+        private void UpdateExternalCredentials(string profileName, string accessKeyId, string accessKeySecret,
+            string securityToken, long expiration)
+        {
+            string configPath = CLI_CREDENTIALS_CONFIG_PATH;
+            if (!File.Exists(configPath)) return;
+
+            string jsonContent = File.ReadAllText(configPath);
+            Config config = JsonConvert.DeserializeObject<Config>(jsonContent);
+            if (config == null || config.GetProfiles() == null) return;
+
+            string name = !string.IsNullOrEmpty(profileName) ? profileName : config.GetCurrent();
+            Profile externalProfile = FindExternalProfile(config, name);
+            if (externalProfile == null) return;
+
+            externalProfile.SetAccessKeyId(accessKeyId);
+            externalProfile.SetAccessKeySecret(accessKeySecret);
+            externalProfile.SetSecurityToken(securityToken);
+            externalProfile.SetStsExpire(expiration);
+
+            string updatedJson = JsonConvert.SerializeObject(config, Formatting.Indented);
+            File.WriteAllText(configPath, updatedJson);
+        }
+
         private Profile FindOAuthProfile(Config config, string profileName)
         {
             if (config.GetProfiles() == null) return null;
@@ -349,6 +392,22 @@ namespace Aliyun.Credentials.Provider
                     if (p.GetMode() == "OAuth") return p;
                     if (!string.IsNullOrEmpty(p.GetSourceProfile()))
                         return FindOAuthProfile(config, p.GetSourceProfile());
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        private Profile FindExternalProfile(Config config, string profileName)
+        {
+            if (config.GetProfiles() == null) return null;
+            foreach (var p in config.GetProfiles())
+            {
+                if (p.GetName() == profileName)
+                {
+                    if (p.GetMode() == "External") return p;
+                    if (!string.IsNullOrEmpty(p.GetSourceProfile()))
+                        return FindExternalProfile(config, p.GetSourceProfile());
                     return null;
                 }
             }
@@ -432,6 +491,8 @@ namespace Aliyun.Credentials.Provider
             private string oauthAccessToken;
             [JsonProperty("oauth_access_token_expire")]
             private long oauthAccessTokenExpire;
+            [JsonProperty("process_command")]
+            private readonly string processCommand;
             [JsonProperty("sts_expiration")]
             private long stsExpire;
 
@@ -562,6 +623,11 @@ namespace Aliyun.Credentials.Provider
             public long GetOauthAccessTokenExpire()
             {
                 return oauthAccessTokenExpire;
+            }
+
+            public string GetProcessCommand()
+            {
+                return processCommand;
             }
 
             public void SetOauthRefreshToken(string value) { oauthRefreshToken = value; }

@@ -179,6 +179,13 @@ namespace aliyun_net_credentials_unit_tests.Provider
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "OAuth_InvalidSite"); });
             Assert.Contains("Invalid OAuth site type, support CN or INTL.", ex.Message);
 
+            credentialsProvider = provider.ReloadCredentialsProvider(config, "External");
+            Assert.True(credentialsProvider is ExternalCredentialProvider);
+            Assert.Equal("external", ((ExternalCredentialProvider)credentialsProvider).GetProviderName());
+            credential = credentialsProvider.GetCredentials();
+            Assert.Equal("externalAk", credential.AccessKeyId);
+            Assert.Equal("externalSk", credential.AccessKeySecret);
+
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "Unsupported"); });
             Assert.Contains("Unsupported profile mode 'Unsupported' form CLI credentials file.", ex.Message);
         }
