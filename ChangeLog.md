@@ -1,3 +1,6 @@
+### 2026-06-10 Version 1.5.3
+* feat: support CloudSSO && OAuth && External mode in cli profile
+
 ### 2025-04-18 Version 1.5.2
 * feat: support StsToken mode in cli profile
 
