@@ -76,6 +76,33 @@
         "source_profile": "InvalidSource"
       },
       {
+        "name": "CloudSSO",
+        "mode": "CloudSSO",
+        "cloud_sso_sign_in_url": "https://signin.aliyuncs.com/saml/sso",
+        "cloud_sso_account_id": "account123",
+        "cloud_sso_access_config": "config123",
+        "access_token": "sso_token",
+        "cloud_sso_access_token_expire": 4102444800
+      },
+      {
+        "name": "OAuth",
+        "mode": "OAuth",
+        "oauth_site_type": "CN",
+        "oauth_refresh_token": "refresh_token_value",
+        "oauth_access_token": "oauth_access_token_value",
+        "oauth_access_token_expire": 4102444800
+      },
+      {
+        "name": "OAuth_InvalidSite",
+        "mode": "OAuth",
+        "oauth_site_type": "INVALID"
+      },
+      {
+        "name": "External",
+        "mode": "External",
+        "process_command": "/usr/bin/printf \\173\\042mode\\042:\\042AK\\042,\\042access_key_id\\042:\\042externalAk\\042,\\042access_key_secret\\042:\\042externalSk\\042\\175"
+      },
+      {
         "name": "Unsupported",
         "mode": "Unsupported"
       }
