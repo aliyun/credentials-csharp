@@ -47,7 +47,8 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         
   build-windows:
-    runs-on: windows-2019
+    # windows-2019 runners were retired by GitHub; jobs queue forever.
+    runs-on: windows-2022
     strategy:
       matrix:
         framework: [net45, netcoreapp3.1]
