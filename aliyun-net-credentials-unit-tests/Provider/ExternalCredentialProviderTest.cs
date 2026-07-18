@@ -12,6 +12,13 @@ namespace aliyun_net_credentials_unit_tests.Provider
     {
         private static string CreateScript(string json)
         {
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                string batPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".bat");
+                File.WriteAllText(batPath, "@echo off\r\necho " + json + "\r\n");
+                return batPath;
+            }
+
             string scriptPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".sh");
             File.WriteAllText(scriptPath, "#!/bin/sh\nprintf '%s\\n' '" + json.Replace("'", "'\\''") + "'\n");
             using (var process = new System.Diagnostics.Process
