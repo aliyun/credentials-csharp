@@ -6,12 +6,25 @@ using Aliyun.Credentials.Exceptions;
 namespace Aliyun.Credentials.Utils
 {
     /// <summary>
-    /// Split process_command into argv with quote support (POSIX shlex-like),
+    /// Split process_command into argv with quote support,
     /// so Windows paths like "C:\Program Files\tool.exe" work as one argument.
+    ///
+    /// On Unix, escape rules follow POSIX shlex: outside quotes, '\' escapes the
+    /// next char; inside double quotes, '\' only escapes '"', '\', '$', '`' and
+    /// newline; inside single quotes, all characters are literal.
+    ///
+    /// On Windows, '\' is a path separator and is treated as a literal (except
+    /// '\"' inside double quotes), so unquoted paths like C:\tools\cred.exe keep
+    /// their backslashes.
     /// </summary>
     public static class CommandLineUtils
     {
         public static string[] Split(string command)
+        {
+            return Split(command, System.IO.Path.DirectorySeparatorChar == '\\');
+        }
+
+        internal static string[] Split(string command, bool windows)
         {
             if (string.IsNullOrWhiteSpace(command))
             {
@@ -54,7 +67,17 @@ namespace Aliyun.Credentials.Utils
                     if (c == '\\' && i + 1 < input.Length)
                     {
                         char next = input[i + 1];
-                        if (next == '"' || next == '\\' || next == '$' || next == '`' || next == '\n')
+                        if (windows)
+                        {
+                            // On Windows only \" is an escape inside double quotes.
+                            if (next == '"')
+                            {
+                                current.Append(next);
+                                i++;
+                                continue;
+                            }
+                        }
+                        else if (next == '"' || next == '\\' || next == '$' || next == '`' || next == '\n')
                         {
                             current.Append(next);
                             i++;
@@ -68,6 +91,14 @@ namespace Aliyun.Credentials.Utils
 
                 if (c == '\\')
                 {
+                    if (windows)
+                    {
+                        // Path separator — keep literal.
+                        hasToken = true;
+                        current.Append(c);
+                        continue;
+                    }
+
                     if (i + 1 >= input.Length)
                     {
                         throw new CredentialException("invalid process_command: trailing backslash");
