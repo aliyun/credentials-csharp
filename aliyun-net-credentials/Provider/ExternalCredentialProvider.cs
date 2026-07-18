@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
@@ -101,11 +100,7 @@ namespace Aliyun.Credentials.Provider
 
         internal CredentialModel GetCredentialsInternal()
         {
-            string[] args = Regex.Split(this.processCommand.Trim(), "\\s+");
-            if (args.Length == 0 || string.IsNullOrEmpty(args[0]))
-            {
-                throw new CredentialException("process_command is empty");
-            }
+            string[] args = CommandLineUtils.Split(this.processCommand);
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -117,7 +112,7 @@ namespace Aliyun.Credentials.Provider
             };
             for (int i = 1; i < args.Length; i++)
             {
-                startInfo.Arguments += (i > 1 ? " " : "") + args[i];
+                startInfo.Arguments += (i > 1 ? " " : "") + QuoteArgumentIfNeeded(args[i]);
             }
 
             try
@@ -149,6 +144,21 @@ namespace Aliyun.Credentials.Provider
             {
                 throw new CredentialException("failed to execute external command: " + ex.Message);
             }
+        }
+
+        private static string QuoteArgumentIfNeeded(string arg)
+        {
+            if (string.IsNullOrEmpty(arg))
+            {
+                return "\"\"";
+            }
+
+            if (arg.IndexOfAny(new char[] {' ', '\t', '"'}) < 0)
+            {
+                return arg;
+            }
+
+            return "\"" + arg.Replace("\"", "\\\"") + "\"";
         }
 
         private CredentialModel ParseCredentialResponse(string stdout)

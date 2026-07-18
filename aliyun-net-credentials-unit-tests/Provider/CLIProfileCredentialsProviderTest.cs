@@ -182,9 +182,13 @@ namespace aliyun_net_credentials_unit_tests.Provider
             credentialsProvider = provider.ReloadCredentialsProvider(config, "External");
             Assert.True(credentialsProvider is ExternalCredentialProvider);
             Assert.Equal("external", ((ExternalCredentialProvider)credentialsProvider).GetProviderName());
-            credential = credentialsProvider.GetCredentials();
-            Assert.Equal("externalAk", credential.AccessKeyId);
-            Assert.Equal("externalSk", credential.AccessKeySecret);
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                // The fixture process_command uses /usr/bin/printf, unavailable on Windows.
+                credential = credentialsProvider.GetCredentials();
+                Assert.Equal("externalAk", credential.AccessKeyId);
+                Assert.Equal("externalSk", credential.AccessKeySecret);
+            }
 
             ex = Assert.Throws<CredentialException>(() => { provider.ReloadCredentialsProvider(config, "Unsupported"); });
             Assert.Contains("Unsupported profile mode 'Unsupported' form CLI credentials file.", ex.Message);
