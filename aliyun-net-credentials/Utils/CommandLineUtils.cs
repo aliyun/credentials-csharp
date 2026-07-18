@@ -23,6 +23,9 @@ namespace Aliyun.Credentials.Utils
             var current = new StringBuilder();
             bool inSingle = false;
             bool inDouble = false;
+            // Tracks that a token has started even if it is empty, so quoted empty
+            // arguments like `tool "" arg` keep their empty argv element.
+            bool hasToken = false;
 
             for (int i = 0; i < input.Length; i++)
             {
@@ -70,6 +73,7 @@ namespace Aliyun.Credentials.Utils
                         throw new CredentialException("invalid process_command: trailing backslash");
                     }
 
+                    hasToken = true;
                     current.Append(input[++i]);
                     continue;
                 }
@@ -77,26 +81,30 @@ namespace Aliyun.Credentials.Utils
                 if (c == '\'')
                 {
                     inSingle = true;
+                    hasToken = true;
                     continue;
                 }
 
                 if (c == '"')
                 {
                     inDouble = true;
+                    hasToken = true;
                     continue;
                 }
 
                 if (char.IsWhiteSpace(c))
                 {
-                    if (current.Length > 0)
+                    if (hasToken)
                     {
                         args.Add(current.ToString());
                         current.Length = 0;
+                        hasToken = false;
                     }
 
                     continue;
                 }
 
+                hasToken = true;
                 current.Append(c);
             }
 
@@ -105,7 +113,7 @@ namespace Aliyun.Credentials.Utils
                 throw new CredentialException("invalid process_command: unclosed quote");
             }
 
-            if (current.Length > 0)
+            if (hasToken)
             {
                 args.Add(current.ToString());
             }

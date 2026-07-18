@@ -62,6 +62,24 @@ namespace aliyun_net_credentials_unit_tests.Utils
         }
 
         [Fact]
+        public void TestEmptyDoubleQuotedArgument()
+        {
+            Assert.Equal(new[] {"tool", "", "arg"}, CommandLineUtils.Split("tool \"\" arg"));
+        }
+
+        [Fact]
+        public void TestEmptySingleQuotedArgument()
+        {
+            Assert.Equal(new[] {"tool", "", "arg"}, CommandLineUtils.Split("tool '' arg"));
+        }
+
+        [Fact]
+        public void TestAdjacentQuotedSegmentsFormOneArgument()
+        {
+            Assert.Equal(new[] {"tool", "a bc d"}, CommandLineUtils.Split("tool \"a b\"'c d'"));
+        }
+
+        [Fact]
         public void TestEmpty()
         {
             var ex = Assert.Throws<CredentialException>(() => CommandLineUtils.Split("   "));
