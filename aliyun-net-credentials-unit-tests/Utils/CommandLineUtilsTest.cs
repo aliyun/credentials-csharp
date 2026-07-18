@@ -121,6 +121,22 @@ namespace aliyun_net_credentials_unit_tests.Utils
         }
 
         [Fact]
+        public void TestBackslashNewlineOutsideQuotesIsLineContinuationUnix()
+        {
+            Assert.Equal(
+                new[] {"tool", "arg1", "arg2"},
+                CommandLineUtils.Split("tool arg1 \\\n arg2", false));
+        }
+
+        [Fact]
+        public void TestBackslashNewlineInsideDoubleQuotesIsLineContinuationUnix()
+        {
+            Assert.Equal(
+                new[] {"tool", "ab"},
+                CommandLineUtils.Split("tool \"a\\\nb\"", false));
+        }
+
+        [Fact]
         public void TestEmpty()
         {
             var ex = Assert.Throws<CredentialException>(() => CommandLineUtils.Split("   "));

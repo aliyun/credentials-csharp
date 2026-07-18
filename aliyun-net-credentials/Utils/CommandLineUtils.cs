@@ -10,8 +10,9 @@ namespace Aliyun.Credentials.Utils
     /// so Windows paths like "C:\Program Files\tool.exe" work as one argument.
     ///
     /// On Unix, escape rules follow POSIX shlex: outside quotes, '\' escapes the
-    /// next char; inside double quotes, '\' only escapes '"', '\', '$', '`' and
-    /// newline; inside single quotes, all characters are literal.
+    /// next char; inside double quotes, '\' only escapes '"', '\', '$' and '`';
+    /// backslash-newline is a line continuation (both removed) outside single
+    /// quotes; inside single quotes, all characters are literal.
     ///
     /// On Windows, '\' is a path separator and is treated as a literal (except
     /// '\"' inside double quotes), so unquoted paths like C:\tools\cred.exe keep
@@ -77,7 +78,13 @@ namespace Aliyun.Credentials.Utils
                                 continue;
                             }
                         }
-                        else if (next == '"' || next == '\\' || next == '$' || next == '`' || next == '\n')
+                        else if (next == '\n')
+                        {
+                            // Backslash-newline is a line continuation: both removed.
+                            i++;
+                            continue;
+                        }
+                        else if (next == '"' || next == '\\' || next == '$' || next == '`')
                         {
                             current.Append(next);
                             i++;
@@ -102,6 +109,13 @@ namespace Aliyun.Credentials.Utils
                     if (i + 1 >= input.Length)
                     {
                         throw new CredentialException("invalid process_command: trailing backslash");
+                    }
+
+                    if (input[i + 1] == '\n')
+                    {
+                        // Backslash-newline is a line continuation: both removed.
+                        i++;
+                        continue;
                     }
 
                     hasToken = true;
