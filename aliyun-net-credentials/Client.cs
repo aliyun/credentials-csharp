@@ -70,6 +70,7 @@ namespace Aliyun.Credentials
                     return new EcsRamRoleCredentialProvider.Builder()
                         .RoleName(config.RoleName)
                         .DisableIMDSv1(config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1)
+                        .EnableIMDSv2(config.EnableIMDSv2)
                         .ConnectTimeout(config.ConnectTimeout)
                         .ReadTimeout(config.Timeout)
                         .Build();

@@ -272,6 +272,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("ecs_ram_role", providerRoleName.GetProviderName());
             Assert.NotNull(providerRoleName.CredentialUrl);
             Assert.False(providerRoleName.DisableIMDSv1);
+            Assert.True(providerRoleName.EnableIMDSv2);
 
             EcsRamRoleCredentialProvider providerConfig =
                 new EcsRamRoleCredentialProvider(new Config() { RoleName = "roleName" });
@@ -290,6 +291,163 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 ex.Message);
             AuthUtils.DisableIMDSv1 = origin;
             providerConfig.Dispose();
+        }
+
+        [Fact]
+        public void FallbackToIMDSv1WhenGetFailsAfterTokenOk()
+        {
+            var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("test")
+                .AsyncCredentialUpdateEnabled(false).Build();
+            Assert.True(provider.EnableIMDSv2);
+            var mock = new Mock<IConnClient>();
+            var callCount = 0;
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns((HttpRequest req) =>
+            {
+                callCount++;
+                if (req.Method == MethodType.PUT)
+                {
+                    return new HttpResponse("http://token")
+                    {
+                        Status = 200, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("tokenxxxxx")
+                    };
+                }
+
+                if (req.Headers.ContainsKey("X-aliyun-ecs-metadata-token"))
+                {
+                    return new HttpResponse("http://meta")
+                    {
+                        Status = 500, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("v2 failed")
+                    };
+                }
+
+                return new HttpResponse("http://meta")
+                {
+                    Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json,
+                    Content = Encoding.UTF8.GetBytes(
+                        "{\"Code\":\"Success\",  \"AccessKeyId\":\"akid\", \"AccessKeySecret\":\"aksecret\", \"SecurityToken\":\"ststoken\",  \"Expiration\":\"2200-08-08T01:01:01Z\"}")
+                };
+            });
+
+            var result = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(
+                typeof(EcsRamRoleCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
+            Assert.Equal("akid", result.Value.AccessKeyId);
+            Assert.Equal("aksecret", result.Value.AccessKeySecret);
+            Assert.True(callCount >= 3);
+            provider.Dispose();
+        }
+
+        [Fact]
+        public void NoFallbackWhenDisableIMDSv1AfterTokenOk()
+        {
+            var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("test").DisableIMDSv1(true)
+                .AsyncCredentialUpdateEnabled(false).Build();
+            var mock = new Mock<IConnClient>();
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns((HttpRequest req) =>
+            {
+                if (req.Method == MethodType.PUT)
+                {
+                    return new HttpResponse("http://token")
+                    {
+                        Status = 200, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("tokenxxxxx")
+                    };
+                }
+
+                return new HttpResponse("http://meta")
+                {
+                    Status = 500, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("fail")
+                };
+            });
+
+            var ex = Assert.Throws<CredentialException>(() =>
+            {
+                TestHelper.RunInstanceMethod(typeof(EcsRamRoleCredentialProvider), "CreateCredential", provider,
+                    new object[] { mock.Object });
+            });
+            Assert.Equal("Failed to get RAM session credentials from ECS metadata service. HttpCode=500", ex.Message);
+            provider.Dispose();
+        }
+
+        [Fact]
+        public void SkipIMDSv2WhenDisabled()
+        {
+            var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("test").EnableIMDSv2(false)
+                .AsyncCredentialUpdateEnabled(false).Build();
+            Assert.False(provider.EnableIMDSv2);
+            var mock = new Mock<IConnClient>();
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns((HttpRequest req) =>
+            {
+                Assert.NotEqual(MethodType.PUT, req.Method);
+                Assert.False(req.Headers.ContainsKey("X-aliyun-ecs-metadata-token"));
+                return new HttpResponse("http://meta")
+                {
+                    Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json,
+                    Content = Encoding.UTF8.GetBytes(
+                        "{\"Code\":\"Success\",  \"AccessKeyId\":\"akid\", \"AccessKeySecret\":\"aksecret\", \"SecurityToken\":\"ststoken\",  \"Expiration\":\"2200-08-08T01:01:01Z\"}")
+                };
+            });
+
+            var result = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(
+                typeof(EcsRamRoleCredentialProvider), "CreateCredential", provider, new object[] { mock.Object });
+            Assert.Equal("akid", result.Value.AccessKeyId);
+            provider.Dispose();
+        }
+
+        [Fact]
+        public void EnableIMDSv2FromConfigAndEnv()
+        {
+            var provider = new EcsRamRoleCredentialProvider(new Config { RoleName = "role", EnableIMDSv2 = false });
+            Assert.False(provider.EnableIMDSv2);
+            provider.Dispose();
+
+            provider = new EcsRamRoleCredentialProvider.Builder().RoleName("role").EnableIMDSv2(true).Build();
+            Assert.True(provider.EnableIMDSv2);
+            provider.Dispose();
+
+            var cache = AuthUtils.EnvironmentEcsIMDSv2Enable;
+            AuthUtils.EnvironmentEcsIMDSv2Enable = "false";
+            provider = new EcsRamRoleCredentialProvider.Builder().RoleName("role").Build();
+            Assert.False(provider.EnableIMDSv2);
+            AuthUtils.EnvironmentEcsIMDSv2Enable = cache;
+            provider.Dispose();
+        }
+
+        [Fact]
+        public async Task FallbackToIMDSv1WhenGetFailsAfterTokenOkAsync()
+        {
+            var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("test")
+                .AsyncCredentialUpdateEnabled(false).Build();
+            var mock = new Mock<IConnClient>();
+            mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync((HttpRequest req) =>
+            {
+                if (req.Method == MethodType.PUT)
+                {
+                    return new HttpResponse("http://token")
+                    {
+                        Status = 200, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("tokenxxxxx")
+                    };
+                }
+
+                if (req.Headers.ContainsKey("X-aliyun-ecs-metadata-token"))
+                {
+                    return new HttpResponse("http://meta")
+                    {
+                        Status = 500, Encoding = "UTF-8", Content = Encoding.UTF8.GetBytes("v2 failed")
+                    };
+                }
+
+                return new HttpResponse("http://meta")
+                {
+                    Status = 200, Encoding = "UTF-8", ContentType = FormatType.Json,
+                    Content = Encoding.UTF8.GetBytes(
+                        "{\"Code\":\"Success\",  \"AccessKeyId\":\"akid\", \"AccessKeySecret\":\"aksecret\", \"SecurityToken\":\"ststoken\",  \"Expiration\":\"2200-08-08T01:01:01Z\"}")
+                };
+            });
+
+            var result = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(
+                typeof(EcsRamRoleCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object });
+            Assert.Equal("akid", result.Value.AccessKeyId);
+            provider.Dispose();
+            await Task.CompletedTask;
         }
 
         [Fact]

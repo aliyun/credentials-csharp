@@ -35,15 +35,27 @@ namespace Aliyun.Credentials.Provider
         private readonly int connectTimeout = 1000;
         private readonly int readTimeout = 1000;
         private readonly bool disableIMDSv1;
+        private readonly bool enableIMDSv2;
         private const int metadataTokenDuration = 21600;
 
         private Timer _updateTimer;
+
+        internal static bool ResolveEnableIMDSv2(bool? explicitValue)
+        {
+            if (explicitValue.HasValue)
+            {
+                return explicitValue.Value;
+            }
+
+            return !AuthUtils.ShouldSkipECSIMDSv2();
+        }
 
         [Obsolete("Use builder instead.")]
         public EcsRamRoleCredentialProvider(string roleName)
         {
             this.roleName = roleName;
             this.disableIMDSv1 = false;
+            this.enableIMDSv2 = ResolveEnableIMDSv2(null);
             SetCredentialUrl();
             CheckCredentialsUpdateAsynchronously();
         }
@@ -62,6 +74,7 @@ namespace Aliyun.Credentials.Provider
             }
 
             this.disableIMDSv1 = config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1;
+            this.enableIMDSv2 = ResolveEnableIMDSv2(config.EnableIMDSv2);
             roleName = config.RoleName;
             SetCredentialUrl();
             CheckCredentialsUpdateAsynchronously();
@@ -107,6 +120,7 @@ namespace Aliyun.Credentials.Provider
 
             this.roleName = builder.roleName;
             this.disableIMDSv1 = builder.disableIMDSv1 ?? AuthUtils.DisableIMDSv1;
+            this.enableIMDSv2 = ResolveEnableIMDSv2(builder.enableIMDSv2);
             this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0)
                 ? 5000
                 : builder.connectTimeout.Value;
@@ -121,6 +135,7 @@ namespace Aliyun.Credentials.Provider
         {
             internal string roleName;
             internal bool? disableIMDSv1;
+            internal bool? enableIMDSv2;
             internal int? connectTimeout;
             internal int? readTimeout;
 
@@ -140,6 +155,12 @@ namespace Aliyun.Credentials.Provider
             public Builder DisableIMDSv1(bool? disableIMDSv1)
             {
                 this.disableIMDSv1 = disableIMDSv1;
+                return this;
+            }
+
+            public Builder EnableIMDSv2(bool? enableIMDSv2)
+            {
+                this.enableIMDSv2 = enableIMDSv2;
                 return this;
             }
 
@@ -221,6 +242,29 @@ namespace Aliyun.Credentials.Provider
 
         private string GetMetadata(IConnClient client, string url)
         {
+            var metadataToken = GetMetadataToken(client);
+            try
+            {
+                return DoGetMetadata(client, url, metadataToken);
+            }
+            catch (CredentialException)
+            {
+                if (ShouldFallbackToIMDSv1(metadataToken))
+                {
+                    return DoGetMetadata(client, url, null);
+                }
+
+                throw;
+            }
+        }
+
+        private bool ShouldFallbackToIMDSv1(string metadataToken)
+        {
+            return metadataToken != null && !this.disableIMDSv1;
+        }
+
+        private string DoGetMetadata(IConnClient client, string url, string metadataToken)
+        {
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
@@ -229,7 +273,6 @@ namespace Aliyun.Credentials.Provider
                 Url = url
             };
 
-            var metadataToken = GetMetadataToken(client);
             if (metadataToken != null)
             {
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
@@ -266,6 +309,11 @@ namespace Aliyun.Credentials.Provider
 
         private string GetMetadataToken(IConnClient client)
         {
+            if (!this.enableIMDSv2)
+            {
+                return null;
+            }
+
             try
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
@@ -308,6 +356,11 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<string> GetMetadataTokenAsync(IConnClient client)
         {
+            if (!this.enableIMDSv2)
+            {
+                return null;
+            }
+
             try
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
@@ -357,6 +410,33 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<string> GetMetadataAsync(IConnClient client, string url)
         {
+            var metadataToken = await GetMetadataTokenAsync(client);
+            CredentialException firstError = null;
+            try
+            {
+                return await DoGetMetadataAsync(client, url, metadataToken);
+            }
+            catch (CredentialException ex)
+            {
+                // Cannot await in catch on older C# language versions (netstandard2.0).
+                firstError = ex;
+            }
+
+            if (firstError != null)
+            {
+                if (ShouldFallbackToIMDSv1(metadataToken))
+                {
+                    return await DoGetMetadataAsync(client, url, null);
+                }
+
+                throw firstError;
+            }
+
+            throw new CredentialException("Unexpected metadata fetch state");
+        }
+
+        private async Task<string> DoGetMetadataAsync(IConnClient client, string url, string metadataToken)
+        {
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
@@ -365,7 +445,6 @@ namespace Aliyun.Credentials.Provider
                 Url = url
             };
 
-            var metadataToken = await GetMetadataTokenAsync(client);
             if (metadataToken != null)
             {
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
@@ -532,6 +611,11 @@ namespace Aliyun.Credentials.Provider
         public bool DisableIMDSv1
         {
             get { return disableIMDSv1; }
+        }
+
+        public bool EnableIMDSv2
+        {
+            get { return enableIMDSv2; }
         }
 
         public override string GetProviderName()
