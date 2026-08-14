@@ -412,7 +412,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         }
 
         [Fact]
-        public async Task FallbackToIMDSv1WhenGetFailsAfterTokenOkAsync()
+        public void FallbackToIMDSv1WhenGetFailsAfterTokenOkAsync()
         {
             var provider = new EcsRamRoleCredentialProvider.Builder().RoleName("test")
                 .AsyncCredentialUpdateEnabled(false).Build();
@@ -447,7 +447,6 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 typeof(EcsRamRoleCredentialProvider), "CreateCredentialAsync", provider, new object[] { mock.Object });
             Assert.Equal("akid", result.Value.AccessKeyId);
             provider.Dispose();
-            await Task.CompletedTask;
         }
 
         [Fact]
