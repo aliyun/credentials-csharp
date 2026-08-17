@@ -56,13 +56,6 @@ namespace Aliyun.Credentials.Models
         [NameInMap("disableIMDSv1")]
         public bool? DisableIMDSv1 { get; set; }
 
-        /// <summary>
-        /// Whether to try IMDSv2 first. Default: true.
-        /// Set to false to use IMDSv1 only (private clouds without hardening).
-        /// </summary>
-        [NameInMap("enableIMDSv2")]
-        public bool? EnableIMDSv2 { get; set; }
-
         [NameInMap("private_key_file")]
         public string PrivateKeyFile { get; set; }
 

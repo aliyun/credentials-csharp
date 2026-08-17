@@ -35,27 +35,15 @@ namespace Aliyun.Credentials.Provider
         private readonly int connectTimeout = 1000;
         private readonly int readTimeout = 1000;
         private readonly bool disableIMDSv1;
-        private readonly bool enableIMDSv2;
         private const int metadataTokenDuration = 21600;
 
         private Timer _updateTimer;
-
-        internal static bool ResolveEnableIMDSv2(bool? explicitValue)
-        {
-            if (explicitValue.HasValue)
-            {
-                return explicitValue.Value;
-            }
-
-            return !AuthUtils.ShouldSkipECSIMDSv2();
-        }
 
         [Obsolete("Use builder instead.")]
         public EcsRamRoleCredentialProvider(string roleName)
         {
             this.roleName = roleName;
             this.disableIMDSv1 = false;
-            this.enableIMDSv2 = ResolveEnableIMDSv2(null);
             SetCredentialUrl();
             CheckCredentialsUpdateAsynchronously();
         }
@@ -74,7 +62,6 @@ namespace Aliyun.Credentials.Provider
             }
 
             this.disableIMDSv1 = config.DisableIMDSv1 ?? AuthUtils.DisableIMDSv1;
-            this.enableIMDSv2 = ResolveEnableIMDSv2(config.EnableIMDSv2);
             roleName = config.RoleName;
             SetCredentialUrl();
             CheckCredentialsUpdateAsynchronously();
@@ -120,7 +107,6 @@ namespace Aliyun.Credentials.Provider
 
             this.roleName = builder.roleName;
             this.disableIMDSv1 = builder.disableIMDSv1 ?? AuthUtils.DisableIMDSv1;
-            this.enableIMDSv2 = ResolveEnableIMDSv2(builder.enableIMDSv2);
             this.connectTimeout = (builder.connectTimeout == null || builder.connectTimeout <= 0)
                 ? 5000
                 : builder.connectTimeout.Value;
@@ -135,7 +121,6 @@ namespace Aliyun.Credentials.Provider
         {
             internal string roleName;
             internal bool? disableIMDSv1;
-            internal bool? enableIMDSv2;
             internal int? connectTimeout;
             internal int? readTimeout;
 
@@ -155,12 +140,6 @@ namespace Aliyun.Credentials.Provider
             public Builder DisableIMDSv1(bool? disableIMDSv1)
             {
                 this.disableIMDSv1 = disableIMDSv1;
-                return this;
-            }
-
-            public Builder EnableIMDSv2(bool? enableIMDSv2)
-            {
-                this.enableIMDSv2 = enableIMDSv2;
                 return this;
             }
 
@@ -309,11 +288,6 @@ namespace Aliyun.Credentials.Provider
 
         private string GetMetadataToken(IConnClient client)
         {
-            if (!this.enableIMDSv2)
-            {
-                return null;
-            }
-
             try
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
@@ -356,11 +330,6 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<string> GetMetadataTokenAsync(IConnClient client)
         {
-            if (!this.enableIMDSv2)
-            {
-                return null;
-            }
-
             try
             {
                 HttpRequest httpRequest = new HttpRequest("http://" + MetadataServiceHost + UrlInMetadataToken);
@@ -611,11 +580,6 @@ namespace Aliyun.Credentials.Provider
         public bool DisableIMDSv1
         {
             get { return disableIMDSv1; }
-        }
-
-        public bool EnableIMDSv2
-        {
-            get { return enableIMDSv2; }
         }
 
         public override string GetProviderName()

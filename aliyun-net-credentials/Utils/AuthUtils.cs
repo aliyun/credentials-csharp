@@ -22,7 +22,6 @@ namespace Aliyun.Credentials.Utils
         private string environmentCLIProfileDisabled;
         private volatile string environmentCredentialsURI;
         private volatile string disableECSIMDSv1;
-        private volatile string enableECSIMDSv2;
         private string privateKey;
         private static volatile string oidcToken;
 
@@ -43,7 +42,6 @@ namespace Aliyun.Credentials.Utils
             environmentCLIProfileDisabled = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CLI_PROFILE_DISABLED") ?? environmentCLIProfileDisabled;
             environmentCredentialsURI = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_CREDENTIALS_URI") ?? environmentCredentialsURI;
             disableECSIMDSv1 = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_IMDSV1_DISABLED") ?? disableECSIMDSv1;
-            enableECSIMDSv2 = Environment.GetEnvironmentVariable("ALIBABA_CLOUD_ECS_IMDSV2_ENABLE") ?? enableECSIMDSv2;
         }
 
         public static string GetPrivateKey(string filePath)
@@ -250,24 +248,6 @@ namespace Aliyun.Credentials.Utils
             }
 
             set { authUtils.disableECSIMDSv1 = value.ToString(); }
-        }
-
-        /// <summary>
-        /// Skip IMDSv2 probe and use IMDSv1 only.
-        /// False by default so hardening mode is still tried unless
-        /// ALIBABA_CLOUD_ECS_IMDSV2_ENABLE is explicitly "false".
-        /// </summary>
-        public static bool ShouldSkipECSIMDSv2()
-        {
-            var env = authUtils.enableECSIMDSv2;
-            return !string.IsNullOrEmpty(env)
-                   && string.Equals(env, "false", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public static string EnvironmentEcsIMDSv2Enable
-        {
-            get { return authUtils.enableECSIMDSv2; }
-            set { authUtils.enableECSIMDSv2 = value; }
         }
     }
 }
