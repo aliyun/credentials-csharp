@@ -1,3 +1,7 @@
+### 2026-08-18 Version 1.5.4
+* fix: ECS RAM Role falls back to IMDSv1 when IMDSv2 token succeeds but later metadata requests fail
+* fix: treat backslash-newline as POSIX line continuation when splitting process_command
+
 ### 2026-06-10 Version 1.5.3
 * feat: support CloudSSO && OAuth && External mode in cli profile
 
