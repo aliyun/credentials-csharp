@@ -402,28 +402,32 @@ namespace aliyun_net_credentials_unit_tests.Provider
             var nonBlocking = new NonBlocking();
             var wasCalled1 = false;
             var wasCalled2 = false;
+            var started = new ManualResetEventSlim(false);
 
             TestHelper.SetPrivateField(typeof(NonBlocking), "concurrentRefreshLeases", nonBlocking,
                 new SemaphoreSlim(1, 1));
 
             // 一个任务还没结束时（信号量/锁未释放），第二个任务开始了，就算拿到了锁，但是信号量不够
+            // Mark started before sleep so slow ThreadPool scheduling cannot miss the assertion window.
             var tasks = new[]
             {
                 Task.Run(() => nonBlocking.Prefetch(() =>
                 {
-                    Thread.Sleep(1000);
                     wasCalled1 = true;
+                    started.Set();
+                    Thread.Sleep(1000);
                 })),
                 Task.Run(() => nonBlocking.Prefetch(() =>
                 {
-                    Thread.Sleep(1000);
                     wasCalled2 = true;
+                    started.Set();
+                    Thread.Sleep(1000);
                 })),
             };
 
             Task.WaitAll(tasks);
-            Thread.Sleep(1100);
-            Assert.True(wasCalled1 || wasCalled2, "At least two variable must be true");
+            Assert.True(started.Wait(5000), "Prefetch background work did not start in time");
+            Assert.True(wasCalled1 || wasCalled2, "At least one variable must be true");
             Assert.False(wasCalled1 && wasCalled2, "Both variables cannot be true at the same time");
             nonBlocking.Dispose();
         }
@@ -435,31 +439,37 @@ namespace aliyun_net_credentials_unit_tests.Provider
             var wasCalled1 = false;
             var wasCalled2 = false;
             var wasCalled3 = false;
+            var started = new ManualResetEventSlim(false);
 
             TestHelper.SetPrivateField(typeof(NonBlocking), "concurrentRefreshLeases", nonBlocking,
                 new SemaphoreSlim(2, 2));
 
+            // currentlyRefreshing allows only one Prefetch to schedule work; mark the winner
+            // before sleeping so CI ThreadPool delay cannot make all flags stay false.
             var tasks = new[]
             {
                 Task.Run(() => nonBlocking.Prefetch(() =>
                 {
-                    Thread.Sleep(100);
                     wasCalled1 = true;
+                    started.Set();
+                    Thread.Sleep(100);
                 })),
                 Task.Run(() => nonBlocking.Prefetch(() =>
                 {
-                    Thread.Sleep(800);
                     wasCalled2 = true;
+                    started.Set();
+                    Thread.Sleep(800);
                 })),
                 Task.Run(() => nonBlocking.Prefetch(() =>
                 {
-                    Thread.Sleep(3000);
                     wasCalled3 = true;
+                    started.Set();
+                    Thread.Sleep(3000);
                 }))
             };
 
             Task.WaitAll(tasks);
-            Thread.Sleep(3100);
+            Assert.True(started.Wait(5000), "Prefetch background work did not start in time");
 
             Assert.True(wasCalled1 || wasCalled2 || wasCalled3, "At least one variable must be true");
             Assert.False(wasCalled1 && wasCalled2 && wasCalled3, "Both variables cannot be true at the same time");

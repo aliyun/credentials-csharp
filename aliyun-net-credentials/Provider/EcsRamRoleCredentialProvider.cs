@@ -221,6 +221,29 @@ namespace Aliyun.Credentials.Provider
 
         private string GetMetadata(IConnClient client, string url)
         {
+            var metadataToken = GetMetadataToken(client);
+            try
+            {
+                return DoGetMetadata(client, url, metadataToken);
+            }
+            catch (CredentialException)
+            {
+                if (ShouldFallbackToIMDSv1(metadataToken))
+                {
+                    return DoGetMetadata(client, url, null);
+                }
+
+                throw;
+            }
+        }
+
+        private bool ShouldFallbackToIMDSv1(string metadataToken)
+        {
+            return metadataToken != null && !this.disableIMDSv1;
+        }
+
+        private string DoGetMetadata(IConnClient client, string url, string metadataToken)
+        {
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
@@ -229,7 +252,6 @@ namespace Aliyun.Credentials.Provider
                 Url = url
             };
 
-            var metadataToken = GetMetadataToken(client);
             if (metadataToken != null)
             {
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
@@ -357,6 +379,33 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<string> GetMetadataAsync(IConnClient client, string url)
         {
+            var metadataToken = await GetMetadataTokenAsync(client);
+            CredentialException firstError = null;
+            try
+            {
+                return await DoGetMetadataAsync(client, url, metadataToken);
+            }
+            catch (CredentialException ex)
+            {
+                // Cannot await in catch on older C# language versions (netstandard2.0).
+                firstError = ex;
+            }
+
+            if (firstError != null)
+            {
+                if (ShouldFallbackToIMDSv1(metadataToken))
+                {
+                    return await DoGetMetadataAsync(client, url, null);
+                }
+
+                throw firstError;
+            }
+
+            throw new CredentialException("Unexpected metadata fetch state");
+        }
+
+        private async Task<string> DoGetMetadataAsync(IConnClient client, string url, string metadataToken)
+        {
             HttpRequest httpRequest = new HttpRequest
             {
                 Method = MethodType.GET,
@@ -365,7 +414,6 @@ namespace Aliyun.Credentials.Provider
                 Url = url
             };
 
-            var metadataToken = await GetMetadataTokenAsync(client);
             if (metadataToken != null)
             {
                 httpRequest.Headers.Add("X-aliyun-ecs-metadata-token", metadataToken);
