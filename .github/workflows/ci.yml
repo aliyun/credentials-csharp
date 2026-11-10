@@ -41,6 +41,12 @@ jobs:
         ALIBABA_CLOUD_ROLE_ARN: ${{ secrets.ALIBABA_CLOUD_ROLE_ARN }}
     - name: Test
       run: dotnet test aliyun-net-credentials-unit-tests/ /p:AltCover=true --framework netcoreapp3.1
+    - name: Save Unix coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-unix
+        path: aliyun-net-credentials-unit-tests/coverage.netcoreapp3.1.xml
+        if-no-files-found: error
     - name: Upload code coverage report
       uses: codecov/codecov-action@v4
       with:
@@ -67,6 +73,14 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --no-build --logger "trx;LogFileName=TestResults_${{ matrix.framework }}.trx" --framework ${{ matrix.framework }} /p:AltCover=${{ matrix.framework == 'netcoreapp3.1' }}
+
+      - name: Save Windows coverage report
+        if: matrix.framework == 'netcoreapp3.1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-windows
+          path: aliyun-net-credentials-unit-tests/coverage.netcoreapp3.1.xml
+          if-no-files-found: error
 
       - name: Upload Windows coverage report
         if: matrix.framework == 'netcoreapp3.1'
