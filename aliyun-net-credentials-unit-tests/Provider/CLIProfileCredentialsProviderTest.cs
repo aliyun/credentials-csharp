@@ -1,18 +1,148 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using Aliyun.Credentials.Http;
+using Moq;
 
 using Aliyun.Credentials.Exceptions;
 using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace aliyun_net_credentials_unit_tests.Provider
 {
     public class CLIProfileCredentialsProviderTest
     {
+        [Fact]
+        public async Task SharedCloudSSOValidatesAndRefreshesTheSession()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(directory);
+            try
+            {
+                string path = Path.Combine(directory, "config.json");
+                File.WriteAllText(path, "{\"current\":\"dev\",\"profiles\":[{\"name\":\"dev\",\"mode\":\"CloudSSO\","
+                    + "\"sso_session\":\"company\",\"cloud_sso_account_id\":\"account\",\"cloud_sso_access_config\":\"role\","
+                    + "\"cloud_sso_sign_in_url\":\"https://example.test\",\"access_token\":\"inline\",\"cloud_sso_access_token_expire\":4102444800}]}");
+                var cli = new CLIProfileCredentialsProvider("dev");
+                var provider = cli.ReloadCredentialsProvider(cli.ParseProfile(path), "dev");
+                var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials());
+                Assert.Contains("Unable to read CloudSSO session company", ex.Message);
+                await Assert.ThrowsAsync<CredentialException>(() => provider.GetCredentialsAsync());
+
+                string canonicalPath = (string)typeof(CLIProfileCredentialsProvider)
+                    .GetMethod("CanonicalConfigPath", BindingFlags.Static | BindingFlags.NonPublic)
+                    .Invoke(null, new object[] { path });
+                string hash;
+                using (var sha256 = SHA256.Create())
+                {
+                    hash = BitConverter.ToString(sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalPath)))
+                        .Replace("-", "").ToLowerInvariant();
+                }
+                string sessionDirectory = Path.Combine(directory, "sso", hash);
+                Directory.CreateDirectory(sessionDirectory);
+                string session = Path.Combine(sessionDirectory, "company.json");
+                foreach (var entry in new[] {
+                    new { Contents = "{", Message = "Invalid CloudSSO session" },
+                    new { Contents = "{\"name\":\"wrong\"}", Message = "Invalid CloudSSO session" },
+                    new { Contents = "{\"name\":\"company\",\"sign_in_url\":\"https://example.test\",\"access_token\":\"expired\",\"expires_at\":1}",
+                          Message = "expired" }
+                })
+                {
+                    File.WriteAllText(session, entry.Contents);
+                    ex = Assert.Throws<CredentialException>(() => provider.GetCredentials());
+                    Assert.Contains(entry.Message, ex.Message);
+                }
+
+                File.Delete(session);
+                Directory.CreateDirectory(session);
+                Assert.Contains("Unable to read CloudSSO session",
+                    Assert.Throws<CredentialException>(() => provider.GetCredentials()).Message);
+                Directory.Delete(session);
+
+                var transport = new Mock<IConnClient>();
+                var response = new HttpResponse("https://example.test/cloud-credentials")
+                {
+                    Status = 200, Encoding = "UTF-8",
+                    Content = Encoding.UTF8.GetBytes("{\"CloudCredential\":{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\","
+                        + "\"SecurityToken\":\"sts\",\"Expiration\":\"2099-01-01T00:00:00Z\"}}")
+                };
+                transport.Setup(client => client.DoAction(It.Is<HttpRequest>(
+                    request => request.Headers["Authorization"] == "Bearer first"))).Returns(response);
+                transport.Setup(client => client.DoActionAsync(It.Is<HttpRequest>(
+                    request => request.Headers["Authorization"] == "Bearer second"))).ReturnsAsync(response);
+                const string template = "{{\"name\":\"company\",\"sign_in_url\":\"https://example.test\",\"access_token\":\"{0}\",\"expires_at\":4102444800}}";
+                File.WriteAllText(session, string.Format(template, "first"));
+                var first = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(
+                    typeof(CloudSSOCredentialProvider), "GetNewSessionCredentials", provider, new object[] { transport.Object });
+                Assert.Equal("ak", first.Value.AccessKeyId);
+                File.WriteAllText(session, string.Format(template, "second"));
+                var second = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethodAsync(
+                    typeof(CloudSSOCredentialProvider), "GetNewSessionCredentialsAsync", provider, new object[] { transport.Object });
+                Assert.Equal("sts", second.Value.SecurityToken);
+
+                File.WriteAllText(path, File.ReadAllText(path).Replace("company", "../outside"));
+                var invalid = cli.ReloadCredentialsProvider(cli.ParseProfile(path), "dev");
+                Assert.Contains("Invalid CloudSSO session name",
+                    Assert.Throws<CredentialException>(() => invalid.GetCredentials()).Message);
+                File.Delete(path);
+                File.Delete(session);
+                Assert.Contains("Unable to read CloudSSO session",
+                    Assert.Throws<CredentialException>(() => provider.GetCredentials()).Message);
+
+
+            }
+            finally
+            {
+                Directory.Delete(directory, true);
+            }
+        }
+
+        [Theory]
+        [InlineData("OAuth")]
+        [InlineData("External")]
+        public void WritebackPreservesOtherCliProfiles(string mode)
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                string fixture = "{\"current\":\"writer\",\"future_config\":{\"date\":\"2099-01-01T01:00:00+08:00\",\"empty\":{},\"nullable\":null},"
+                    + "\"profiles\":[{\"name\":\"writer\",\"mode\":\"" + mode + "\",\"future_writer\":{}},"
+                    + "{\"name\":\"shared\",\"mode\":\"CloudSSO\",\"sso_session\":\"company\",\"future_profile\":{}}]}";
+                File.WriteAllText(path, fixture);
+                var provider = new CLIProfileCredentialsProvider("writer");
+                typeof(CLIProfileCredentialsProvider).GetField("CLI_CREDENTIALS_CONFIG_PATH",
+                    BindingFlags.NonPublic | BindingFlags.Instance).SetValue(provider, path);
+                if (mode == "OAuth")
+                {
+                    TestHelper.RunInstanceMethod(typeof(CLIProfileCredentialsProvider), "UpdateOAuthTokens", provider,
+                        new object[] { "writer", "refresh", "access", "new-ak", "secret", "token", 100L, 200L });
+                }
+                else
+                {
+                    TestHelper.RunInstanceMethod(typeof(CLIProfileCredentialsProvider), "UpdateExternalCredentials", provider,
+                        new object[] { "writer", "new-ak", "secret", "token", 200L });
+                }
+                var settings = new JsonSerializerSettings { DateParseHandling = DateParseHandling.None };
+                var before = JsonConvert.DeserializeObject<JObject>(fixture, settings);
+                var after = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(path), settings);
+                Assert.Equal("new-ak", (string)after["profiles"][0]["access_key_id"]);
+                Assert.True(JToken.DeepEquals(before["profiles"][0]["future_writer"], after["profiles"][0]["future_writer"]));
+                Assert.True(JToken.DeepEquals(before["profiles"][1], after["profiles"][1]));
+                Assert.True(JToken.DeepEquals(before["future_config"], after["future_config"]));
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
         [Fact]
         public void GetProfileNameTest()
         {
