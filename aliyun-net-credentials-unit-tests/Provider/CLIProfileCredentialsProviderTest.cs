@@ -14,6 +14,28 @@ namespace aliyun_net_credentials_unit_tests.Provider
     public class CLIProfileCredentialsProviderTest
     {
         [Fact]
+        public void SharedCloudSSODoesNotFallBackToInlineToken()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(directory);
+            try
+            {
+                string path = Path.Combine(directory, "config.json");
+                File.WriteAllText(path, "{\"current\":\"dev\",\"profiles\":[{\"name\":\"dev\",\"mode\":\"CloudSSO\","
+                    + "\"sso_session\":\"company\",\"cloud_sso_account_id\":\"account\",\"cloud_sso_access_config\":\"role\","
+                    + "\"cloud_sso_sign_in_url\":\"https://example.test\",\"access_token\":\"inline\",\"cloud_sso_access_token_expire\":4102444800}]}");
+                var cli = new CLIProfileCredentialsProvider("dev");
+                var provider = cli.ReloadCredentialsProvider(cli.ParseProfile(path), "dev");
+                var ex = Assert.Throws<CredentialException>(() => provider.GetCredentials());
+                Assert.Contains("Unable to read CloudSSO session company", ex.Message);
+            }
+            finally
+            {
+                Directory.Delete(directory, true);
+            }
+        }
+
+        [Fact]
         public void GetProfileNameTest()
         {
             CLIProfileCredentialsProvider provider = new CLIProfileCredentialsProvider();

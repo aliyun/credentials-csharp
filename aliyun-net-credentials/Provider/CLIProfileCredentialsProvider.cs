@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Security.Cryptography;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using System.Threading.Tasks;
 
 using Aliyun.Credentials.Exceptions;
@@ -230,13 +233,18 @@ namespace Aliyun.Credentials.Provider
                                     .ExternalId(profile.GetExternalId())
                                     .Build();
                             case "CloudSSO":
-                                return new CloudSSOCredentialProvider.Builder()
+                                var cloudSSO = new CloudSSOCredentialProvider.Builder()
                                     .SignInUrl(profile.GetSignInUrl())
                                     .AccountId(profile.GetAccountId())
                                     .AccessConfig(profile.GetAccessConfig())
                                     .AccessToken(profile.GetAccessToken())
-                                    .AccessTokenExpire(profile.GetAccessTokenExpire())
-                                    .Build();
+                                    .AccessTokenExpire(profile.GetAccessTokenExpire());
+                                if (!string.IsNullOrEmpty(profile.SsoSession))
+                                {
+                                    string configPath = config.ConfigFilePath ?? CLI_CREDENTIALS_CONFIG_PATH;
+                                    cloudSSO.LoadSession = () => LoadCloudSSOSession(configPath, profile.SsoSession);
+                                }
+                                return cloudSSO.Build();
                             case "OAuth":
                                 string siteType = (profile.GetOauthSiteType() ?? "").ToUpper();
                                 if (!OAuthBaseUrlMap.ContainsKey(siteType))
@@ -288,13 +296,114 @@ namespace Aliyun.Credentials.Provider
                     }
 
                     string jsonContent = sb.ToString();
-                    return JsonConvert.DeserializeObject<Config>(jsonContent);
+                    var config = JsonConvert.DeserializeObject<Config>(jsonContent);
+                    if (config != null) config.ConfigFilePath = configFilePath;
+                    return config;
                 }
             }
             catch (Exception)
             {
                 throw new CredentialException(string.Format("Failed to parse credential from CLI credentials file: {0}.", configFile.FullName));
             }
+        }
+
+        [DllImport("libc", EntryPoint = "realpath")]
+        private static extern IntPtr RealPath(string path, IntPtr buffer);
+
+        [DllImport("libc", EntryPoint = "free")]
+        private static extern void FreePath(IntPtr path);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        private static extern uint GetFinalPathNameByHandle(SafeFileHandle file, StringBuilder path, uint length, uint flags);
+
+        private static string CanonicalConfigPath(string path)
+        {
+            if (Path.DirectorySeparatorChar == '/')
+            {
+                IntPtr resolved = RealPath(path, IntPtr.Zero);
+                if (resolved == IntPtr.Zero)
+                {
+                    return Path.GetFullPath(path);
+                }
+                try
+                {
+                    return Marshal.PtrToStringAnsi(resolved);
+                }
+                finally
+                {
+                    FreePath(resolved);
+                }
+            }
+
+            path = Path.GetFullPath(path);
+            if (!File.Exists(path))
+            {
+                return path;
+            }
+            using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                var resolved = new StringBuilder(path.Length + 260);
+                uint count = GetFinalPathNameByHandle(file.SafeFileHandle, resolved, (uint)resolved.Capacity, 0);
+                if (count >= resolved.Capacity)
+                {
+                    resolved.EnsureCapacity((int)count + 1);
+                    count = GetFinalPathNameByHandle(file.SafeFileHandle, resolved, (uint)resolved.Capacity, 0);
+                }
+                if (count == 0 || count >= resolved.Capacity)
+                {
+                    return path;
+                }
+                string name = resolved.ToString();
+                if (name.StartsWith(@"\\?\UNC\", StringComparison.Ordinal))
+                {
+                    return @"\\" + name.Substring(8);
+                }
+                return name.StartsWith(@"\\?\", StringComparison.Ordinal) ? name.Substring(4) : name;
+            }
+        }
+
+        private CloudSSOSession LoadCloudSSOSession(string configPath, string name)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"\A[a-z0-9_-]{1,64}\z"))
+            {
+                throw new CredentialException("Invalid CloudSSO session name.");
+            }
+            configPath = CanonicalConfigPath(configPath);
+            string dir = Path.Combine(Path.GetDirectoryName(configPath), "sso");
+            if (configPath != CanonicalConfigPath(CLI_CREDENTIALS_CONFIG_PATH))
+            {
+                using (var sha256 = SHA256.Create())
+                {
+                    var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(configPath));
+                    dir = Path.Combine(dir, BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant());
+                }
+            }
+            CloudSSOSession session;
+            try
+            {
+                session = JsonConvert.DeserializeObject<CloudSSOSession>(File.ReadAllText(Path.Combine(dir, name + ".json")));
+            }
+            catch (IOException)
+            {
+                throw new CredentialException("Unable to read CloudSSO session " + name);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw new CredentialException("Unable to read CloudSSO session " + name);
+            }
+            catch (JsonException)
+            {
+                throw new CredentialException("Invalid CloudSSO session " + name);
+            }
+            if (session == null || session.Name != name || string.IsNullOrEmpty(session.SignInUrl))
+            {
+                throw new CredentialException("Invalid CloudSSO session " + name);
+            }
+            if (string.IsNullOrEmpty(session.AccessToken) || session.ExpiresAt <= DateTime.UtcNow.GetTimeMillis() / 1000)
+            {
+                throw new CredentialException("CloudSSO access token is empty or expired, please re-login with CLI.");
+            }
+            return session;
         }
 
         internal bool ShouldReloadCredentialsProvider(string profileName)
@@ -421,6 +530,7 @@ namespace Aliyun.Credentials.Provider
 
         internal class Config
         {
+            internal string ConfigFilePath;
             [JsonProperty("current")]
             private readonly string current;
             [JsonProperty("profiles")]
@@ -439,6 +549,8 @@ namespace Aliyun.Credentials.Provider
 
         internal class Profile
         {
+            [JsonProperty("sso_session")]
+            internal string SsoSession;
             [JsonProperty("name")]
             private readonly string name;
             [JsonProperty("mode")]
