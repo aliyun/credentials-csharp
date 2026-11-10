@@ -45,7 +45,7 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        
+
   build-windows:
     # windows-2019 runners were retired by GitHub; jobs queue forever.
     runs-on: windows-2022
@@ -61,9 +61,17 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj
-        
+
       - name: Ensure Tests Compile
         run: dotnet build aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --configuration Debug --framework ${{ matrix.framework }}
 
       - name: Run Unit Tests
-        run: dotnet test aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --no-build --logger "trx;LogFileName=TestResults_${{ matrix.framework }}.trx" --framework ${{ matrix.framework }}
+        run: dotnet test aliyun-net-credentials-unit-tests/aliyun-net-credentials-unit-tests.csproj --no-build --logger "trx;LogFileName=TestResults_${{ matrix.framework }}.trx" --framework ${{ matrix.framework }} /p:AltCover=${{ matrix.framework == 'netcoreapp3.1' }}
+
+      - name: Upload Windows coverage report
+        if: matrix.framework == 'netcoreapp3.1'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: aliyun-net-credentials-unit-tests/coverage.netcoreapp3.1.xml
+          disable_search: true
