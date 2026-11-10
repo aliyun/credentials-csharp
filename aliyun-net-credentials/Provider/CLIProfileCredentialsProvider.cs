@@ -12,6 +12,7 @@ using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Utils;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Aliyun.Credentials.Provider
 {
@@ -449,22 +450,25 @@ namespace Aliyun.Credentials.Provider
             if (!File.Exists(configPath)) return;
 
             string jsonContent = File.ReadAllText(configPath);
-            Config config = JsonConvert.DeserializeObject<Config>(jsonContent);
+            JObject document = JsonConvert.DeserializeObject<JObject>(jsonContent,
+                new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
+            Config config = document == null ? null : document.ToObject<Config>();
             if (config == null || config.GetProfiles() == null) return;
 
             string name = !string.IsNullOrEmpty(profileName) ? profileName : config.GetCurrent();
             Profile oauthProfile = FindOAuthProfile(config, name);
             if (oauthProfile == null) return;
 
-            oauthProfile.SetOauthRefreshToken(refreshToken);
-            oauthProfile.SetOauthAccessToken(accessToken);
-            oauthProfile.SetOauthAccessTokenExpire(accessTokenExpire);
-            oauthProfile.SetAccessKeyId(accessKeyId);
-            oauthProfile.SetAccessKeySecret(accessKeySecret);
-            oauthProfile.SetSecurityToken(securityToken);
-            oauthProfile.SetStsExpire(stsExpire);
+            var profile = document["profiles"][config.GetProfiles().IndexOf(oauthProfile)];
+            profile["oauth_refresh_token"] = refreshToken;
+            profile["oauth_access_token"] = accessToken;
+            profile["oauth_access_token_expire"] = accessTokenExpire;
+            profile["access_key_id"] = accessKeyId;
+            profile["access_key_secret"] = accessKeySecret;
+            profile["sts_token"] = securityToken;
+            profile["sts_expiration"] = stsExpire;
 
-            string updatedJson = JsonConvert.SerializeObject(config, Formatting.Indented);
+            string updatedJson = document.ToString(Formatting.Indented);
             File.WriteAllText(configPath, updatedJson);
         }
 
@@ -475,19 +479,22 @@ namespace Aliyun.Credentials.Provider
             if (!File.Exists(configPath)) return;
 
             string jsonContent = File.ReadAllText(configPath);
-            Config config = JsonConvert.DeserializeObject<Config>(jsonContent);
+            JObject document = JsonConvert.DeserializeObject<JObject>(jsonContent,
+                new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
+            Config config = document == null ? null : document.ToObject<Config>();
             if (config == null || config.GetProfiles() == null) return;
 
             string name = !string.IsNullOrEmpty(profileName) ? profileName : config.GetCurrent();
             Profile externalProfile = FindExternalProfile(config, name);
             if (externalProfile == null) return;
 
-            externalProfile.SetAccessKeyId(accessKeyId);
-            externalProfile.SetAccessKeySecret(accessKeySecret);
-            externalProfile.SetSecurityToken(securityToken);
-            externalProfile.SetStsExpire(expiration);
+            var profile = document["profiles"][config.GetProfiles().IndexOf(externalProfile)];
+            profile["access_key_id"] = accessKeyId;
+            profile["access_key_secret"] = accessKeySecret;
+            profile["sts_token"] = securityToken;
+            profile["sts_expiration"] = expiration;
 
-            string updatedJson = JsonConvert.SerializeObject(config, Formatting.Indented);
+            string updatedJson = document.ToString(Formatting.Indented);
             File.WriteAllText(configPath, updatedJson);
         }
 

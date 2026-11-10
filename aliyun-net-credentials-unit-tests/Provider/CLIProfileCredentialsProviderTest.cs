@@ -12,6 +12,7 @@ using Aliyun.Credentials.Models;
 using Aliyun.Credentials.Provider;
 using Aliyun.Credentials.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace aliyun_net_credentials_unit_tests.Provider
@@ -100,6 +101,45 @@ namespace aliyun_net_credentials_unit_tests.Provider
             finally
             {
                 Directory.Delete(directory, true);
+            }
+        }
+
+        [Theory]
+        [InlineData("OAuth")]
+        [InlineData("External")]
+        public void WritebackPreservesOtherCliProfiles(string mode)
+        {
+            string path = Path.GetTempFileName();
+            try
+            {
+                string fixture = "{\"current\":\"writer\",\"future_config\":{\"date\":\"2099-01-01T01:00:00+08:00\",\"empty\":{},\"nullable\":null},"
+                    + "\"profiles\":[{\"name\":\"writer\",\"mode\":\"" + mode + "\",\"future_writer\":{}},"
+                    + "{\"name\":\"shared\",\"mode\":\"CloudSSO\",\"sso_session\":\"company\",\"future_profile\":{}}]}";
+                File.WriteAllText(path, fixture);
+                var provider = new CLIProfileCredentialsProvider("writer");
+                typeof(CLIProfileCredentialsProvider).GetField("CLI_CREDENTIALS_CONFIG_PATH",
+                    BindingFlags.NonPublic | BindingFlags.Instance).SetValue(provider, path);
+                if (mode == "OAuth")
+                {
+                    TestHelper.RunInstanceMethod(typeof(CLIProfileCredentialsProvider), "UpdateOAuthTokens", provider,
+                        new object[] { "writer", "refresh", "access", "new-ak", "secret", "token", 100L, 200L });
+                }
+                else
+                {
+                    TestHelper.RunInstanceMethod(typeof(CLIProfileCredentialsProvider), "UpdateExternalCredentials", provider,
+                        new object[] { "writer", "new-ak", "secret", "token", 200L });
+                }
+                var settings = new JsonSerializerSettings { DateParseHandling = DateParseHandling.None };
+                var before = JsonConvert.DeserializeObject<JObject>(fixture, settings);
+                var after = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(path), settings);
+                Assert.Equal("new-ak", (string)after["profiles"][0]["access_key_id"]);
+                Assert.True(JToken.DeepEquals(before["profiles"][0]["future_writer"], after["profiles"][0]["future_writer"]));
+                Assert.True(JToken.DeepEquals(before["profiles"][1], after["profiles"][1]));
+                Assert.True(JToken.DeepEquals(before["future_config"], after["future_config"]));
+            }
+            finally
+            {
+                File.Delete(path);
             }
         }
 
