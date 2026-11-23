@@ -12,9 +12,22 @@ using Newtonsoft.Json;
 
 namespace Aliyun.Credentials.Provider
 {
+    internal sealed class CloudSSOSession
+    {
+        [JsonProperty("name")]
+        internal string Name;
+        [JsonProperty("sign_in_url")]
+        internal string SignInUrl;
+        [JsonProperty("access_token")]
+        internal string AccessToken;
+        [JsonProperty("expires_at")]
+        internal long ExpiresAt;
+    }
+
     public class CloudSSOCredentialProvider : SessionCredentialsProvider
     {
         private readonly string signInUrl;
+        private readonly Func<CloudSSOSession> loadSession;
         private readonly string accountId;
         private readonly string accessConfig;
         private readonly string accessToken;
@@ -25,17 +38,17 @@ namespace Aliyun.Credentials.Provider
         private CloudSSOCredentialProvider(Builder builder) : base(builder)
         {
             long now = DateTime.UtcNow.GetTimeMillis() / 1000;
-            if (string.IsNullOrEmpty(builder.accessToken) || builder.accessTokenExpire == 0
-                || builder.accessTokenExpire - now <= 0)
+            if (builder.LoadSession == null && (string.IsNullOrEmpty(builder.accessToken) || builder.accessTokenExpire <= now))
             {
                 throw new CredentialException("CloudSSO access token is empty or expired, please re-login with cli.");
             }
-            if (string.IsNullOrEmpty(builder.signInUrl) || string.IsNullOrEmpty(builder.accountId)
+            if ((builder.LoadSession == null && string.IsNullOrEmpty(builder.signInUrl)) || string.IsNullOrEmpty(builder.accountId)
                 || string.IsNullOrEmpty(builder.accessConfig))
             {
                 throw new CredentialException("CloudSSO sign in url, account id, and access config cannot be empty.");
             }
 
+            this.loadSession = builder.LoadSession;
             this.signInUrl = builder.signInUrl;
             this.accountId = builder.accountId;
             this.accessConfig = builder.accessConfig;
@@ -48,6 +61,7 @@ namespace Aliyun.Credentials.Provider
         public class Builder : SessionCredentialsProvider.Builder
         {
             internal string signInUrl;
+            internal Func<CloudSSOSession> LoadSession;
             internal string accountId;
             internal string accessConfig;
             internal string accessToken;
@@ -117,7 +131,8 @@ namespace Aliyun.Credentials.Provider
 
         private RefreshResult<CredentialModel> GetNewSessionCredentials(IConnClient client)
         {
-            Uri parsedUrl = new Uri(this.signInUrl);
+            var session = this.loadSession == null ? null : this.loadSession();
+            Uri parsedUrl = new Uri(session == null ? this.signInUrl : session.SignInUrl);
             string requestUrl = parsedUrl.Scheme + "://" + parsedUrl.Host + "/cloud-credentials";
 
             string body = string.Format("{{\"AccountId\":\"{0}\",\"AccessConfigurationId\":\"{1}\"}}",
@@ -130,7 +145,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.SetHttpContent(Encoding.UTF8.GetBytes(body), "UTF-8", FormatType.Json);
             httpRequest.Headers["Accept"] = "application/json";
             httpRequest.Headers["Content-Type"] = "application/json";
-            httpRequest.Headers["Authorization"] = "Bearer " + this.accessToken;
+            httpRequest.Headers["Authorization"] = "Bearer " + (session == null ? this.accessToken : session.AccessToken);
 
             HttpResponse httpResponse = client.DoAction(httpRequest);
 
@@ -179,7 +194,8 @@ namespace Aliyun.Credentials.Provider
 
         private async Task<RefreshResult<CredentialModel>> GetNewSessionCredentialsAsync(IConnClient client)
         {
-            Uri parsedUrl = new Uri(this.signInUrl);
+            var session = this.loadSession == null ? null : this.loadSession();
+            Uri parsedUrl = new Uri(session == null ? this.signInUrl : session.SignInUrl);
             string requestUrl = parsedUrl.Scheme + "://" + parsedUrl.Host + "/cloud-credentials";
 
             string body = string.Format("{{\"AccountId\":\"{0}\",\"AccessConfigurationId\":\"{1}\"}}",
@@ -192,7 +208,7 @@ namespace Aliyun.Credentials.Provider
             httpRequest.SetHttpContent(Encoding.UTF8.GetBytes(body), "UTF-8", FormatType.Json);
             httpRequest.Headers["Accept"] = "application/json";
             httpRequest.Headers["Content-Type"] = "application/json";
-            httpRequest.Headers["Authorization"] = "Bearer " + this.accessToken;
+            httpRequest.Headers["Authorization"] = "Bearer " + (session == null ? this.accessToken : session.AccessToken);
 
             HttpResponse httpResponse = await client.DoActionAsync(httpRequest);
 

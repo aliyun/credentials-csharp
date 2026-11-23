@@ -295,7 +295,7 @@ namespace aliyun_net_credentials_unit_tests.Provider
         }
 
         [Fact]
-        public async void TestNonBlockingAsync()
+        public async Task TestNonBlockingAsync()
         {
             var supplier = new RefreshCachedSupplier<CredentialModel>.Builder(RefreshFunc, RefreshFuncAsync)
                 .AsyncUpdateEnabled(true)
@@ -311,36 +311,46 @@ namespace aliyun_net_credentials_unit_tests.Provider
 
             var res = await supplier.GetAsync();
             Assert.Equal("accessKey", res.AccessKeyId);
-            await Task.Delay(1000);
-            res = await supplier.GetAsync();
+            var deadline = DateTime.UtcNow.AddSeconds(10);
+            do
+            {
+                await Task.Delay(10);
+                res = await supplier.GetAsync();
+            } while (res.AccessKeyId != "newAccessKeyForAsync" && DateTime.UtcNow < deadline);
             Assert.Equal("newAccessKeyForAsync", res.AccessKeyId);
         }
 
         [Fact]
-        public async Task NonBlocking_Prefetch_When_Not_Refreshing()
+        public void NonBlocking_Prefetch_When_Not_Refreshing()
         {
             var nonBlocking = new NonBlocking();
-            // Create a TaskCompletionSource to await the action
-            var tcs = new TaskCompletionSource<bool>();
-
-            void MockAction()
+            using (var release = new ManualResetEventSlim(false))
+            using (var started = new ManualResetEventSlim(false))
             {
-                tcs.SetResult(true);
+                var completed = false;
+                try
+                {
+                    nonBlocking.Prefetch(() =>
+                    {
+                        started.Set();
+                        release.Wait();
+                        completed = true;
+                    });
+                    Assert.True(started.Wait(TimeSpan.FromSeconds(10)));
+                    // The caller returned while the background action is still blocked.
+                    Assert.False(completed);
+                }
+                finally
+                {
+                    release.Set();
+                    var refreshing = typeof(NonBlocking).GetField("currentlyRefreshing",
+                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    Assert.True(SpinWait.SpinUntil(
+                        () => (int)refreshing.GetValue(nonBlocking) == 0, TimeSpan.FromSeconds(10)));
+                    nonBlocking.Dispose();
+                }
+                Assert.True(completed);
             }
-
-            nonBlocking.Prefetch(MockAction);
-            var result = await tcs.Task;
-            Assert.True(result);
-
-            var wasCalled = false;
-            nonBlocking.Prefetch(() =>
-            {
-                Thread.Sleep(100);
-                wasCalled = true;
-            });
-            await Task.Delay(1);
-            Assert.False(wasCalled);
-            nonBlocking.Dispose();
         }
 
         [Fact]
