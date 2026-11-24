@@ -73,8 +73,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Status = 200,
                 Encoding = "UTF-8",
                 Content = Encoding.UTF8.GetBytes(
-                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
-                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+                    "{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\"," +
+                    "\"SecurityToken\":\"token\",\"Expiration\":\"2019-12-12T1:1:1Z\"}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
 
@@ -88,6 +88,52 @@ namespace aliyun_net_credentials_unit_tests.Provider
             Assert.Equal("token", result.Value.SecurityToken);
             Assert.Equal(AuthConstant.Sts, result.Value.Type);
             Assert.Equal("oauth", result.Value.ProviderName);
+        }
+
+        [Fact]
+        public void TestGetNewSessionCredentialsCamelCaseFallback()
+        {
+            OAuthCredentialProvider provider = new OAuthCredentialProvider.Builder()
+                .ClientId("client123")
+                .SignInUrl("https://oauth.aliyun.com")
+                .AccessToken("access_token")
+                .AccessTokenExpire(UnixTimeSeconds() + 10000)
+                .Build();
+
+            Mock<IConnClient> mock = new Mock<IConnClient>();
+            HttpResponse response = new HttpResponse("https://oauth.aliyun.com/v1/exchange")
+            {
+                Status = 200,
+                Encoding = "UTF-8",
+                Content = Encoding.UTF8.GetBytes(
+                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
+                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+            };
+            mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
+
+            var result = (RefreshResult<CredentialModel>)TestHelper.RunInstanceMethod(
+                typeof(OAuthCredentialProvider), "GetNewSessionCredentials", provider,
+                new object[] { mock.Object });
+
+            Assert.Equal("ak", result.Value.AccessKeyId);
+            Assert.Equal("token", result.Value.SecurityToken);
+        }
+
+        [Fact]
+        public void TestGetExchangeFieldPrefersPascalCase()
+        {
+            var map = new System.Collections.Generic.Dictionary<string, object>
+            {
+                { "AccessKeyId", "pascal" },
+                { "accessKeyId", "camel" }
+            };
+            Assert.Equal("pascal", OAuthCredentialProvider.GetExchangeField(map, "AccessKeyId", "accessKeyId"));
+            Assert.Equal("camel", OAuthCredentialProvider.GetExchangeField(
+                new System.Collections.Generic.Dictionary<string, object> { { "accessKeyId", "camel" } },
+                "AccessKeyId", "accessKeyId"));
+            Assert.Null(OAuthCredentialProvider.GetExchangeField(
+                new System.Collections.Generic.Dictionary<string, object>(),
+                "AccessKeyId", "accessKeyId"));
         }
 
         [Fact]
@@ -106,8 +152,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Status = 200,
                 Encoding = "UTF-8",
                 Content = Encoding.UTF8.GetBytes(
-                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
-                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+                    "{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\"," +
+                    "\"SecurityToken\":\"token\",\"Expiration\":\"2019-12-12T1:1:1Z\"}")
             };
             mock.Setup(p => p.DoActionAsync(It.IsAny<HttpRequest>())).ReturnsAsync(response);
 
@@ -174,8 +220,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Status = 200,
                 Encoding = "UTF-8",
                 Content = Encoding.UTF8.GetBytes(
-                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
-                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+                    "{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\"," +
+                    "\"SecurityToken\":\"token\",\"Expiration\":\"2019-12-12T1:1:1Z\"}")
             };
 
             int callCount = 0;
@@ -250,8 +296,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Status = 200,
                 Encoding = "UTF-8",
                 Content = Encoding.UTF8.GetBytes(
-                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
-                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+                    "{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\"," +
+                    "\"SecurityToken\":\"token\",\"Expiration\":\"2019-12-12T1:1:1Z\"}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
 
@@ -284,8 +330,8 @@ namespace aliyun_net_credentials_unit_tests.Provider
                 Status = 200,
                 Encoding = "UTF-8",
                 Content = Encoding.UTF8.GetBytes(
-                    "{\"accessKeyId\":\"ak\",\"accessKeySecret\":\"sk\"," +
-                    "\"securityToken\":\"token\",\"expiration\":\"2019-12-12T1:1:1Z\"}")
+                    "{\"AccessKeyId\":\"ak\",\"AccessKeySecret\":\"sk\"," +
+                    "\"SecurityToken\":\"token\",\"Expiration\":\"2019-12-12T1:1:1Z\"}")
             };
             mock.Setup(p => p.DoAction(It.IsAny<HttpRequest>())).Returns(response);
 

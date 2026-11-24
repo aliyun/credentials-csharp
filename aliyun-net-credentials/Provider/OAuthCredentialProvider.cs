@@ -260,10 +260,10 @@ namespace Aliyun.Credentials.Provider
                     "Get session token from OAuth failed, result: {0}.", httpResponse.GetHttpContentString()));
             }
 
-            string accessKeyId = GetString(map, "accessKeyId");
-            string accessKeySecret = GetString(map, "accessKeySecret");
-            string securityToken = GetString(map, "securityToken");
-            string expirationStr = GetString(map, "expiration");
+            string accessKeyId = GetExchangeField(map, "AccessKeyId", "accessKeyId");
+            string accessKeySecret = GetExchangeField(map, "AccessKeySecret", "accessKeySecret");
+            string securityToken = GetExchangeField(map, "SecurityToken", "securityToken");
+            string expirationStr = GetExchangeField(map, "Expiration", "expiration");
 
             if (string.IsNullOrEmpty(accessKeyId) || string.IsNullOrEmpty(accessKeySecret)
                 || string.IsNullOrEmpty(securityToken))
@@ -340,10 +340,10 @@ namespace Aliyun.Credentials.Provider
                     "Get session token from OAuth failed, result: {0}.", httpResponse.GetHttpContentString()));
             }
 
-            string accessKeyId = GetString(map, "accessKeyId");
-            string accessKeySecret = GetString(map, "accessKeySecret");
-            string securityToken = GetString(map, "securityToken");
-            string expirationStr = GetString(map, "expiration");
+            string accessKeyId = GetExchangeField(map, "AccessKeyId", "accessKeyId");
+            string accessKeySecret = GetExchangeField(map, "AccessKeySecret", "accessKeySecret");
+            string securityToken = GetExchangeField(map, "SecurityToken", "securityToken");
+            string expirationStr = GetExchangeField(map, "Expiration", "expiration");
 
             if (string.IsNullOrEmpty(accessKeyId) || string.IsNullOrEmpty(accessKeySecret)
                 || string.IsNullOrEmpty(securityToken))
@@ -386,6 +386,19 @@ namespace Aliyun.Credentials.Provider
         public override string GetProviderName()
         {
             return "oauth";
+        }
+
+        /// <summary>
+        /// Prefer real-service PascalCase key, then fall back to camelCase.
+        /// </summary>
+        internal static string GetExchangeField(Dictionary<string, object> values, string primaryKey, string fallbackKey)
+        {
+            string primary = GetString(values, primaryKey);
+            if (!string.IsNullOrEmpty(primary))
+            {
+                return primary;
+            }
+            return GetString(values, fallbackKey);
         }
 
         private static string GetString(Dictionary<string, object> values, string key)
